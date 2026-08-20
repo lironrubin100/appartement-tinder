@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens — DECISIONS.md I15, ARCHITECTURE.md §6. Source of truth: design_handoff_shutaf_design_system/ */
+@theme {
+  --color-orange: #E2883A;
+  --color-orange-soft: #FBE7D2;
+  --color-orange-dark: #B5661F;
+  --color-teal: #1F94B3;
+  --color-teal-hover: #16748C;
+  --color-teal-soft: #DCF0F5;
+  --color-gold: #F0B429;
+  --color-success: #4E9F63;
+  --color-error: #DB5A4A;
+  --color-ink: #262220;
+  --color-body-text: #4A4340;
+  --color-muted-text: #837B76;
+  --color-disabled-text: #B4ACA6;
+  --color-neutral-bg: #F1ECE5;
+  --color-neutral-bg-soft: #F8F5F1;
+  --color-card-border: #E8E2DC;
+  --color-page-bg: #FBF9F6;
+
+  --radius-shutaf-sm: 12px;
+  --radius-shutaf-md: 16px;
+  --radius-shutaf-lg: 20px;
+  --radius-shutaf-xl: 24px;
+  --radius-shutaf-2xl: 28px;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
+
+body {
+  background-color: var(--color-page-bg);
+  color: var(--color-ink);
+}

@@ -1,4 +1,4 @@
--- Roomie — schema v1 (Beer Sheva launch)
+-- Shutaf — schema v1 (Beer Sheva launch)
 -- Run in the Supabase SQL editor, or `supabase db push`.
 -- ponytail: no PostGIS. One city, ~200 listings -> the app fetches all active
 -- apartments once and filters/bounds them client-side. Add PostGIS + a GIST

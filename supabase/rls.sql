@@ -1,4 +1,4 @@
--- Roomie — row level security + read views. Run AFTER schema.sql.
+-- Shutaf — row level security + read views. Run AFTER schema.sql.
 -- Without this file the anon key can read and rewrite your entire database.
 
 -- ------------------------------------------------- auto-create profile on signup
