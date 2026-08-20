@@ -1,14 +1,10 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createServerClient } from '@/utils/supabase/server';
 import { Avatar, Button, Badge } from '@/components/ui';
 import { signOut } from './actions';
-
-const MODE_LABELS: Record<string, string> = {
-  solo: '🏠 מחפש דירה',
-  group: '👥 בקבוצה',
-  room_filler: '➕ מחפש שותפים',
-  lister: '🔑 משכיר',
-};
+import { tagOptionLabel } from '@/utils/profileTags';
+import { ModeSwitcher } from './ModeSwitcher';
 
 const TAG_COLUMNS = [
   'gender_dynamic', 'cleanliness', 'sleep_schedule', 'social_guests',
@@ -45,8 +41,11 @@ export default async function ProfilePage() {
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)]">
       <div className="max-w-2xl mx-auto bg-white">
         {/* Header */}
-        <div className="border-b border-card-border px-6 py-8">
+        <div className="border-b border-card-border px-6 py-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-ink">הפרופיל שלי</h1>
+          <Link href="/profile/edit" className="text-sm text-orange hover:underline">
+            ✎ עריכת פרופיל
+          </Link>
         </div>
 
         <div className="p-6 md:p-8 space-y-8">
@@ -63,9 +62,9 @@ export default async function ProfilePage() {
               <p className="text-body-text">
                 {age !== null ? `בן/בת ${age}` : 'גיל לא הוגדר'}
               </p>
-              {profile.is_verified && (
+              {profile.student_email_verified_at && (
                 <Badge variant="success" className="mt-2">
-                  אימות דוא״ל
+                  מאומת כסטודנט
                 </Badge>
               )}
             </div>
@@ -82,13 +81,7 @@ export default async function ProfilePage() {
           {/* Mode Selector */}
           <div className="border-b border-card-border pb-6">
             <h3 className="font-semibold text-ink mb-3">מצב נוכחי</h3>
-            <div className="flex gap-3 flex-wrap">
-              {(['solo', 'group', 'room_filler'] as const).map((mode) => (
-                <Button key={mode} variant={profile.mode === mode ? 'primary' : 'ghost'}>
-                  {MODE_LABELS[mode]}
-                </Button>
-              ))}
-            </div>
+            <ModeSwitcher userId={profile.id} currentMode={profile.mode} />
           </div>
 
           {/* Tags */}
@@ -97,7 +90,7 @@ export default async function ProfilePage() {
             {setTags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {setTags.map((key) => (
-                  <Badge key={key}>{String(profile[key])}</Badge>
+                  <Badge key={key}>{tagOptionLabel(key, profile[key])}</Badge>
                 ))}
               </div>
             ) : (
@@ -106,23 +99,13 @@ export default async function ProfilePage() {
           </div>
 
           {/* Settings */}
-          <div className="border-b border-card-border pb-6 space-y-4">
-            <h3 className="font-semibold text-ink">הגדרות</h3>
-            <button className="w-full text-start px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors">
-              <span className="text-body-text">🌐 שפה</span>
-              <span className="float-end text-muted-text">עברית (תמיד)</span>
-            </button>
-            <button className="w-full text-start px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors">
-              <span className="text-body-text">🔔 הודעות</span>
-              <span className="float-end text-muted-text">
-                {profile.notifications_enabled ? 'פעיל' : 'כבוי'}
-              </span>
-            </button>
-            <button className="w-full text-start px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors">
-              <span className="text-body-text">🔒 פרטיות</span>
-              <span className="float-end text-muted-text">הצג עוד</span>
-            </button>
-          </div>
+          <Link
+            href="/settings"
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors border-b border-card-border"
+          >
+            <span className="font-semibold text-ink">⚙️ הגדרות</span>
+            <span className="text-muted-text">›</span>
+          </Link>
 
           {/* Danger Zone */}
           <div className="space-y-3">
