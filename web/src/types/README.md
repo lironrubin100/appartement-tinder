@@ -1,0 +1,132 @@
+# Database Type Definitions
+
+This directory contains TypeScript type definitions generated from the Shutaf database schema.
+
+## database.ts
+
+Complete type definitions for all Supabase tables, views, and functions, aligned with DECISIONS.md and ARCHITECTURE.md.
+
+### Core Tables
+
+#### profiles
+User profiles with structured lifestyle categories. All 31 categories from the taxonomy (DECISIONS.md C1/C2) are implemented as dedicated columns, not free-text arrays.
+
+**Key fields:**
+- `residency`: "resident" or "non_resident" (DECISIONS.md D1)
+- `current_mode`: Solo/Group/Room-Filler/Lister (DECISIONS.md I9)
+- `is_verified`: email-only verification via domain check (DECISIONS.md B3/B4)
+- 16 renter-lifestyle categories (gender_dynamic, cleanliness, sleep_schedule, etc.)
+
+#### apartments
+Apartment listings with all required fields (DECISIONS.md D2). Title, price, bedrooms, location, available-from, phone, photos.
+
+**Key fields:**
+- `status`: active/rented/flagged/archived (DECISIONS.md D6/D7)
+- `interest_count`: trigger-maintained counter (ARCHITECTURE.md §3.3)
+- 15 apartment-characteristic categories (proximity_to_bgu, ac, security_safety, etc.)
+- `latitude`, `longitude`: for map viewport queries (ARCHITECTURE.md §3.1)
+
+#### swipes
+Likes/passes sent by users (DECISIONS.md C6/C8). Always has an attached message (minimum 10 chars).
+
+**Key fields:**
+- `action`: "like" or "pass"
+- `message`: required, anti-spam mechanism
+- `is_undone`: track reversals without deleting
+
+#### matches
+Two-way matches or accepted likes (DECISIONS.md C9). Tracks the progression from pending to accepted.
+
+**Key fields:**
+- `match_type`: "roommate" or "apartment_inquiry" (DECISIONS.md F4)
+- `match_score`: computed two-tier score (non-negotiable + flexible)
+- `conversation_id`: FK to start chat (ARCHITECTURE.md §3.4)
+
+#### conversations
+Chat threads. One per unique pair of participants (DECISIONS.md F1).
+
+**Key fields:**
+- `participant_a`, `participant_b`: user IDs
+- `last_message_id`: reference to latest message for preview (ARCHITECTURE.md §3.4)
+- `context_type`: "roommate" or "apartment"
+- `is_archived_by_*`: per-user archive flag (DECISIONS.md F5)
+
+#### messages
+Individual chat messages. Types: text or listing_card (DECISIONS.md F3).
+
+**Key fields:**
+- `message_type`: "text" or "listing_card" (DECISIONS.md E8)
+- `is_read`: read receipt (DECISIONS.md F2)
+- `deleted_at`: soft delete with cascade to account deletion (DECISIONS.md B7)
+
+#### groups
+Group aggregates (up to 4 members). Created from a conversation (DECISIONS.md E1).
+
+**Key fields:**
+- `admin_id`: owner, inherits on departure (DECISIONS.md E3)
+- `status`: open/closed/archived (DECISIONS.md E4)
+- `max_members`: hard limit 4 (DECISIONS.md E2)
+- `shared_budget_*`: group-level budget range (DECISIONS.md C4)
+
+#### group_members
+Join table for group membership with roles.
+
+#### apartment_listings_photos
+Photos with blur derivatives for Pro paywall (DECISIONS.md G2, J9).
+
+**Key fields:**
+- `blur_url`: computed blurred version, withheld from non-Pro (ARCHITECTURE.md §4.1)
+
+#### favorites
+Wishlist entries (DECISIONS.md C4).
+
+#### hand_me_downs
+Furniture marketplace within apartments (DECISIONS.md D15).
+
+**Key fields:**
+- `seller_id`: the leaving roommate
+- `status`: available/sold/removed
+
+### Views
+
+#### apartment_stats
+Trigger-maintained counters for apartment interest and views. Security-definer view wrapping correlated subqueries — scale concern at 1,000+ listings noted but documented (ARCHITECTURE.md §3.3).
+
+### Functions (RPCs)
+
+Three core RPCs per ARCHITECTURE.md §4.3: multi-write operations are server-side to ensure consistency.
+
+#### accept_like
+Accepts an inbound like, creates a conversation and match in one transaction. Takes the swipe ID and receiver ID, returns conversation and match IDs.
+
+#### get_discover_feed
+Keyset pagination for the roommate feed with compatibility scoring (DECISIONS.md C3, J2). Excludes passed/liked profiles server-side.
+
+#### get_map_listings
+Viewport-filtered map pins for a given bounding box and zoom level (ARCHITECTURE.md §3.1). Returns lightweight payload: id, lat, lng, price, is_favorited.
+
+## Extending the Schema
+
+### Adding a New Lifestyle Category
+
+If DECISIONS.md adds a 17th renter category or 16th apartment category:
+
+1. Add a column to the `profiles` or `apartments` table in Supabase
+2. Add the TypeScript column to this file in the appropriate Row/Insert/Update interfaces
+3. Update the matching algorithm to classify it as non-negotiable or flexible (C13)
+
+### Adding a Message Type
+
+If DECISIONS.md adds image messages (F3 is currently text + listing_card only):
+
+1. Add the type to the `message_type` union in the `messages` table
+2. Add any new columns (e.g., `image_url`, `thumbnail_url`)
+3. Update the `get_discover_feed` and chat query handlers to handle the new type
+
+## Notes
+
+- All timestamps use UTC ISO strings (`created_at`, `updated_at`)
+- All IDs are UUIDs generated by Supabase
+- `deleted_at` is used for soft deletes; hard delete cascades on account deletion (B7)
+- Structured categories use exact-match enums, not free text, to enable compatibility scoring
+- No dark mode in v1 (DECISIONS.md I11), so no theme-specific colors in this schema

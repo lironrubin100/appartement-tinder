@@ -1,8 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Design tokens — DECISIONS.md I15, ARCHITECTURE.md §6. Source of truth: design_handoff_shutaf_design_system/ */
+/* Design tokens — DECISIONS.md I15, ARCHITECTURE.md §6. Tailwind v4 CSS-first config. */
 @theme {
   --color-orange: #E2883A;
   --color-orange-soft: #FBE7D2;
@@ -30,12 +28,31 @@
 }
 
 @layer base {
-  :root {
-    --radius: 0.5rem;
+  body {
+    background-color: var(--color-page-bg);
+    color: var(--color-ink);
   }
-}
 
-body {
-  background-color: var(--color-page-bg);
-  color: var(--color-ink);
+  h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  p {
+    color: var(--color-body-text);
+    line-height: 1.5;
+  }
 }

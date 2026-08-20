@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Desktop\\\\appartement tinder\" -Recurse -Directory | Where-Object { $_.Name -eq \"web\" -or $_.Name -eq \"src\" } | Select-Object FullName)"
     ]
   }
 }
