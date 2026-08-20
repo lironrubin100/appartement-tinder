@@ -1,691 +1,676 @@
-/* Database type definitions for Shutaf
- * Generated from DECISIONS.md (C1, C13) and ARCHITECTURE.md
- * The 31-category taxonomy is structured as dedicated columns, not free text[]
+/* Database type definitions for Shutaf.
+ * Generated from the live Supabase schema (supabase/schema.sql + rls.sql)
+ * via the Supabase MCP `generate_typescript_types`. Regenerate the same way
+ * after any migration — do not hand-edit table shapes here.
  */
 
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "14.15"
+  }
   public: {
     Tables: {
-      profiles: {
+      apartment_interests: {
         Row: {
-          id: string;
-          created_at: string;
-          updated_at: string;
-          email: string;
-          full_name: string;
-          display_name: string;
-          photo_url: string | null;
-          bio: string | null;
-          phone_number: string | null;
-          is_verified: boolean;
-          is_banned: boolean;
-          residency: "resident" | "non_resident";
-          current_mode: "Solo" | "Group" | "Room-Filler" | "Lister" | null;
-          deleted_at: string | null;
-
-          // Renter-lifestyle categories (16 total) — DECIDED C1/C2/C13
-          gender_dynamic:
-            | "1_guy_guys"
-            | "2_girls_1_girl"
-            | "coed_anyone"
-            | null;
-          cleanliness: "very_clean" | "clean" | "average" | "relaxed" | null;
-          sleep_schedule:
-            | "early_bed_early_wake"
-            | "night_owl"
-            | "flexible"
-            | null;
-          social_guests:
-            | "frequent_visitors"
-            | "occasional"
-            | "rarely"
-            | null;
-          noise_tolerance:
-            | "quiet"
-            | "moderate"
-            | "high"
-            | null;
-          music_vibe:
-            | "silent"
-            | "ambient"
-            | "upbeat"
-            | "loud"
-            | null;
-          climate: "cold" | "moderate" | "hot" | null;
-          smoking: "yes" | "no" | "outdoor_only" | null;
-          kitchen_dietary:
-            | "strict"
-            | "vegetarian"
-            | "mixed"
-            | null;
-          cooking_dynamics:
-            | "shared_cooking"
-            | "individual"
-            | "meal_prep"
-            | null;
-          pets: "yes" | "no" | "small_only" | null;
-          weekend_routine:
-            | "home_body"
-            | "mixed"
-            | "always_out"
-            | null;
-          relationship_status:
-            | "single"
-            | "in_relationship"
-            | "flexible"
-            | null;
-          study_habits:
-            | "heavy_studying"
-            | "moderate"
-            | "minimal"
-            | null;
-          financial_splitting:
-            | "strict"
-            | "flexible"
-            | "shared_expenses"
-            | null;
-          miluim_reserve_duty:
-            | "active"
-            | "occasional"
-            | "none"
-            | null;
-        };
+          apartment_id: string
+          created_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          email: string;
-          full_name: string;
-          display_name: string;
-          photo_url?: string | null;
-          bio?: string | null;
-          phone_number?: string | null;
-          is_verified?: boolean;
-          is_banned?: boolean;
-          residency: "resident" | "non_resident";
-          current_mode?: "Solo" | "Group" | "Room-Filler" | "Lister" | null;
-          deleted_at?: string | null;
-          gender_dynamic?: string | null;
-          cleanliness?: string | null;
-          sleep_schedule?: string | null;
-          social_guests?: string | null;
-          noise_tolerance?: string | null;
-          music_vibe?: string | null;
-          climate?: string | null;
-          smoking?: string | null;
-          kitchen_dietary?: string | null;
-          cooking_dynamics?: string | null;
-          pets?: string | null;
-          weekend_routine?: string | null;
-          relationship_status?: string | null;
-          study_habits?: string | null;
-          financial_splitting?: string | null;
-          miluim_reserve_duty?: string | null;
-        };
+          apartment_id: string
+          created_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          email?: string;
-          full_name?: string;
-          display_name?: string;
-          photo_url?: string | null;
-          bio?: string | null;
-          phone_number?: string | null;
-          is_verified?: boolean;
-          is_banned?: boolean;
-          residency?: "resident" | "non_resident";
-          current_mode?: "Solo" | "Group" | "Room-Filler" | "Lister" | null;
-          deleted_at?: string | null;
-          gender_dynamic?: string | null;
-          cleanliness?: string | null;
-          sleep_schedule?: string | null;
-          social_guests?: string | null;
-          noise_tolerance?: string | null;
-          music_vibe?: string | null;
-          climate?: string | null;
-          smoking?: string | null;
-          kitchen_dietary?: string | null;
-          cooking_dynamics?: string | null;
-          pets?: string | null;
-          weekend_routine?: string | null;
-          relationship_status?: string | null;
-          study_habits?: string | null;
-          financial_splitting?: string | null;
-          miluim_reserve_duty?: string | null;
-        };
-      };
-
+          apartment_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_interests_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_stats"
+            referencedColumns: ["apartment_id"]
+          },
+          {
+            foreignKeyName: "apartment_interests_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_interests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_reports: {
+        Row: {
+          apartment_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          apartment_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          apartment_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_reports_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_stats"
+            referencedColumns: ["apartment_id"]
+          },
+          {
+            foreignKeyName: "apartment_reports_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartments: {
         Row: {
-          id: string;
-          created_at: string;
-          updated_at: string;
-          poster_id: string;
-          title: string;
-          description: string | null;
-          price: number;
-          currency: string;
-          bedrooms: number;
-          latitude: number;
-          longitude: number;
-          address: string | null;
-          available_from: string;
-          phone_contact: string;
-          is_furnished: boolean;
-          is_sublet: boolean;
-          bills_included: boolean;
-          status: "active" | "rented" | "flagged" | "archived";
-          viewed_count: number;
-          interest_count: number;
-          posted_at: string;
-          expires_at: string | null;
-          deleted_at: string | null;
-
-          // Apartment-characteristic categories (15 total) — DECIDED C1/C2/C13
-          proximity_to_bgu:
-            | "walkable"
-            | "nearby"
-            | "far"
-            | null;
-          ac: "yes" | "no" | "partial" | null;
-          security_safety:
-            | "gated"
-            | "secure_building"
-            | "open"
-            | null;
-          water_heating:
-            | "solar"
-            | "gas"
-            | "electric"
-            | null;
-          furnishing:
-            | "fully_furnished"
-            | "partial"
-            | "unfurnished"
-            | null;
-          hand_me_downs:
-            | "yes"
-            | "no"
-            | null;
-          outdoor_space:
-            | "balcony"
-            | "patio"
-            | "yard"
-            | "none"
-            | null;
-          laundry:
-            | "in_unit"
-            | "building"
-            | "none"
-            | null;
-          accessibility:
-            | "elevator"
-            | "ground_floor"
-            | "stairs"
-            | null;
-          parking:
-            | "included"
-            | "nearby"
-            | "none"
-            | null;
-          pet_rules:
-            | "allowed"
-            | "small_only"
-            | "not_allowed"
-            | null;
-          kitchen_setup:
-            | "full"
-            | "kitchenette"
-            | "shared"
-            | null;
-          hidden_costs:
-            | "maintenance"
-            | "utilities_separate"
-            | "none"
-            | null;
-          internet:
-            | "included"
-            | "available"
-            | "none"
-            | null;
-          roommate_cap: number | null;
-        };
+          address: string | null
+          available_from: string | null
+          bedrooms: number
+          contact_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_sublet: boolean
+          lat: number
+          lister_id: string | null
+          lng: number
+          photos: string[]
+          price: number
+          source: string
+          status: string
+          title: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          poster_id: string;
-          title: string;
-          description?: string | null;
-          price: number;
-          currency?: string;
-          bedrooms: number;
-          latitude: number;
-          longitude: number;
-          address?: string | null;
-          available_from: string;
-          phone_contact: string;
-          is_furnished?: boolean;
-          is_sublet?: boolean;
-          bills_included?: boolean;
-          status?: "active" | "rented" | "flagged" | "archived";
-          viewed_count?: number;
-          interest_count?: number;
-          posted_at?: string;
-          expires_at?: string | null;
-          deleted_at?: string | null;
-          proximity_to_bgu?: string | null;
-          ac?: string | null;
-          security_safety?: string | null;
-          water_heating?: string | null;
-          furnishing?: string | null;
-          hand_me_downs?: string | null;
-          outdoor_space?: string | null;
-          laundry?: string | null;
-          accessibility?: string | null;
-          parking?: string | null;
-          pet_rules?: string | null;
-          kitchen_setup?: string | null;
-          hidden_costs?: string | null;
-          internet?: string | null;
-          roommate_cap?: number | null;
-        };
+          address?: string | null
+          available_from?: string | null
+          bedrooms: number
+          contact_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_sublet?: boolean
+          lat: number
+          lister_id?: string | null
+          lng: number
+          photos?: string[]
+          price: number
+          source?: string
+          status?: string
+          title: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          poster_id?: string;
-          title?: string;
-          description?: string | null;
-          price?: number;
-          currency?: string;
-          bedrooms?: number;
-          latitude?: number;
-          longitude?: number;
-          address?: string | null;
-          available_from?: string;
-          phone_contact?: string;
-          is_furnished?: boolean;
-          is_sublet?: boolean;
-          bills_included?: boolean;
-          status?: "active" | "rented" | "flagged" | "archived";
-          viewed_count?: number;
-          interest_count?: number;
-          posted_at?: string;
-          expires_at?: string | null;
-          deleted_at?: string | null;
-          proximity_to_bgu?: string | null;
-          ac?: string | null;
-          security_safety?: string | null;
-          water_heating?: string | null;
-          furnishing?: string | null;
-          hand_me_downs?: string | null;
-          outdoor_space?: string | null;
-          laundry?: string | null;
-          accessibility?: string | null;
-          parking?: string | null;
-          pet_rules?: string | null;
-          kitchen_setup?: string | null;
-          hidden_costs?: string | null;
-          internet?: string | null;
-          roommate_cap?: number | null;
-        };
-      };
-
-      swipes: {
+          address?: string | null
+          available_from?: string | null
+          bedrooms?: number
+          contact_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_sublet?: boolean
+          lat?: number
+          lister_id?: string | null
+          lng?: number
+          photos?: string[]
+          price?: number
+          source?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartments_lister_id_fkey"
+            columns: ["lister_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blocks: {
         Row: {
-          id: string;
-          created_at: string;
-          sender_id: string;
-          receiver_id: string | null;
-          apartment_id: string | null;
-          message: string;
-          action: "like" | "pass";
-          is_undone: boolean;
-        };
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          sender_id: string;
-          receiver_id?: string | null;
-          apartment_id?: string | null;
-          message: string;
-          action: "like" | "pass";
-          is_undone?: boolean;
-        };
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          sender_id?: string;
-          receiver_id?: string | null;
-          apartment_id?: string | null;
-          message?: string;
-          action?: "like" | "pass";
-          is_undone?: boolean;
-        };
-      };
-
-      matches: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_members: {
         Row: {
-          id: string;
-          created_at: string;
-          user_a_id: string;
-          user_b_id: string;
-          match_type: "roommate" | "apartment_inquiry";
-          match_score: number;
-          status: "pending" | "accepted" | "rejected" | "archived";
-          conversation_id: string | null;
-          initiated_by: string;
-        };
+          conversation_id: string
+          last_read_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          user_a_id: string;
-          user_b_id: string;
-          match_type: "roommate" | "apartment_inquiry";
-          match_score: number;
-          status?: "pending" | "accepted" | "rejected" | "archived";
-          conversation_id?: string | null;
-          initiated_by: string;
-        };
+          conversation_id: string
+          last_read_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          user_a_id?: string;
-          user_b_id?: string;
-          match_type?: "roommate" | "apartment_inquiry";
-          match_score?: number;
-          status?: "pending" | "accepted" | "rejected" | "archived";
-          conversation_id?: string | null;
-          initiated_by?: string;
-        };
-      };
-
+          conversation_id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_members_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
-          id: string;
-          created_at: string;
-          updated_at: string;
-          last_message_id: string | null;
-          last_message_at: string | null;
-          participant_a: string;
-          participant_b: string;
-          context_type: "roommate" | "apartment";
-          context_id: string | null;
-          is_archived_by_a: boolean;
-          is_archived_by_b: boolean;
-        };
+          created_at: string
+          group_id: string | null
+          id: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          last_message_id?: string | null;
-          last_message_at?: string | null;
-          participant_a: string;
-          participant_b: string;
-          context_type: "roommate" | "apartment";
-          context_id?: string | null;
-          is_archived_by_a?: boolean;
-          is_archived_by_b?: boolean;
-        };
+          created_at?: string
+          group_id?: string | null
+          id?: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          last_message_id?: string | null;
-          last_message_at?: string | null;
-          participant_a?: string;
-          participant_b?: string;
-          context_type?: "roommate" | "apartment";
-          context_id?: string | null;
-          is_archived_by_a?: boolean;
-          is_archived_by_b?: boolean;
-        };
-      };
-
-      messages: {
-        Row: {
-          id: string;
-          created_at: string;
-          conversation_id: string;
-          sender_id: string;
-          content: string;
-          message_type: "text" | "listing_card";
-          listing_id: string | null;
-          is_read: boolean;
-          read_at: string | null;
-          deleted_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          created_at?: string;
-          conversation_id: string;
-          sender_id: string;
-          content: string;
-          message_type?: "text" | "listing_card";
-          listing_id?: string | null;
-          is_read?: boolean;
-          read_at?: string | null;
-          deleted_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          created_at?: string;
-          conversation_id?: string;
-          sender_id?: string;
-          content?: string;
-          message_type?: "text" | "listing_card";
-          listing_id?: string | null;
-          is_read?: boolean;
-          read_at?: string | null;
-          deleted_at?: string | null;
-        };
-      };
-
-      groups: {
-        Row: {
-          id: string;
-          created_at: string;
-          updated_at: string;
-          admin_id: string;
-          status: "open" | "closed" | "archived";
-          max_members: number;
-          created_from_conversation_id: string | null;
-          deleted_at: string | null;
-          shared_budget_min: number | null;
-          shared_budget_max: number | null;
-        };
-        Insert: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          admin_id: string;
-          status?: "open" | "closed" | "archived";
-          max_members?: number;
-          created_from_conversation_id?: string | null;
-          deleted_at?: string | null;
-          shared_budget_min?: number | null;
-          shared_budget_max?: number | null;
-        };
-        Update: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          admin_id?: string;
-          status?: "open" | "closed" | "archived";
-          max_members?: number;
-          created_from_conversation_id?: string | null;
-          deleted_at?: string | null;
-          shared_budget_min?: number | null;
-          shared_budget_max?: number | null;
-        };
-      };
-
+          created_at?: string
+          group_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
-          id: string;
-          created_at: string;
-          group_id: string;
-          user_id: string;
-          role: "admin" | "member";
-          joined_at: string;
-          left_at: string | null;
-        };
+          group_id: string
+          joined_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          group_id: string;
-          user_id: string;
-          role?: "admin" | "member";
-          joined_at?: string;
-          left_at?: string | null;
-        };
+          group_id: string
+          joined_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          group_id?: string;
-          user_id?: string;
-          role?: "admin" | "member";
-          joined_at?: string;
-          left_at?: string | null;
-        };
-      };
-
-      apartment_listings_photos: {
+          group_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
         Row: {
-          id: string;
-          created_at: string;
-          apartment_id: string;
-          photo_url: string;
-          blur_url: string | null;
-          display_order: number;
-        };
+          admin_id: string
+          apartment_id: string | null
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          id: string
+          name: string | null
+          status: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          apartment_id: string;
-          photo_url: string;
-          blur_url?: string | null;
-          display_order: number;
-        };
+          admin_id: string
+          apartment_id?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          status?: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          apartment_id?: string;
-          photo_url?: string;
-          blur_url?: string | null;
-          display_order?: number;
-        };
-      };
-
-      favorites: {
+          admin_id?: string
+          apartment_id?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_stats"
+            referencedColumns: ["apartment_id"]
+          },
+          {
+            foreignKeyName: "groups_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      likes: {
         Row: {
-          id: string;
-          created_at: string;
-          user_id: string;
-          apartment_id: string;
-        };
+          created_at: string
+          from_user: string
+          id: string
+          message: string
+          ref_tag: string | null
+          to_group: string | null
+          to_user: string | null
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          user_id: string;
-          apartment_id: string;
-        };
+          created_at?: string
+          from_user: string
+          id?: string
+          message: string
+          ref_tag?: string | null
+          to_group?: string | null
+          to_user?: string | null
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          user_id?: string;
-          apartment_id?: string;
-        };
-      };
-
-      hand_me_downs: {
+          created_at?: string
+          from_user?: string
+          id?: string
+          message?: string
+          ref_tag?: string | null
+          to_group?: string | null
+          to_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_to_group_fkey"
+            columns: ["to_group"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
         Row: {
-          id: string;
-          created_at: string;
-          apartment_id: string;
-          seller_id: string;
-          title: string;
-          description: string | null;
-          price: number;
-          photo_url: string | null;
-          status: "available" | "sold" | "removed";
-        };
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          apartment_id: string;
-          seller_id: string;
-          title: string;
-          description?: string | null;
-          price: number;
-          photo_url?: string | null;
-          status?: "available" | "sold" | "removed";
-        };
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          apartment_id?: string;
-          seller_id?: string;
-          title?: string;
-          description?: string | null;
-          price?: number;
-          photo_url?: string | null;
-          status?: "available" | "sold" | "removed";
-        };
-      };
-    };
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          birth_date: string | null
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          gender: string | null
+          id: string
+          is_pro: boolean
+          is_verified: boolean
+          last_active_at: string
+          mode: string
+          move_in_date: string | null
+          name: string
+          onboarded: boolean
+          photo_blur_url: string | null
+          photo_url: string | null
+          vibe_tags: string[]
+        }
+        Insert: {
+          bio?: string | null
+          birth_date?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          gender?: string | null
+          id: string
+          is_pro?: boolean
+          is_verified?: boolean
+          last_active_at?: string
+          mode?: string
+          move_in_date?: string | null
+          name: string
+          onboarded?: boolean
+          photo_blur_url?: string | null
+          photo_url?: string | null
+          vibe_tags?: string[]
+        }
+        Update: {
+          bio?: string | null
+          birth_date?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          is_pro?: boolean
+          is_verified?: boolean
+          last_active_at?: string
+          mode?: string
+          move_in_date?: string | null
+          name?: string
+          onboarded?: boolean
+          photo_blur_url?: string | null
+          photo_url?: string | null
+          vibe_tags?: string[]
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          token: string
+          user_id: string
+        }
+        Insert: {
+          token: string
+          user_id: string
+        }
+        Update: {
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saves: {
+        Row: {
+          apartment_id: string
+          created_at: string
+          group_id: string | null
+          user_id: string
+        }
+        Insert: {
+          apartment_id: string
+          created_at?: string
+          group_id?: string | null
+          user_id: string
+        }
+        Update: {
+          apartment_id?: string
+          created_at?: string
+          group_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saves_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_stats"
+            referencedColumns: ["apartment_id"]
+          },
+          {
+            foreignKeyName: "saves_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saves_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saves_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Views: {
+      apartment_hype_faces: {
+        Row: {
+          apartment_id: string | null
+          name: string | null
+          photo_url: string | null
+          unblurred: boolean | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_interests_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_stats"
+            referencedColumns: ["apartment_id"]
+          },
+          {
+            foreignKeyName: "apartment_interests_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartment_stats: {
         Row: {
-          apartment_id: string;
-          interest_count: number;
-          viewer_count: number;
-        };
-      };
-    };
+          apartment_id: string | null
+          interest_count: number | null
+          report_count: number | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
-      accept_like: {
-        Args: {
-          p_swipe_id: string;
-          p_receiver_id: string;
-        };
-        Returns: {
-          conversation_id: string;
-          match_id: string;
-        };
-      };
-      get_discover_feed: {
-        Args: {
-          p_user_id: string;
-          p_limit?: number;
-          p_cursor?: string;
-        };
-        Returns: Array<{
-          id: string;
-          display_name: string;
-          photo_url: string | null;
-          match_score: number;
-          bio: string | null;
-        }>;
-      };
-      get_map_listings: {
-        Args: {
-          p_min_lat: number;
-          p_max_lat: number;
-          p_min_lng: number;
-          p_max_lng: number;
-          p_zoom: number;
-        };
-        Returns: Array<{
-          id: string;
-          lat: number;
-          lng: number;
-          price: number;
-          is_favorited: boolean;
-        }>;
-      };
-    };
-  };
-};
+      accept_like: { Args: { p_like_id: string }; Returns: string }
+      am_pro: { Args: never; Returns: boolean }
+      blocked_with: { Args: { other: string }; Returns: boolean }
+      is_conversation_member: { Args: { cid: string }; Returns: boolean }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DefaultSchema = Database["public"]
+
+export type Tables<
+  TableName extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+> = (DefaultSchema["Tables"] & DefaultSchema["Views"])[TableName] extends {
+  Row: infer R
+}
+  ? R
+  : never
+
+export type TablesInsert<
+  TableName extends keyof DefaultSchema["Tables"]
+> = DefaultSchema["Tables"][TableName] extends { Insert: infer I } ? I : never
+
+export type TablesUpdate<
+  TableName extends keyof DefaultSchema["Tables"]
+> = DefaultSchema["Tables"][TableName] extends { Update: infer U } ? U : never
