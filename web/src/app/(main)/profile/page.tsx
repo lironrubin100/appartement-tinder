@@ -1,8 +1,46 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { createServerClient } from '@/utils/supabase/server';
+import { Avatar, Button, Badge } from '@/components/ui';
+import { signOut } from './actions';
 
-import { Avatar, Button, Badge, Input } from '@/components/ui';
+const MODE_LABELS: Record<string, string> = {
+  solo: '🏠 מחפש דירה',
+  group: '👥 בקבוצה',
+  room_filler: '➕ מחפש שותפים',
+  lister: '🔑 משכיר',
+};
 
-export default function ProfilePage() {
+const TAG_COLUMNS = [
+  'gender_dynamic', 'cleanliness', 'sleep_schedule', 'social_guests',
+  'noise_tolerance', 'music_vibe', 'climate', 'smoking', 'kitchen_dietary',
+  'cooking_dynamics', 'pets', 'weekend_routine', 'relationship_status',
+  'study_habits', 'financial_splitting', 'miluim_reserve_duty',
+] as const;
+
+export default async function ProfilePage() {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile) {
+    redirect('/login');
+  }
+
+  const age = profile.birth_date
+    ? Math.floor((Date.now() - new Date(profile.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    : null;
+
+  const setTags = TAG_COLUMNS.filter((key) => profile[key]);
+
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)]">
       <div className="max-w-2xl mx-auto bg-white">
@@ -15,17 +53,21 @@ export default function ProfilePage() {
           {/* Profile Picture & Name */}
           <div className="flex items-center gap-6">
             <Avatar
-              initials="AR"
+              initials={profile.name.slice(0, 2)}
               size="xl"
-              verified={true}
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop"
+              verified={profile.is_verified}
+              src={profile.photo_url ?? undefined}
             />
             <div>
-              <h2 className="text-2xl font-bold text-ink">Ari Rubin</h2>
-              <p className="text-body-text">בן 22 · סטודנט באוניברסיטת בן-גוריון</p>
-              <Badge variant="success" className="mt-2">
-                אימות דוא״ל
-              </Badge>
+              <h2 className="text-2xl font-bold text-ink">{profile.name}</h2>
+              <p className="text-body-text">
+                {age !== null ? `בן/בת ${age}` : 'גיל לא הוגדר'}
+              </p>
+              {profile.is_verified && (
+                <Badge variant="success" className="mt-2">
+                  אימות דוא״ל
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -33,7 +75,7 @@ export default function ProfilePage() {
           <div>
             <h3 className="font-semibold text-ink mb-2">ביו</h3>
             <p className="text-body-text">
-              Love tech, board games, and good conversations. Looking for clean, organized roommates.
+              {profile.bio || 'עדיין לא הוספת ביו.'}
             </p>
           </div>
 
@@ -41,21 +83,26 @@ export default function ProfilePage() {
           <div className="border-b border-card-border pb-6">
             <h3 className="font-semibold text-ink mb-3">מצב נוכחי</h3>
             <div className="flex gap-3 flex-wrap">
-              <Button variant="primary">🏠 מחפש דירה</Button>
-              <Button variant="secondary">👥 בקבוצה</Button>
-              <Button variant="ghost">➕ מחפש שותפים</Button>
+              {(['solo', 'group', 'room_filler'] as const).map((mode) => (
+                <Button key={mode} variant={profile.mode === mode ? 'primary' : 'ghost'}>
+                  {MODE_LABELS[mode]}
+                </Button>
+              ))}
             </div>
           </div>
 
           {/* Tags */}
           <div>
             <h3 className="font-semibold text-ink mb-3">התגים שלי</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge>נקייה</Badge>
-              <Badge>בוקר מוקדם</Badge>
-              <Badge>חברתית</Badge>
-              <Badge>טבעונית</Badge>
-            </div>
+            {setTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {setTags.map((key) => (
+                  <Badge key={key}>{String(profile[key])}</Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-text text-sm">עדיין לא הוספת תגיות.</p>
+            )}
           </div>
 
           {/* Settings */}
@@ -67,7 +114,9 @@ export default function ProfilePage() {
             </button>
             <button className="w-full text-start px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors">
               <span className="text-body-text">🔔 הודעות</span>
-              <span className="float-end text-success">פעיל</span>
+              <span className="float-end text-muted-text">
+                {profile.notifications_enabled ? 'פעיל' : 'כבוי'}
+              </span>
             </button>
             <button className="w-full text-start px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors">
               <span className="text-body-text">🔒 פרטיות</span>
@@ -80,9 +129,11 @@ export default function ProfilePage() {
             <Button variant="danger" className="w-full">
               🗑️ מחק חשבון
             </Button>
-            <button className="w-full text-error text-sm hover:underline">
-              התנתק
-            </button>
+            <form action={signOut}>
+              <button type="submit" className="w-full text-error text-sm hover:underline">
+                התנתק
+              </button>
+            </form>
           </div>
         </div>
       </div>

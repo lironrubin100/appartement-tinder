@@ -60,6 +60,37 @@ create policy write_own_profile on profiles for update to authenticated
 -- Column privileges, because RLS cannot express "any column except these".
 revoke update (is_pro, is_verified) on profiles from authenticated;
 
+-- Same reasoning: only the server-side student-email OTP-verify route
+-- (admin client) may set this, never the browser client directly.
+revoke update (student_email_verified_at) on profiles from authenticated;
+
+-- ------------------------------------------------- profile_photos
+alter table profile_photos enable row level security;
+create policy read_profile_photos on profile_photos for select to authenticated using (true);
+create policy own_profile_photos on profile_photos for all to authenticated
+  using (profile_id = auth.uid()) with check (profile_id = auth.uid());
+
+-- ------------------------------------------------- profile-photos storage bucket
+insert into storage.buckets (id, name, public)
+values ('profile-photos', 'profile-photos', true)
+on conflict (id) do nothing;
+
+create policy "profile photos are publicly readable"
+  on storage.objects for select
+  using (bucket_id = 'profile-photos');
+
+create policy "users upload their own profile photos"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "users update their own profile photos"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "users delete their own profile photos"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
 -- ------------------------------------------------- apartments
 create policy read_apartments on apartments for select to authenticated
   using (status <> 'paused');

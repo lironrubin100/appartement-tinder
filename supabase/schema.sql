@@ -5,6 +5,10 @@
 -- index when you launch a second city or cross ~5k listings.
 
 -- ---------------------------------------------------------------- profiles
+-- vibe_tags (free text[]) replaced by the structured 31-category taxonomy's
+-- renter half per DECISIONS.md C1/C2/C13 -- the 16 columns below. The
+-- apartment-side 15 categories live on `apartments`, not here (out of scope
+-- until that table needs the same treatment).
 create table profiles (
   id             uuid primary key references auth.users on delete cascade,
   name           text not null,
@@ -13,7 +17,6 @@ create table profiles (
   birth_date     date,
   gender         text check (gender in ('male','female','other')),
   bio            text check (char_length(bio) <= 300),
-  vibe_tags      text[] not null default '{}',
   mode           text not null default 'solo'
                  check (mode in ('solo','group','room_filler','lister')),
   -- matching criteria: the PRD says users "edit matching criteria" but never says what they are
@@ -23,10 +26,46 @@ create table profiles (
   is_verified    boolean not null default false,
   is_pro         boolean not null default false,
   onboarded      boolean not null default false,
+  notifications_enabled boolean not null default true,
+  -- student-email verification (DECISIONS.md B3/B4): separate from the
+  -- Google login email, proven via Supabase Auth OTP (see rls.sql for the
+  -- revoked-column lockdown).
+  student_email               text,
+  student_email_verified_at   timestamptz,
+  -- 16 renter-lifestyle categories, DECISIONS.md C1/C2/C13. Single-select
+  -- per category; null = not set yet.
+  gender_dynamic       text check (gender_dynamic in ('1_guy_guys','2_girls_1_girl','coed_anyone')),
+  cleanliness          text check (cleanliness in ('very_clean','clean','average','relaxed')),
+  sleep_schedule       text check (sleep_schedule in ('early_bed_early_wake','night_owl','flexible')),
+  social_guests        text check (social_guests in ('frequent_visitors','occasional','rarely')),
+  noise_tolerance      text check (noise_tolerance in ('quiet','moderate','high')),
+  music_vibe           text check (music_vibe in ('silent','ambient','upbeat','loud')),
+  climate              text check (climate in ('cold','moderate','hot')),
+  smoking              text check (smoking in ('yes','no','outdoor_only')),
+  kitchen_dietary      text check (kitchen_dietary in ('strict','vegetarian','mixed')),
+  cooking_dynamics     text check (cooking_dynamics in ('shared_cooking','individual','meal_prep')),
+  pets                 text check (pets in ('yes','no','small_only')),
+  weekend_routine      text check (weekend_routine in ('home_body','mixed','always_out')),
+  relationship_status  text check (relationship_status in ('single','in_relationship','flexible')),
+  study_habits         text check (study_habits in ('heavy_studying','moderate','minimal')),
+  financial_splitting  text check (financial_splitting in ('strict','flexible','shared_expenses')),
+  miluim_reserve_duty  text check (miluim_reserve_duty in ('active','occasional','none')),
   last_active_at timestamptz not null default now(),
   created_at     timestamptz not null default now()
 );
 create index on profiles (last_active_at desc) where onboarded;
+
+-- Multi-photo gallery for the profile edit screen. photo_url/photo_blur_url
+-- above stay in place -- apartment_hype_faces still reads them for the
+-- Pro-unblur gate -- this is an additive gallery, not a replacement.
+create table profile_photos (
+  id             uuid primary key default gen_random_uuid(),
+  profile_id     uuid not null references profiles on delete cascade,
+  url            text not null,
+  display_order  int not null default 0,
+  created_at     timestamptz not null default now()
+);
+create index on profile_photos (profile_id, display_order);
 
 -- ---------------------------------------------------------------- apartments
 create table apartments (
