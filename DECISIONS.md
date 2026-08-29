@@ -26,7 +26,7 @@ This file is the **ABSOLUTE SINGLE SOURCE OF TRUTH**. If `PRD.md`, `ARCHITECTURE
 | A1 | One sentence: what is this product? | DECIDED | An all-in-one platform for Beer Sheva students to find both an apartment and the people to share it with, operating as a closed ecosystem. Web-first platform. | everything |
 | A2 | What is it explicitly **not**? | OPEN | Not a general listings site, not a national portal, not a broker. | A1, M6 |
 | A3 | The single job-to-be-done in the primary journey | OPEN | "Go from alone to signed-lease-with-roommates." | C, D, E |
-| A4 | Which tab does the app open on? | DECIDED | Map. Apartments have standalone value on day one. | I4 |
+| A4 | Which tab does the app open on? | DECIDED | Mode-conditional. **Superseded 2026-08-29** (was: Map for everyone). Residents (Solo/Group/Room-Filler) open on Discover — the onboarding pitch now leads with "find your shutafim" before apartments, so the default entry matches. Lister-mode accounts open on their own dashboard (D16) instead, since Listers have no Discover access. | I4, D16 |
 | A5 | Geographic scope and how the boundary is enforced | OPEN | Beer Sheva only. Enforce by rejecting listings outside a bounding box, not by user location. | D4, J6 |
 | A6 | Students only, or anyone? | OPEN | Anyone may register; students get the verified badge. Excluding non-students loses young professionals who are the same customer. | B3, M5 |
 | A7 | Languages | DECIDED | Superseded by I16: Hebrew **and** English, both from v1. | I2, I16, all copy |
@@ -277,3 +277,4 @@ These shipped before (or outside) the register. Each needs a row above resolved,
 | Discover accept-a-like vs mutual match | — | C9 | N/A — now formally DECIDED as accept-a-like; rebuild will match |
 | Chats fetch-all-messages pattern | — | J2 | N/A — mobile scaffold removed |
 | Live database seed listings | Not re-verified this pass — needs a direct DB check, not a code read | J12 | Unverified |
+| `web/src/app/page.tsx` | Unconditionally `redirect('/map')` for everyone, no auth check | A4 | **Live — needs fixing** now that A4 is mode-conditional; tracked in `docs/superpowers/specs/2026-08-29-onboarding-design.md` |

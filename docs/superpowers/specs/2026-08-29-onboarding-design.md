@@ -130,14 +130,22 @@ isn't looking for shutafim themselves).
    Within a group, selection is exclusive (the underlying column only
    holds one value); across groups, pick as many or as few as you want.
    Whole screen has a Skip.
-8. **Done** — confirmation, then into the app.
+8. **Done** — confirmation, then into the app: **Discover** for a resident,
+   the (not-yet-built) Lister dashboard for a Lister — see below.
 
-**Flagged, not yet decided:** the done screen's destination. `DECISIONS.md`
-A4 is DECIDED as "app opens on Map" — but the reframed intro now leads with
-roommates, so landing on Discover would match the pitch better. Defaulting
-to **Map** here (A4 is source of truth and this row wasn't reopened), but
-flagging it since it's a real tension, not an oversight — say the word if
-you want the onboarding completion CTA to go to Discover instead.
+**Resolved 2026-08-29:** `DECISIONS.md` A4 is now mode-conditional —
+residents land on Discover (matches the shutafim-first pitch), Lister-mode
+accounts land on their own dashboard instead of Map/Discover. `PRD.md`
+updated to match. `web/src/app/page.tsx`'s unconditional
+`redirect('/map')` is now a known, tracked contradiction (see the
+`DECISIONS.md` "already made in code" table) — fixing it is part of this
+plan's implementation, not a separate task: it needs to branch on session +
+`profiles.mode` the same way the new `(main)/layout.tsx` gate does.
+
+Since the Lister dashboard (D16) doesn't exist yet, the Lister intake's
+last step redirects to `/compose` for now (post the listing you just told
+us about) rather than a dashboard that isn't built — swap this one line
+once D16 ships.
 
 ### Component architecture (modular, not hardcoded)
 

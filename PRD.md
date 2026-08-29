@@ -11,9 +11,9 @@ The first onboarding fork is **residency, not persona**: "Will you be living her
 4. **The Lister (Landlord/Realtor):** Account-only, no profile. Has a dedicated dashboard ("My listings") instead of Discover access.
 
 ## 3. Core Features & App Architecture
-The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destinations — Profile, Discover, Map, Plus (post a listing), Chats — rendered as a fixed bottom bar on mobile and free to take another shape on desktop. It opens directly to the Map.
+The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destinations — Profile, Discover, Map, Plus (post a listing), Chats — rendered as a fixed bottom bar on mobile and free to take another shape on desktop. Default entry is mode-conditional (updated 2026-08-29): residents (Solo/Group/Room-Filler) open on Discover, since roommate-matching is the lead pitch; Lister-mode accounts open on their own dashboard instead.
 
-### Map (The Apartment Feed) [DEFAULT ENTRY POINT]
+### Map (The Apartment Feed)
 *   **Geographical Map:** Shows available apartments. For performance, map pins are lightweight, displaying only the flat rent price and location.
 *   **Details on Demand:** Tapping a pin dynamically loads the full listing details, photos, and descriptions.
 *   **Favorites (Wishlist):** Users can save apartments. Favorited apartments render with a distinct star icon and a yellow aura on the map.
@@ -21,7 +21,7 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 *   **Whole Apartments Only:** All listings represent an entire apartment, not individual rooms.
 *   **Hand-Me-Down Market:** A leaving roommate can list furniture directly on their apartment's listing (e.g. "bed frame + mattress, 300 ₪"). The incoming roommate messages the seller to arrange pickup during move-in — no separate marketplace, no Facebook/Yad2 handoff.
 
-### Discover (The Roommate Feed)
+### Discover (The Roommate Feed) [DEFAULT ENTRY POINT for residents]
 *   **Structured Profiles:** Users are scored and filtered based on structured lifestyle categories (not free-form text).
 *   **Interaction Model:** Users send a "Like" attached to a specific trait or bio element, along with an optional message. The receiving user must accept the like to open a chat (Accept-a-Like model).
 *   **Dynamic Group Cards:** Formed Groups are displayed as a swipeable card. The group's card is dynamically computed and generated from the individual profiles of its members.
@@ -38,7 +38,7 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 ### Profile & Status
 *   The control center: a persistent mode-switcher row ("Currently: [mode]"), a "Your tags" summary of structured lifestyle categories, and verification status. Language, notifications, privacy, and account deletion live in a separate **Settings** screen, not Profile itself.
 
-### Lister Dashboard
+### Lister Dashboard [DEFAULT ENTRY POINT for Lister mode]
 *   Replaces Discover/Map browsing for Lister-mode accounts: "My listings" with per-listing status (Active + interested count, or Rented).
 
 ## 4. The Matching Engine
