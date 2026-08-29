@@ -12,6 +12,7 @@ interface ListingCardProps {
   availableFrom: string;
   tags?: string[];
   interestedCount?: number;
+  isNew?: boolean;
   saved?: boolean;
   onSave?: (id: string) => void;
   onMessage?: (id: string) => void;
@@ -28,6 +29,7 @@ export function ListingCard({
   availableFrom,
   tags = [],
   interestedCount = 0,
+  isNew = false,
   saved = false,
   onSave,
   onMessage,
@@ -37,6 +39,8 @@ export function ListingCard({
     <div
       className="bg-white rounded-shutaf-lg shadow-sm border border-card-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
       onClick={onClick}
+      data-testid="listing-card"
+      data-apartment-id={id}
     >
       {/* Image */}
       <div className="relative bg-neutral-bg-soft h-40 flex items-center justify-center overflow-hidden group">
@@ -57,12 +61,20 @@ export function ListingCard({
             e.stopPropagation();
             onSave?.(id);
           }}
+          aria-label={saved ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
+          aria-pressed={saved}
+          data-testid="favorite-toggle"
           className="absolute top-3 inset-e-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
         >
           <Heart
             className={`w-5 h-5 ${saved ? 'fill-gold text-gold' : 'text-muted-text'}`}
           />
         </button>
+        {isNew && (
+          <span className="absolute top-3 inset-s-3 bg-success text-white text-xs font-bold px-2.5 py-1 rounded-full">
+            חדש
+          </span>
+        )}
         {/* Price Badge */}
         <div className="absolute bottom-3 start-3 bg-white px-3 py-1.5 rounded-shutaf-md shadow-md">
           <span className="font-bold text-lg text-orange">₪{price.toLocaleString()}</span>

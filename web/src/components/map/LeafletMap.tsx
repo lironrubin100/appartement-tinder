@@ -1,8 +1,12 @@
 'use client';
 
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
+import 'leaflet.markercluster';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import type { Tables } from '@/types/database';
 
 type Apartment = Tables<'apartments'>;
@@ -10,13 +14,21 @@ type Apartment = Tables<'apartments'>;
 // Beer Sheva city center — this is where Shutaf launches (DECISIONS.md L3).
 const BEER_SHEVA_CENTER: [number, number] = [31.2530, 34.7915];
 
+// DECISIONS.md D14: cluster below zoom 14. Individual pins from zoom 14 up.
+const CLUSTER_MAX_ZOOM = 14;
+
 // Fixed-size box (not content-sized) so the div's own bounding rect — what
 // Leaflet uses for click hit-testing — actually covers the visible pill.
 // A CSS-transform-positioned auto-width tag leaves a 0x0 hit target.
-function priceIcon(price: number, isSelected: boolean) {
+function priceIcon(apt: Apartment, isSelected: boolean) {
   return L.divIcon({
     className: '',
-    html: `<div style="
+    html: `<div
+      data-testid="apartment-marker"
+      data-apartment-id="${apt.id}"
+      role="button"
+      aria-label="${apt.title.replace(/"/g, '&quot;')}, ₪${apt.price.toLocaleString()}"
+      style="
       width:100%;height:100%;
       display:flex;align-items:center;justify-content:center;
       background:${isSelected ? '#B5661F' : '#E2883A'};
@@ -27,9 +39,30 @@ function priceIcon(price: number, isSelected: boolean) {
       white-space:nowrap;
       box-shadow:0 2px 6px rgba(0,0,0,.3);
       border:2px solid white;
-    ">₪${price.toLocaleString()}</div>`,
+    ">₪${apt.price.toLocaleString()}</div>`,
     iconSize: [64, 28],
     iconAnchor: [32, 28],
+  });
+}
+
+// DECISIONS.md D17: "A numbered dark-circle pin shown when overlapping pins
+// collapse at low zoom."
+function clusterIcon(cluster: L.MarkerCluster) {
+  return L.divIcon({
+    className: '',
+    html: `<div
+      data-testid="apartment-cluster"
+      style="
+      width:36px;height:36px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:#262220;
+      color:#fff;
+      font-weight:700;
+      font-size:14px;
+      border:2px solid white;
+      box-shadow:0 2px 6px rgba(0,0,0,.3);
+    ">${cluster.getChildCount()}</div>`,
+    iconSize: [36, 36],
   });
 }
 
@@ -51,14 +84,21 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {apartments.map((apt) => (
-        <Marker
-          key={apt.id}
-          position={[apt.lat, apt.lng]}
-          icon={priceIcon(apt.price, apt.id === selectedId)}
-          eventHandlers={{ click: () => onSelect(apt.id) }}
-        />
-      ))}
+      <MarkerClusterGroup
+        iconCreateFunction={clusterIcon}
+        disableClusteringAtZoom={CLUSTER_MAX_ZOOM}
+        spiderfyOnMaxZoom={false}
+        showCoverageOnHover={false}
+      >
+        {apartments.map((apt) => (
+          <Marker
+            key={apt.id}
+            position={[apt.lat, apt.lng]}
+            icon={priceIcon(apt, apt.id === selectedId)}
+            eventHandlers={{ click: () => onSelect(apt.id) }}
+          />
+        ))}
+      </MarkerClusterGroup>
     </MapContainer>
   );
 }

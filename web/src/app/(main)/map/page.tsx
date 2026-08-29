@@ -5,8 +5,11 @@ import dynamic from 'next/dynamic';
 import { Heart, MapPin, MessageCircle } from 'lucide-react';
 import { ListingCard } from '@/components/discovery';
 import { Badge, Button, Modal } from '@/components/ui';
+import { FilterBar } from '@/components/map/FilterBar';
+import { APARTMENT_FILTERS } from '@/components/map/filters';
 import { createClient } from '@/utils/supabase/client';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useApartmentFilters } from '@/hooks/useApartmentFilters';
 import type { Tables } from '@/types/database';
 
 type Apartment = Tables<'apartments'>;
@@ -18,11 +21,18 @@ const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
   ),
 });
 
+const NEW_WITHIN_DAYS = 7;
+function isNewListing(createdAt: string) {
+  const ageMs = Date.now() - new Date(createdAt).getTime();
+  return ageMs < NEW_WITHIN_DAYS * 24 * 60 * 60 * 1000;
+}
+
 export default function MapPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { isSaved, toggle } = useFavorites();
+  const { values, setValue, filtered } = useApartmentFilters(apartments);
 
   useEffect(() => {
     const supabase = createClient();
@@ -39,46 +49,53 @@ export default function MapPage() {
   const selected = apartments.find((a) => a.id === selectedId) ?? null;
 
   return (
-    <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] flex flex-col md:flex-row gap-6 p-4 md:p-8">
-      {/* Map */}
-      <div className="flex-1 min-h-96 md:min-h-screen">
-        {loading ? (
-          <div className="w-full h-full rounded-shutaf-lg bg-neutral-bg-soft flex items-center justify-center">
-            <p className="text-muted-text">טוען מפה…</p>
-          </div>
-        ) : (
-          <LeafletMap apartments={apartments} selectedId={selectedId} onSelect={setSelectedId} />
-        )}
-      </div>
+    <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] p-4 md:p-8">
+      <FilterBar filters={APARTMENT_FILTERS} values={values} onChange={setValue} resultCount={filtered.length} />
 
-      {/* Listing Cards */}
-      <div className="w-full md:w-96 space-y-4">
-        <h3 className="text-lg font-bold text-ink mb-6">דירות בבאר שבע</h3>
-        <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-          {apartments.map((apt) => (
-            <ListingCard
-              key={apt.id}
-              id={apt.id}
-              title={apt.title}
-              price={apt.price}
-              image={apt.photos[0]}
-              location={apt.address ?? ''}
-              bedrooms={apt.bedrooms}
-              availableFrom={apt.available_from ?? ''}
-              tags={apt.is_sublet ? ['סאבלט'] : []}
-              saved={isSaved(apt.id)}
-              onSave={toggle}
-              onMessage={(id) => console.log('Message:', id)}
-              onClick={() => setSelectedId(apt.id)}
-            />
-          ))}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Map */}
+        <div className="flex-1 min-h-96 md:min-h-[calc(100vh-220px)]" data-testid="map-container">
+          {loading ? (
+            <div className="w-full h-full rounded-shutaf-lg bg-neutral-bg-soft flex items-center justify-center">
+              <p className="text-muted-text">טוען מפה…</p>
+            </div>
+          ) : (
+            <LeafletMap apartments={filtered} selectedId={selectedId} onSelect={setSelectedId} />
+          )}
+        </div>
+
+        {/* Listing Cards */}
+        <div className="w-full md:w-[36rem]">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[calc(100vh-220px)] overflow-y-auto content-start"
+            data-testid="listing-grid"
+          >
+            {filtered.map((apt) => (
+              <ListingCard
+                key={apt.id}
+                id={apt.id}
+                title={apt.title}
+                price={apt.price}
+                image={apt.photos[0]}
+                location={apt.address ?? ''}
+                bedrooms={apt.bedrooms}
+                availableFrom={apt.available_from ?? ''}
+                tags={apt.is_sublet ? ['סאבלט'] : []}
+                isNew={isNewListing(apt.created_at)}
+                saved={isSaved(apt.id)}
+                onSave={toggle}
+                onMessage={(id) => console.log('Message:', id)}
+                onClick={() => setSelectedId(apt.id)}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Apartment detail */}
       <Modal isOpen={!!selected} onClose={() => setSelectedId(null)} size="md">
         {selected && (
-          <div>
+          <div data-testid="apartment-detail">
             {selected.photos[0] && (
               <img
                 src={selected.photos[0]}
@@ -90,6 +107,9 @@ export default function MapPage() {
               <h2 className="text-xl font-bold text-ink">{selected.title}</h2>
               <button
                 onClick={() => toggle(selected.id)}
+                aria-label={isSaved(selected.id) ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
+                aria-pressed={isSaved(selected.id)}
+                data-testid="favorite-toggle"
                 className="p-2 bg-white rounded-full shadow-md shrink-0"
               >
                 <Heart

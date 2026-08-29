@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -28,6 +29,13 @@ export function Modal({
   size = 'md',
   closeButton = true,
 }: ModalProps) {
+  // Portaled to <body> so `fixed` positions against the viewport no matter
+  // what transform/overflow/stacking-context ancestors the caller sits under
+  // (e.g. a Leaflet map pane) — without this a caller-side ancestor can trap
+  // the overlay and render it in normal flow instead of on top.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -37,15 +45,22 @@ export function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    // z-[1001]: Leaflet's own control panes sit at z-index 1000, above
+    // Tailwind's z-50 — a lower value here left the map's zoom control
+    // clickable through the modal.
+    <div className="fixed inset-0 z-[1001] flex items-center justify-center" data-testid="modal-overlay">
       <div
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className={`
+      <div
+        role="dialog"
+        aria-modal="true"
+        data-testid="modal-content"
+        className={`
         relative bg-white rounded-shutaf-lg
         shadow-lg w-full mx-4 ${sizeClasses[size]}
         max-h-[90vh] overflow-y-auto
@@ -57,6 +72,8 @@ export function Modal({
             {closeButton && (
               <button
                 onClick={onClose}
+                aria-label="סגור"
+                data-testid="modal-close"
                 className="p-1 hover:bg-neutral-bg-soft rounded-md transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -71,6 +88,7 @@ export function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
