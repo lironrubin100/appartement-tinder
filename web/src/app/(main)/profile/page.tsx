@@ -31,8 +31,14 @@ export default async function ProfilePage() {
     redirect('/login');
   }
 
-  const age = profile.birth_date
-    ? Math.floor((Date.now() - new Date(profile.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+  const { data: privateProfile } = await supabase
+    .from('profile_private')
+    .select('birth_date, student_email, student_email_verified_at')
+    .eq('profile_id', user.id)
+    .maybeSingle();
+
+  const age = privateProfile?.birth_date
+    ? Math.floor((Date.now() - new Date(privateProfile.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null;
 
   const setTags = TAG_COLUMNS.filter((key) => profile[key]);
@@ -54,7 +60,7 @@ export default async function ProfilePage() {
             <Avatar
               initials={profile.name.slice(0, 2)}
               size="xl"
-              verified={profile.is_verified}
+              verified={profile.is_verified && profile.public_badges.includes('student_verified')}
               src={profile.photo_url ?? undefined}
             />
             <div>
@@ -62,10 +68,13 @@ export default async function ProfilePage() {
               <p className="text-body-text">
                 {age !== null ? `בן/בת ${age}` : 'גיל לא הוגדר'}
               </p>
-              {profile.student_email_verified_at && (
+              {privateProfile?.student_email_verified_at && profile.public_badges.includes('student_verified') && (
                 <Badge variant="success" className="mt-2">
                   מאומת כסטודנט
                 </Badge>
+              )}
+              {privateProfile?.student_email_verified_at && !profile.public_badges.includes('student_verified') && (
+                <p className="text-sm text-muted-text mt-2">האימות שלך פרטי</p>
               )}
             </div>
           </div>

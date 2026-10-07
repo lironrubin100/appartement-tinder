@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
 import { NotificationsToggle } from './NotificationsToggle';
+import { DefaultHomeSelect } from './DefaultHomeSelect';
 import { Button } from '@/components/ui';
 
 export default async function SettingsPage() {
@@ -10,7 +11,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('notifications_enabled')
+    .select('notifications_enabled, default_home, mode')
     .eq('id', user.id)
     .single();
   if (!profile) redirect('/login');
@@ -31,6 +32,12 @@ export default async function SettingsPage() {
             <span className="text-body-text">🔔 הודעות</span>
             <NotificationsToggle userId={user.id} initialEnabled={profile.notifications_enabled} />
           </div>
+          {profile.mode !== 'lister' && (
+            <DefaultHomeSelect
+              userId={user.id}
+              initialHome={profile.default_home === 'map' ? 'map' : 'discover'}
+            />
+          )}
           <button className="w-full text-start px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors">
             <span className="text-body-text">🔒 פרטיות</span>
             <span className="float-end text-muted-text">הצג עוד</span>

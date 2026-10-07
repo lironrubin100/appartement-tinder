@@ -9,15 +9,18 @@ import { uploadProfilePhoto } from '@/utils/photos';
 import type { Database } from '@/types/database';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
+type PrivateProfile = Database['public']['Tables']['profile_private']['Row'];
 type ProfilePhoto = Database['public']['Tables']['profile_photos']['Row'];
 
 const MAX_PHOTOS = 6;
 
 export function EditProfileForm({
   profile,
+  privateProfile,
   initialPhotos,
 }: {
   profile: Profile;
+  privateProfile: PrivateProfile | null;
   initialPhotos: ProfilePhoto[];
 }) {
   const router = useRouter();
@@ -31,13 +34,15 @@ export function EditProfileForm({
     ) as Record<TagKey, string | null>
   );
   const [photos, setPhotos] = useState(initialPhotos);
+  const [phone, setPhone] = useState(privateProfile?.phone ?? '');
+  const [publicBadges, setPublicBadges] = useState(profile.public_badges);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [studentEmail, setStudentEmail] = useState(profile.student_email ?? '');
+  const [studentEmail, setStudentEmail] = useState(privateProfile?.student_email ?? '');
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const [verified, setVerified] = useState(Boolean(profile.student_email_verified_at));
+  const [verified, setVerified] = useState(Boolean(privateProfile?.student_email_verified_at));
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [verifyBusy, setVerifyBusy] = useState(false);
 
@@ -82,11 +87,15 @@ export function EditProfileForm({
     setError(null);
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ name, bio, ...tags })
+      .update({ name, bio, public_badges: publicBadges, ...tags })
       .eq('id', profile.id);
+    const { error: privateUpdateError } = await supabase
+      .from('profile_private')
+      .update({ phone: phone.trim() || null })
+      .eq('profile_id', profile.id);
     setSaving(false);
-    if (updateError) {
-      setError(updateError.message);
+    if (updateError || privateUpdateError) {
+      setError(updateError?.message ?? privateUpdateError?.message ?? 'שמירת הפרופיל נכשלה');
       return;
     }
     router.push('/profile');
@@ -171,6 +180,13 @@ export function EditProfileForm({
           {/* Name / Bio */}
           <div className="space-y-4">
             <Input label="שם" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              label="טלפון פרטי לחשבון (אופציונלי)"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              helperText="הטלפון לא מוצג בפרופיל או במודעה. פניות נשארות בתוך Shutaf."
+            />
             <div>
               <label className="block text-sm font-medium text-ink mb-2">ביו</label>
               <textarea
@@ -187,7 +203,21 @@ export function EditProfileForm({
           <div className="border-t border-card-border pt-6">
             <h3 className="font-semibold text-ink mb-3">אימות דוא״ל סטודנטיאלי</h3>
             {verified ? (
-              <Badge variant="success">מאומת כסטודנט ({profile.student_email})</Badge>
+              <div className="space-y-3">
+                <Badge variant="success">מאומת כסטודנט ({privateProfile?.student_email})</Badge>
+                <label className="flex items-center gap-2 text-sm text-body-text">
+                  <input
+                    type="checkbox"
+                    checked={publicBadges.includes('student_verified')}
+                    onChange={(event) => setPublicBadges((current) =>
+                      event.target.checked
+                        ? Array.from(new Set([...current, 'student_verified']))
+                        : current.filter((badge) => badge !== 'student_verified')
+                    )}
+                  />
+                  הצג את תג אימות הסטודנט בפרופיל הציבורי
+                </label>
+              </div>
             ) : (
               <div className="space-y-3">
                 <Input

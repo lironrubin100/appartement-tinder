@@ -9,6 +9,7 @@ begin
   insert into profiles (id, name)
   values (new.id, coalesce(new.raw_user_meta_data->>'full_name',
                            new.raw_user_meta_data->>'name', 'New user'));
+  insert into profile_private (profile_id) values (new.id);
   return new;
 end $fn$;
 
@@ -36,6 +37,7 @@ language sql security definer stable set search_path = public as $fn$
 $fn$;
 
 alter table profiles             enable row level security;
+alter table profile_private      enable row level security;
 alter table apartments           enable row level security;
 alter table groups               enable row level security;
 alter table group_members        enable row level security;
@@ -51,10 +53,59 @@ alter table user_reports         enable row level security;
 alter table push_tokens          enable row level security;
 
 -- ------------------------------------------------- profiles
-create policy read_profiles on profiles for select to authenticated
-  using (not blocked_with(id));
+-- Base profile rows are owner-only. Other members use profiles_public, an
+-- explicit projection that contains no contact details or exact birth date.
+create policy read_own_profile on profiles for select to authenticated
+  using (id = auth.uid());
 create policy write_own_profile on profiles for update to authenticated
   using (id = auth.uid()) with check (id = auth.uid());
+
+create policy read_own_private_profile on profile_private for select to authenticated
+  using (profile_id = auth.uid());
+create policy update_own_private_profile on profile_private for update to authenticated
+  using (profile_id = auth.uid()) with check (profile_id = auth.uid());
+
+-- Student verification is written only by the server-side OTP-confirm route.
+revoke update (student_email, student_email_verified_at) on profile_private from authenticated;
+
+-- Safe public projection: age is derived from a private birth date; only
+-- explicitly selected badges are returned, and only for profiles visible to
+-- this caller (blocked users and Lister accounts are filtered out).
+create view profiles_public with (security_barrier = true) as
+select
+  p.id,
+  p.name,
+  p.photo_url,
+  p.bio,
+  case when pp.birth_date is null then null
+       else extract(year from age(current_date, pp.birth_date))::int end as age,
+  p.gender,
+  p.gender_dynamic,
+  p.cleanliness,
+  p.sleep_schedule,
+  p.social_guests,
+  p.noise_tolerance,
+  p.music_vibe,
+  p.climate,
+  p.smoking,
+  p.kitchen_dietary,
+  p.cooking_dynamics,
+  p.pets,
+  p.weekend_routine,
+  p.relationship_status,
+  p.study_habits,
+  p.financial_splitting,
+  p.miluim_reserve_duty,
+  case when p.is_verified and 'student_verified' = any(p.public_badges)
+       then array['student_verified']::text[] else array[]::text[] end as public_badges
+from profiles p
+left join profile_private pp on pp.profile_id = p.id
+where p.onboarded
+  and p.mode <> 'lister'
+  and not blocked_with(p.id);
+
+revoke all on profiles_public from anon;
+grant select on profiles_public to authenticated;
 
 -- A user must not be able to grant themselves Pro or the verified checkmark.
 -- Column privileges, because RLS cannot express "any column except these".
@@ -66,7 +117,17 @@ revoke update (student_email_verified_at) on profiles from authenticated;
 
 -- ------------------------------------------------- profile_photos
 alter table profile_photos enable row level security;
-create policy read_profile_photos on profile_photos for select to authenticated using (true);
+create policy read_profile_photos on profile_photos for select to authenticated
+  using (
+    profile_id = auth.uid()
+    or exists (
+      select 1 from profiles p
+      where p.id = profile_photos.profile_id
+        and p.onboarded
+        and p.mode <> 'lister'
+        and not blocked_with(p.id)
+    )
+  );
 create policy own_profile_photos on profile_photos for all to authenticated
   using (profile_id = auth.uid()) with check (profile_id = auth.uid());
 
@@ -90,6 +151,28 @@ create policy "users update their own profile photos"
 create policy "users delete their own profile photos"
   on storage.objects for delete to authenticated
   using (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- Apartment photos are listing content and may be displayed publicly; uploads
+-- and mutations remain scoped to the authenticated owner's folder.
+insert into storage.buckets (id, name, public)
+values ('apartment-photos', 'apartment-photos', true)
+on conflict (id) do nothing;
+
+create policy "apartment photos are publicly readable"
+  on storage.objects for select
+  using (bucket_id = 'apartment-photos');
+
+create policy "users upload their own apartment photos"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'apartment-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "users update their own apartment photos"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'apartment-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "users delete their own apartment photos"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'apartment-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- ------------------------------------------------- apartments
 create policy read_apartments on apartments for select to authenticated

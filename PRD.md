@@ -11,14 +11,14 @@ The first onboarding fork is **residency, not persona**: "Will you be living her
 4. **The Lister (Landlord/Realtor):** Account-only, no profile. Has a dedicated dashboard ("My listings") instead of Discover access.
 
 ## 3. Core Features & App Architecture
-The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destinations — Profile, Discover, Map, Plus (post a listing), Chats — rendered as a fixed bottom bar on mobile and free to take another shape on desktop. Default entry is mode-conditional (updated 2026-08-29): residents (Solo/Group/Room-Filler) open on Discover, since roommate-matching is the lead pitch; Lister-mode accounts open on their own dashboard instead.
+The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destinations — Profile, Discover, Map, Plus (post a listing), Chats — rendered as a fixed bottom bar on mobile and free to take another shape on desktop. Residents (Solo/Group/Room-Filler) open on Discover by default and can choose Discover or Map as their startup tab in Settings. Lister-mode accounts open on My Listings.
 
 ### Map (The Apartment Feed)
 *   **Geographical Map:** Shows available apartments. For performance, map pins are lightweight, displaying only the flat rent price and location.
 *   **Details on Demand:** Tapping a pin dynamically loads the full listing details, photos, and descriptions.
 *   **Favorites (Wishlist):** Users can save apartments. Favorited apartments render with a distinct star icon and a yellow aura on the map.
 *   **The "Hype" Engine:** Listings feature an "I'm Interested" button.
-*   **Whole Apartments Only:** All listings represent an entire apartment, not individual rooms.
+*   **Whole Apartments Only:** MVP listings represent an entire apartment with one total monthly price. Individual room listings and a bills-included tag are deferred; see `ROADMAP.md`.
 *   **Hand-Me-Down Market:** A leaving roommate can list furniture directly on their apartment's listing (e.g. "bed frame + mattress, 300 ₪"). The incoming roommate messages the seller to arrange pickup during move-in — no separate marketplace, no Facebook/Yad2 handoff.
 
 ### Discover (The Roommate Feed) [DEFAULT ENTRY POINT for residents]
@@ -37,6 +37,8 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 
 ### Profile & Status
 *   The control center: a persistent mode-switcher row ("Currently: [mode]"), a "Your tags" summary of structured lifestyle categories, and verification status. Language, notifications, privacy, and account deletion live in a separate **Settings** screen, not Profile itself.
+*   Public profile fields are display name, photo, age (not birth date), lifestyle tags, bio, and badges the user chooses to show. Phone, email, budget, and exact move-in date stay private. One optional phone number is kept per account and is never printed on the public listing; enquiries stay in-app.
+*   Residents default to Discover and can select Discover or Map as the startup tab in Settings. Listers open on My Listings.
 
 ### Lister Dashboard [DEFAULT ENTRY POINT for Lister mode]
 *   Replaces Discover/Map browsing for Lister-mode accounts: "My listings" with per-listing status (Active + interested count, or Rented).

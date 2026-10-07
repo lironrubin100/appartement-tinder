@@ -24,20 +24,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'קוד שגוי או שפג תוקפו' }, { status: 400 });
   }
 
-  // Verification only proves the caller owns `email`'s inbox. Write the
-  // result onto the caller's own profile with the admin client, since
-  // student_email_verified_at is revoked from client UPDATE.
+  // Student email and verification timestamp live in the owner-private row.
   const { error: updateError } = await admin
-    .from('profiles')
+    .from('profile_private')
     .update({
       student_email: email,
       student_email_verified_at: new Date().toISOString(),
-      is_verified: true,
     })
-    .eq('id', user.id);
+    .eq('profile_id', user.id);
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  const { error: badgeError } = await admin
+    .from('profiles')
+    .update({ is_verified: true })
+    .eq('id', user.id);
+
+  if (badgeError) {
+    return NextResponse.json({ error: badgeError.message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

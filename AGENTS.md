@@ -14,7 +14,7 @@ You are acting as a Staff-Level Solutions Architect and Lead Developer. We are b
 *   **Backend:** Supabase (PostgreSQL, Auth, Real-time WebSockets, Storage).
 
 ## 3. Core Product Principles
-*   **Map-First:** The primary entry point is the Map.
+*   **Discover-first for residents:** Discover is the default startup tab; residents can change their preferred startup tab to Map in Settings. Listers open on their listings dashboard. `DECISIONS.md` is authoritative if this principle changes.
 *   **In-App Ecosystem:** Everything (listings, communication, sharing to groups) must happen natively inside the app. No external links.
 *   **Unified Account:** A single user account handles all personas via a Bumble-style mode switch. 
 

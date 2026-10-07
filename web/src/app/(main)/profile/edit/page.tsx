@@ -14,11 +14,17 @@ export default async function EditProfilePage() {
     .single();
   if (!profile) redirect('/login');
 
+  const { data: privateProfile } = await supabase
+    .from('profile_private')
+    .select('*')
+    .eq('profile_id', user.id)
+    .maybeSingle();
+
   const { data: photos } = await supabase
     .from('profile_photos')
     .select('*')
     .eq('profile_id', user.id)
     .order('display_order', { ascending: true });
 
-  return <EditProfileForm profile={profile} initialPhotos={photos ?? []} />;
+  return <EditProfileForm profile={profile} privateProfile={privateProfile} initialPhotos={photos ?? []} />;
 }

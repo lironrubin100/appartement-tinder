@@ -19,7 +19,7 @@ Every screen was designed twice — once in Hebrew (RTL) and once in English (LT
 - **Color**: see Design Tokens below.
 - **Shape**: radius scale 12 / 20 / 24 / 28 / pill (999px).
 
-### Map feed (mobile, default entry point)
+### Map feed (mobile, design reference)
 - **Purpose**: browse available whole-apartment listings geographically. Opens directly on app launch.
 - **Layout**: full-bleed map background (striped placeholder), floating search bar pinned top (16px inset, white/85% + 6px blur, 16px radius), price pins scattered absolutely, a listing preview card docked above the bottom nav (20px radius, white, 16px padding, 64×64px photo thumbnail + text + favorite button), 5-item bottom tab bar.
 - **Pin states**: default (dark pill, `#262220` bg), favorited (gold `#F0B429` bg + star + soft yellow glow ring), selected (orange `#E2883A` bg, elevated shadow), cluster (dark circle with count, shown when zoomed out).

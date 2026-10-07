@@ -14,24 +14,19 @@ create table profiles (
   name           text not null,
   photo_url      text,          -- full-res. Only ever served to Pro, via the hype view.
   photo_blur_url text,          -- pre-blurred derivative, uploaded by the client.
-  birth_date     date,
   gender         text check (gender in ('male','female','other')),
   bio            text check (char_length(bio) <= 300),
   mode           text not null default 'solo'
                  check (mode in ('solo','group','room_filler','lister')),
   -- matching criteria: the PRD says users "edit matching criteria" but never says what they are
-  budget_min     int,
-  budget_max     int,
-  move_in_date   date,
   is_verified    boolean not null default false,
   is_pro         boolean not null default false,
   onboarded      boolean not null default false,
   notifications_enabled boolean not null default true,
-  -- student-email verification (DECISIONS.md B3/B4): separate from the
-  -- Google login email, proven via Supabase Auth OTP (see rls.sql for the
-  -- revoked-column lockdown).
-  student_email               text,
-  student_email_verified_at   timestamptz,
+  -- Residents default to Discover; Settings lets them choose Discover or Map.
+  default_home text not null default 'discover' check (default_home in ('discover','map')),
+  -- Only selected, verified badges are emitted by profiles_public (B9).
+  public_badges text[] not null default array[]::text[],
   -- 16 renter-lifestyle categories, DECISIONS.md C1/C2/C13. Single-select
   -- per category; null = not set yet.
   gender_dynamic       text check (gender_dynamic in ('1_guy_guys','2_girls_1_girl','coed_anyone')),
@@ -54,6 +49,23 @@ create table profiles (
   created_at     timestamptz not null default now()
 );
 create index on profiles (last_active_at desc) where onboarded;
+
+-- Contact, exact birth date, budget, and move-in data are owner-only. Public
+-- profile reads use the allowlisted profiles_public view in rls.sql, which
+-- derives age without exposing birth_date.
+create table profile_private (
+  profile_id                 uuid primary key references profiles on delete cascade,
+  birth_date                 date,
+  budget_min                 int,
+  budget_max                 int,
+  move_in_date               date,
+  phone                      text,
+  agency_name                text,
+  student_email              text,
+  student_email_verified_at  timestamptz,
+  created_at                 timestamptz not null default now(),
+  updated_at                 timestamptz not null default now()
+);
 
 -- Multi-photo gallery for the profile edit screen. photo_url/photo_blur_url
 -- above stay in place -- apartment_hype_faces still reads them for the

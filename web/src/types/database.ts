@@ -1,7 +1,6 @@
-/* Database type definitions for Shutaf.
- * Generated from the live Supabase schema (supabase/schema.sql + rls.sql)
- * via the Supabase MCP `generate_typescript_types`. Regenerate the same way
- * after any migration — do not hand-edit table shapes here.
+/* Database types synchronized with the local Supabase schema.
+ * The connected project is inactive, so types are updated locally until a
+ * migration can be applied and types regenerated from the live schema.
  */
 
 export type Json =
@@ -468,16 +467,64 @@ export type Database = {
           },
         ]
       }
-      profiles: {
+      profile_private: {
         Row: {
-          bio: string | null
+          agency_name: string | null
           birth_date: string | null
           budget_max: number | null
           budget_min: number | null
+          created_at: string
+          move_in_date: string | null
+          phone: string | null
+          profile_id: string
+          student_email: string | null
+          student_email_verified_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_name?: string | null
+          birth_date?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          move_in_date?: string | null
+          phone?: string | null
+          profile_id: string
+          student_email?: string | null
+          student_email_verified_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_name?: string | null
+          birth_date?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          move_in_date?: string | null
+          phone?: string | null
+          profile_id?: string
+          student_email?: string | null
+          student_email_verified_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_private_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          bio: string | null
           cleanliness: string | null
           climate: string | null
           cooking_dynamics: string | null
           created_at: string
+          default_home: string
           financial_splitting: string | null
           gender: string | null
           gender_dynamic: string | null
@@ -488,7 +535,6 @@ export type Database = {
           last_active_at: string
           miluim_reserve_duty: string | null
           mode: string
-          move_in_date: string | null
           music_vibe: string | null
           name: string
           noise_tolerance: string | null
@@ -497,24 +543,21 @@ export type Database = {
           pets: string | null
           photo_blur_url: string | null
           photo_url: string | null
+          public_badges: string[]
           relationship_status: string | null
           sleep_schedule: string | null
           smoking: string | null
           social_guests: string | null
-          student_email: string | null
-          student_email_verified_at: string | null
           study_habits: string | null
           weekend_routine: string | null
         }
         Insert: {
           bio?: string | null
-          birth_date?: string | null
-          budget_max?: number | null
-          budget_min?: number | null
           cleanliness?: string | null
           climate?: string | null
           cooking_dynamics?: string | null
           created_at?: string
+          default_home?: string
           financial_splitting?: string | null
           gender?: string | null
           gender_dynamic?: string | null
@@ -525,7 +568,6 @@ export type Database = {
           last_active_at?: string
           miluim_reserve_duty?: string | null
           mode?: string
-          move_in_date?: string | null
           music_vibe?: string | null
           name: string
           noise_tolerance?: string | null
@@ -534,24 +576,21 @@ export type Database = {
           pets?: string | null
           photo_blur_url?: string | null
           photo_url?: string | null
+          public_badges?: string[]
           relationship_status?: string | null
           sleep_schedule?: string | null
           smoking?: string | null
           social_guests?: string | null
-          student_email?: string | null
-          student_email_verified_at?: string | null
           study_habits?: string | null
           weekend_routine?: string | null
         }
         Update: {
           bio?: string | null
-          birth_date?: string | null
-          budget_max?: number | null
-          budget_min?: number | null
           cleanliness?: string | null
           climate?: string | null
           cooking_dynamics?: string | null
           created_at?: string
+          default_home?: string
           financial_splitting?: string | null
           gender?: string | null
           gender_dynamic?: string | null
@@ -562,7 +601,6 @@ export type Database = {
           last_active_at?: string
           miluim_reserve_duty?: string | null
           mode?: string
-          move_in_date?: string | null
           music_vibe?: string | null
           name?: string
           noise_tolerance?: string | null
@@ -571,12 +609,11 @@ export type Database = {
           pets?: string | null
           photo_blur_url?: string | null
           photo_url?: string | null
+          public_badges?: string[]
           relationship_status?: string | null
           sleep_schedule?: string | null
           smoking?: string | null
           social_guests?: string | null
-          student_email?: string | null
-          student_email_verified_at?: string | null
           study_habits?: string | null
           weekend_routine?: string | null
         }
@@ -696,6 +733,34 @@ export type Database = {
       }
     }
     Views: {
+      profiles_public: {
+        Row: {
+          age: number | null
+          bio: string | null
+          cleanliness: string | null
+          climate: string | null
+          cooking_dynamics: string | null
+          financial_splitting: string | null
+          gender: string | null
+          gender_dynamic: string | null
+          id: string | null
+          kitchen_dietary: string | null
+          miluim_reserve_duty: string | null
+          music_vibe: string | null
+          name: string | null
+          noise_tolerance: string | null
+          pets: string | null
+          photo_url: string | null
+          public_badges: string[] | null
+          relationship_status: string | null
+          sleep_schedule: string | null
+          smoking: string | null
+          social_guests: string | null
+          study_habits: string | null
+          weekend_routine: string | null
+        }
+        Relationships: []
+      }
       apartment_hype_faces: {
         Row: {
           apartment_id: string | null

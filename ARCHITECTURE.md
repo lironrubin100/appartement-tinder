@@ -93,14 +93,17 @@ Based on the architectural decisions, these are the mandated strategies for perf
 
 Four invariants. Each exists because the obvious implementation is wrong.
 
-**4.1 The Pro paywall is server-side, and it withholds identity, not just pixels.**
-The hype view must withhold `user_id`, `name` and `photo_url` together for non-Pro callers.
+**4.1 Hype identity is withheld server-side.**
+The apartment-interest view must withhold `user_id`, `name`, and `photo_url` together for non-Pro callers. This is distinct from the public Discover profile projection in B9.
 
 **4.2 `is_pro` and `is_verified` are revoked at the column level.**
 RLS cannot express "any column except these two".
 
 **4.3 Multi-write operations are RPCs, not client sequences.**
 Accepting a like creates a conversation, adds two members and posts a message. This happens via one `SECURITY DEFINER` function (`accept_like`).
+
+**4.4 Profile privacy uses separate private data and an explicit public projection.**
+Contact details, birth date, budget, move-in date, and student email live in an owner-only `profile_private` row. Public profile reads go through an allowlisted projection that returns age (never birth date), profile fields, selected public badges, and no contact details. Direct reads of private fields are not granted to other authenticated users.
 
 ---
 
