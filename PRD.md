@@ -7,7 +7,7 @@ A real-time web and mobile marketplace designed to eliminate friction in the ren
 The first onboarding fork is **residency, not persona**: "Will you be living here?" Anyone who will live in the apartment must complete a full profile before posting or matching; anyone posting on behalf of a property they won't live in gets an account-only intake (name, phone, agency — no profile). Within "living here," a single account dynamically switches its "Mode" (similar to Bumble / Bumble BFF) at any time via a persistent mode-switcher in Profile:
 1. **The Solo Renter:** Looking for an apartment or looking to join a group.
 2. **The Formed Group:** Up to 4 matched users looking for an apartment together.
-3. **The Room-Filler:** Renters currently living in an apartment looking for a final roommate to fill an empty room. Posts through a shorter, apartment-scoped form (room rent, move-in date, tags) rather than the full listing composer.
+3. **The Room-Filler:** Renters currently living in an apartment looking for a final roommate to fill an empty room. They create one apartment listing and add the room or rooms currently available, each with its own rent.
 4. **The Lister (Landlord/Realtor):** Account-only, no profile. Has a dedicated dashboard ("My listings") instead of Discover access.
 
 ## 3. Core Features & App Architecture
@@ -18,7 +18,7 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 *   **Details on Demand:** Tapping a pin dynamically loads the full listing details, photos, and descriptions.
 *   **Favorites (Wishlist):** Users can save apartments. Favorited apartments render with a distinct star icon and a yellow aura on the map.
 *   **The "Hype" Engine:** Listings feature an "I'm Interested" button.
-*   **Whole Apartments Only:** MVP listings represent an entire apartment with one total monthly price. Individual room listings and a bills-included tag are deferred; see `ROADMAP.md`.
+*   **Apartment listings with available rooms:** A listing represents an apartment. The poster adds one or more currently available rooms with individual monthly prices, and marks whether bills are included. A room is never a separate public listing.
 *   **Hand-Me-Down Market:** A leaving roommate can list furniture directly on their apartment's listing (e.g. "bed frame + mattress, 300 ₪"). The incoming roommate messages the seller to arrange pickup during move-in — no separate marketplace, no Facebook/Yad2 handoff.
 
 ### Discover (The Roommate Feed) [DEFAULT ENTRY POINT for residents]
@@ -37,7 +37,7 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 
 ### Profile & Status
 *   The control center: a persistent mode-switcher row ("Currently: [mode]"), a "Your tags" summary of structured lifestyle categories, and verification status. Language, notifications, privacy, and account deletion live in a separate **Settings** screen, not Profile itself.
-*   Public profile fields are display name, photo, age (not birth date), lifestyle tags, bio, and badges the user chooses to show. Phone, email, budget, and exact move-in date stay private. One optional phone number is kept per account and is never printed on the public listing; enquiries stay in-app.
+*   Public profile fields are display name, photo, age (not birth date), lifestyle tags, bio, and badges the user chooses to show. Phone, email, budget, and exact move-in date stay private. One optional phone number is kept per account and is never printed on the public listing; enquiries stay in-app. Listings show a stable approximate map pin, 500m from the precise point; their exact address is released only after the poster accepts an in-app enquiry. Each public listing represents an apartment and shows its available room or rooms, their individual monthly price, and whether bills are included; rooms do not appear as standalone listings.
 *   Residents default to Discover and can select Discover or Map as the startup tab in Settings. Listers open on My Listings.
 
 ### Lister Dashboard [DEFAULT ENTRY POINT for Lister mode]

@@ -11,8 +11,9 @@ import { createClient } from '@/utils/supabase/client';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useApartmentFilters } from '@/hooks/useApartmentFilters';
 import type { Tables } from '@/types/database';
+import { publicAreaLabel } from '@/lib/listings/locationPrivacy';
 
-type Apartment = Tables<'apartments'>;
+type Apartment = Tables<'apartments_public'>;
 
 const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
   ssr: false,
@@ -37,9 +38,8 @@ export default function MapPage() {
   useEffect(() => {
     const supabase = createClient();
     supabase
-      .from('apartments')
+      .from('apartments_public')
       .select('*')
-      .eq('status', 'active')
       .then(({ data }) => {
         setApartments(data ?? []);
         setLoading(false);
@@ -47,6 +47,14 @@ export default function MapPage() {
   }, []);
 
   const selected = apartments.find((a) => a.id === selectedId) ?? null;
+  const selectedMinRoomPrice = selected?.min_room_price ?? selected?.price;
+  const selectedMaxRoomPrice = selected?.max_room_price ?? selected?.price;
+  const selectedPriceLabel = selectedMinRoomPrice === selectedMaxRoomPrice
+    ? `₪${selectedMinRoomPrice?.toLocaleString()} לחדר`
+    : `₪${selectedMinRoomPrice?.toLocaleString()}–${selectedMaxRoomPrice?.toLocaleString()} לחדר`;
+  const selectedAvailabilityLabel = selected?.available_room_count === 1
+    ? 'חדר פנוי אחד'
+    : `${selected?.available_room_count} חדרים פנויים`;
 
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] p-4 md:p-8">
@@ -76,8 +84,12 @@ export default function MapPage() {
                 id={apt.id}
                 title={apt.title}
                 price={apt.price}
+                minRoomPrice={apt.min_room_price}
+                maxRoomPrice={apt.max_room_price}
+                availableRoomCount={apt.available_room_count}
+                billsIncluded={apt.bills_included}
                 image={apt.photos[0]}
-                location={apt.address ?? ''}
+                location={publicAreaLabel()}
                 bedrooms={apt.bedrooms}
                 availableFrom={apt.available_from ?? ''}
                 tags={apt.is_sublet ? ['סאבלט'] : []}
@@ -119,19 +131,28 @@ export default function MapPage() {
             </div>
             <div className="flex items-center gap-2 text-muted-text text-sm mb-3">
               <MapPin className="w-4 h-4" />
-              <span>{selected.address}</span>
+              <span>{publicAreaLabel()}</span>
               <span>•</span>
               <span>{selected.bedrooms} חדרים</span>
             </div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="font-bold text-lg text-orange">₪{selected.price.toLocaleString()}</span>
+              <span className="font-bold text-lg text-orange">{selectedPriceLabel}</span>
               {selected.is_sublet && <Badge variant="warning">סאבלט</Badge>}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              <Badge variant="default">{selectedAvailabilityLabel}</Badge>
+              <Badge variant={selected.bills_included ? 'success' : 'default'}>
+                {selected.bills_included ? 'חשבונות כלולים' : 'חשבונות לא כלולים'}
+              </Badge>
             </div>
             {selected.available_from && (
               <p className="text-sm text-muted-text mb-3">
                 זמין מ: {new Date(selected.available_from).toLocaleDateString('he-IL')}
               </p>
             )}
+            <p className="mb-3 rounded-shutaf-md bg-neutral-bg-soft px-3 py-2 text-xs text-muted-text">
+              המיקום במפה מוצג כאזור כללי בלבד. הכתובת המדויקת תישלח בצ׳אט לאחר שהמודעה תאושר עבורך.
+            </p>
             {selected.description && <p className="text-body-text mb-4">{selected.description}</p>}
             <Button
               variant="primary"

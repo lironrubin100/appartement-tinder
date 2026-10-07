@@ -39,6 +39,7 @@ $fn$;
 alter table profiles             enable row level security;
 alter table profile_private      enable row level security;
 alter table apartments           enable row level security;
+alter table apartment_rooms      enable row level security;
 alter table groups               enable row level security;
 alter table group_members        enable row level security;
 alter table likes                enable row level security;
@@ -46,6 +47,7 @@ alter table conversations        enable row level security;
 alter table conversation_members enable row level security;
 alter table messages             enable row level security;
 alter table apartment_interests  enable row level security;
+alter table listing_inquiries    enable row level security;
 alter table apartment_reports    enable row level security;
 alter table saves                enable row level security;
 alter table blocks               enable row level security;
@@ -175,12 +177,124 @@ create policy "users delete their own apartment photos"
   using (bucket_id = 'apartment-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- ------------------------------------------------- apartments
-create policy read_apartments on apartments for select to authenticated
-  using (status <> 'paused');
+-- Exact address and coordinates are owner-only. Public discovery uses the
+-- narrowly projected apartments_public view below.
+create function set_public_listing_location() returns trigger
+language plpgsql set search_path = public as $fn$
+declare
+  hash_value bigint;
+  angle_radians double precision;
+  radius_metres constant double precision := 500;
+begin
+  hash_value := abs(hashtextextended(new.id::text, 0));
+  angle_radians := mod(hash_value, 360) * pi() / 180;
+  new.public_lat := new.lat + (cos(angle_radians) * radius_metres / 111320);
+  new.public_lng := new.lng + (sin(angle_radians) * radius_metres /
+    (111320 * cos(radians(new.lat))));
+  return new;
+end;
+$fn$;
+create trigger set_public_listing_location_before_write
+  before insert or update of lat, lng on apartments
+  for each row execute function set_public_listing_location();
+revoke all on function set_public_listing_location() from public, anon, authenticated;
+
+drop policy if exists read_apartments on apartments;
+drop policy if exists read_apartments_public on apartments;
+create policy read_own_apartments on apartments for select to authenticated
+  using (lister_id = (select auth.uid()));
 create policy insert_own_apartment on apartments for insert to authenticated
   with check (lister_id = auth.uid() and source = 'user');
 create policy update_own_apartment on apartments for update to authenticated
   using (lister_id = auth.uid());
+
+create policy read_own_apartment_rooms on apartment_rooms for select to authenticated
+  using (exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid())));
+create policy insert_own_apartment_rooms on apartment_rooms for insert to authenticated
+  with check (exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid())));
+create policy update_own_apartment_rooms on apartment_rooms for update to authenticated
+  using (exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid())))
+  with check (exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid())));
+create policy delete_own_apartment_rooms on apartment_rooms for delete to authenticated
+  using (exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid())));
+
+-- Keep the legacy apartment.price field aligned with the lowest currently
+-- available room price. It is a cache, never the authoritative room price.
+create function refresh_apartment_room_price() returns trigger
+language plpgsql set search_path = public as $fn$
+declare
+  target_apartment_id uuid := coalesce(new.apartment_id, old.apartment_id);
+begin
+  update apartments
+  set price = room_prices.lowest_price
+  from (
+    select min(monthly_price)::int as lowest_price
+    from apartment_rooms
+    where apartment_id = target_apartment_id and is_available
+  ) room_prices
+  where apartments.id = target_apartment_id and room_prices.lowest_price is not null;
+  return null;
+end;
+$fn$;
+create trigger refresh_apartment_room_price_after_write
+  after insert or update or delete on apartment_rooms
+  for each row execute function refresh_apartment_room_price();
+revoke all on function refresh_apartment_room_price() from public, anon, authenticated;
+
+-- This intentionally runs as the view owner: authenticated users have no
+-- direct SELECT policy for other owners' apartment records. Its explicit
+-- column list is the public API contract; never add address, exact lat/lng,
+-- contact_url, or lister_id here.
+create view apartments_public with (security_barrier = true) as
+select
+  id, title, public_location_label, public_lat as lat, public_lng as lng,
+  room_prices.lowest_price as price,
+  room_prices.lowest_price as min_room_price,
+  room_prices.highest_price as max_room_price,
+  room_prices.available_room_count,
+  bills_included, bedrooms, is_sublet, available_from, description, photos,
+  status, created_at
+from apartments
+join lateral (
+  select
+    min(monthly_price)::int as lowest_price,
+    max(monthly_price)::int as highest_price,
+    count(*)::int as available_room_count
+  from apartment_rooms
+  where apartment_id = apartments.id and is_available
+) room_prices on room_prices.available_room_count > 0
+where status = 'active' and not blocked_with(lister_id);
+revoke all on apartments_public from anon;
+grant select on apartments_public to authenticated;
+
+-- Requesters cannot read the address by sending an inquiry. They receive it
+-- only after the listing owner has explicitly accepted the inquiry.
+create policy read_listing_inquiries on listing_inquiries for select to authenticated
+  using (
+    requester_id = (select auth.uid())
+    or exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid()))
+  );
+create policy create_own_listing_inquiry on listing_inquiries for insert to authenticated
+  with check (
+    requester_id = (select auth.uid())
+    and exists (select 1 from apartments a where a.id = apartment_id and a.status = 'active' and a.lister_id is distinct from (select auth.uid()))
+  );
+create policy listing_owner_updates_inquiry on listing_inquiries for update to authenticated
+  using (exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid())))
+  with check (
+    status in ('accepted', 'declined')
+    and exists (select 1 from apartments a where a.id = apartment_id and a.lister_id = (select auth.uid()))
+  );
+
+-- The precise address is a separate, tightly scoped read surface. It returns
+-- nothing until the requester's inquiry is accepted.
+create view listing_address_access with (security_barrier = true) as
+select a.id as apartment_id, a.address, a.lat, a.lng
+from apartments a
+join listing_inquiries i on i.apartment_id = a.id
+where i.requester_id = auth.uid() and i.status = 'accepted';
+revoke all on listing_address_access from anon;
+grant select on listing_address_access to authenticated;
 
 -- ------------------------------------------------- groups
 create policy read_groups on groups for select to authenticated using (true);

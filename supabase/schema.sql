@@ -88,8 +88,11 @@ create table apartments (
   address        text,
   lat            double precision not null,
   lng            double precision not null,
+  -- Cached lowest available-room price, retained for map sorting and legacy
+  -- data. Canonical prices belong to apartment_rooms below.
   price          int not null,
   bedrooms       int not null,
+  bills_included boolean not null default false,
   is_sublet      boolean not null default false,
   available_from date,
   description    text,
@@ -100,6 +103,41 @@ create table apartments (
   created_at     timestamptz not null default now()
 );
 create index on apartments (status, price);
+
+-- A room is always scoped to its parent apartment. It cannot be discovered or
+-- shared as a standalone listing (D5/D9).
+create table apartment_rooms (
+  id             uuid primary key default gen_random_uuid(),
+  apartment_id   uuid not null references apartments on delete cascade,
+  label          text check (char_length(label) <= 80),
+  monthly_price  int not null check (monthly_price > 0),
+  available_from date not null,
+  is_available   boolean not null default true,
+  created_at     timestamptz not null default now()
+);
+create index on apartment_rooms (apartment_id, is_available);
+
+-- D4: exact location stays on the owner record.  The public map receives the
+-- precomputed approximate pin only, through apartments_public in rls.sql.
+alter table apartments
+  add column public_lat double precision not null default 0,
+  add column public_lng double precision not null default 0,
+  add column public_location_label text not null default 'Beer Sheva';
+
+-- An inquiry is the permission boundary for a precise address. A poster must
+-- explicitly accept it before the requester can read listing_address_access.
+create table listing_inquiries (
+  id           uuid primary key default gen_random_uuid(),
+  apartment_id uuid not null references apartments on delete cascade,
+  requester_id uuid not null references profiles on delete cascade,
+  status       text not null default 'pending'
+               check (status in ('pending', 'accepted', 'declined')),
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  unique (apartment_id, requester_id)
+);
+create index on listing_inquiries (apartment_id, status);
+create index on listing_inquiries (requester_id, status);
 
 -- ---------------------------------------------------------------- groups
 create table groups (

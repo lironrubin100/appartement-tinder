@@ -6,6 +6,10 @@ interface ListingCardProps {
   id: string;
   title: string;
   price: number;
+  minRoomPrice?: number;
+  maxRoomPrice?: number;
+  availableRoomCount?: number;
+  billsIncluded?: boolean;
   image?: string;
   location: string;
   bedrooms: number;
@@ -23,6 +27,10 @@ export function ListingCard({
   id,
   title,
   price,
+  minRoomPrice = price,
+  maxRoomPrice = price,
+  availableRoomCount = 1,
+  billsIncluded,
   image,
   location,
   bedrooms,
@@ -35,6 +43,13 @@ export function ListingCard({
   onMessage,
   onClick,
 }: ListingCardProps) {
+  const roomPriceLabel = minRoomPrice === maxRoomPrice
+    ? `₪${minRoomPrice.toLocaleString()} לחדר`
+    : `₪${minRoomPrice.toLocaleString()}–${maxRoomPrice.toLocaleString()} לחדר`;
+  const availableRoomsLabel = availableRoomCount === 1
+    ? 'חדר פנוי אחד'
+    : `${availableRoomCount} חדרים פנויים`;
+
   return (
     <div
       className="bg-white rounded-shutaf-lg shadow-sm border border-card-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
@@ -77,7 +92,7 @@ export function ListingCard({
         )}
         {/* Price Badge */}
         <div className="absolute bottom-3 start-3 bg-white px-3 py-1.5 rounded-shutaf-md shadow-md">
-          <span className="font-bold text-lg text-orange">₪{price.toLocaleString()}</span>
+          <span className="font-bold text-base text-orange">{roomPriceLabel}</span>
         </div>
       </div>
 
@@ -92,6 +107,17 @@ export function ListingCard({
           <span>{location}</span>
           <span className="text-muted-text">•</span>
           <span>{bedrooms} חדרים</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <Badge variant="default" className="text-xs py-0.5 px-2">
+            {availableRoomsLabel}
+          </Badge>
+          {billsIncluded !== undefined && (
+            <Badge variant={billsIncluded ? 'success' : 'default'} className="text-xs py-0.5 px-2">
+              {billsIncluded ? 'חשבונות כלולים' : 'חשבונות לא כלולים'}
+            </Badge>
+          )}
         </div>
 
         {/* Available From */}

@@ -104,6 +104,7 @@ export type Database = {
           address: string | null
           available_from: string | null
           bedrooms: number
+          bills_included: boolean
           contact_url: string | null
           created_at: string
           description: string | null
@@ -114,6 +115,9 @@ export type Database = {
           lng: number
           photos: string[]
           price: number
+          public_lat: number
+          public_lng: number
+          public_location_label: string
           source: string
           status: string
           title: string
@@ -122,6 +126,7 @@ export type Database = {
           address?: string | null
           available_from?: string | null
           bedrooms: number
+          bills_included?: boolean
           contact_url?: string | null
           created_at?: string
           description?: string | null
@@ -132,6 +137,9 @@ export type Database = {
           lng: number
           photos?: string[]
           price: number
+          public_lat?: number
+          public_lng?: number
+          public_location_label?: string
           source?: string
           status?: string
           title: string
@@ -140,6 +148,7 @@ export type Database = {
           address?: string | null
           available_from?: string | null
           bedrooms?: number
+          bills_included?: boolean
           contact_url?: string | null
           created_at?: string
           description?: string | null
@@ -150,6 +159,9 @@ export type Database = {
           lng?: number
           photos?: string[]
           price?: number
+          public_lat?: number
+          public_lng?: number
+          public_location_label?: string
           source?: string
           status?: string
           title?: string
@@ -160,6 +172,44 @@ export type Database = {
             columns: ["lister_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_rooms: {
+        Row: {
+          apartment_id: string
+          available_from: string
+          created_at: string
+          id: string
+          is_available: boolean
+          label: string | null
+          monthly_price: number
+        }
+        Insert: {
+          apartment_id: string
+          available_from: string
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          label?: string | null
+          monthly_price: number
+        }
+        Update: {
+          apartment_id?: string
+          available_from?: string
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          label?: string | null
+          monthly_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_rooms_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
             referencedColumns: ["id"]
           },
         ]
@@ -733,6 +783,37 @@ export type Database = {
       }
     }
     Views: {
+      apartments_public: {
+        Row: {
+          available_from: string | null
+          bedrooms: number
+          created_at: string
+          description: string | null
+          id: string
+          is_sublet: boolean
+          lat: number
+          lng: number
+          available_room_count: number
+          bills_included: boolean
+          max_room_price: number
+          min_room_price: number
+          photos: string[]
+          price: number
+          public_location_label: string
+          status: string
+          title: string
+        }
+        Relationships: []
+      }
+      listing_address_access: {
+        Row: {
+          address: string | null
+          apartment_id: string | null
+          lat: number | null
+          lng: number | null
+        }
+        Relationships: []
+      }
       profiles_public: {
         Row: {
           age: number | null

@@ -21,9 +21,10 @@ export async function publishListing(formData: FormData): Promise<PublishListing
   const photos = formData.getAll('photos').filter((value): value is File => value instanceof File && value.size > 0);
   const draft = {
     title: String(formData.get('title') ?? ''),
-    price: Number(formData.get('price')),
     location: String(formData.get('location') ?? ''),
     bedrooms: Number(formData.get('bedrooms')),
+    billsIncluded: formData.get('billsIncluded') === 'on',
+    availableRooms: formData.getAll('roomPrice').map((price) => ({ monthlyPrice: Number(price) })),
     availableFrom: String(formData.get('availableFrom') ?? ''),
     description: String(formData.get('description') ?? ''),
     photos,
@@ -31,10 +32,10 @@ export async function publishListing(formData: FormData): Promise<PublishListing
   const validationError = validateListingDraft(draft);
   if (validationError) return { error: validationError };
 
-  // Do not publish until the user can select coordinates and listing images
-  // can be stored. In particular, never put the private profile phone in the
-  // publicly-readable contact_url field.
+  // Do not publish until the composer stores photos and the precise address
+  // through the private location flow. In particular, never put the private
+  // profile phone in the publicly-readable contact_url field.
   return {
-    error: 'הטופס מוכן, אבל פרסום עדיין דורש עדכון מסד נתונים: שדה טלפון פרטי, אחסון תמונות למודעות, וקביעת מיקום במפה. הפרטים לא נשמרו.',
+    error: 'הטופס תקין. הפרסום יופעל אחרי שנחבר העלאת תמונות ובחירת כתובת פרטית למודעה. הפרטים לא נשמרו.',
   };
 }

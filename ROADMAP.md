@@ -4,7 +4,7 @@ This file tracks product scope that should not enter the MVP implementation yet.
 
 ## MVP
 
-- Whole-apartment listings with one total monthly price.
+- Apartment listings with one or more available rooms; each room has its own monthly price and bills-included is shown at apartment level.
 - Resident startup tab defaults to Discover; residents may choose Discover or Map in Settings.
 - In-app messaging and one private account phone number.
 
@@ -12,8 +12,6 @@ This file tracks product scope that should not enter the MVP implementation yet.
 
 | Feature | Deferred scope | Revisit when | Decision reference |
 |---|---|---|---|
-| Individual room listings | Let posters create a listing for a specific room in an existing apartment, with its own rent and availability. Keep separate from the MVP whole-apartment listing model until the user flow and entity model are designed. | After the whole-apartment listing and inquiry flow is working with real users. | D5, D9, D12 |
-| Bills-included tag | Add a clear listing attribute indicating whether utilities are included in the stated rent. | Alongside the room-listing or listing-price iteration, before expanding filters. | D5 |
 
 ## Other deferred capabilities already recorded
 

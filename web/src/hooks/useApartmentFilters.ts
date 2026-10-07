@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { APARTMENT_FILTERS, type FilterDef } from '@/components/map/filters';
 import type { Tables } from '@/types/database';
 
-type Apartment = Tables<'apartments'>;
+type Apartment = Tables<'apartments_public'>;
 type FilterState = Record<string, FilterDef['default']>;
 
 function defaultState(filters: FilterDef[]): FilterState {

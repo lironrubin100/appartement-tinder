@@ -105,6 +105,8 @@ Accepting a like creates a conversation, adds two members and posts a message. T
 **4.4 Profile privacy uses separate private data and an explicit public projection.**
 Contact details, birth date, budget, move-in date, and student email live in an owner-only `profile_private` row. Public profile reads go through an allowlisted projection that returns age (never birth date), profile fields, selected public badges, and no contact details. Direct reads of private fields are not granted to other authenticated users.
 
+Apartment addresses and exact coordinates are also private. `apartments_public` is the only public listing projection: it returns a server-computed 500m approximate pin and excludes the exact address, coordinates, contact information, and listing owner. `listing_address_access` returns the precise location only for a requester whose inquiry the owner has accepted.
+
 ---
 
 ## 5. Bidirectional layout standard (I7, I9)

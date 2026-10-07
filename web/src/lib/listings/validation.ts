@@ -2,11 +2,16 @@ export const LISTING_PHOTO_MIN = 3;
 export const LISTING_PHOTO_MAX = 8;
 export const LISTING_PHOTO_MAX_BYTES = 12 * 1024 * 1024;
 
+export type AvailableRoomDraft = {
+  monthlyPrice: number;
+};
+
 export type ListingDraft = {
   title: string;
-  price: number;
   location: string;
   bedrooms: number;
+  billsIncluded: boolean;
+  availableRooms: AvailableRoomDraft[];
   availableFrom: string;
   description: string;
   photos: File[];
@@ -14,10 +19,14 @@ export type ListingDraft = {
 
 export function validateListingDraft(draft: ListingDraft): string | null {
   if (!draft.title.trim()) return 'יש להזין כותרת למודעה.';
-  if (!Number.isInteger(draft.price) || draft.price < 1) return 'יש להזין מחיר חודשי תקין לכל הדירה.';
   if (!draft.location.trim()) return 'יש להזין אזור או כתובת לדירה.';
   if (!Number.isInteger(draft.bedrooms) || draft.bedrooms < 1 || draft.bedrooms > 20) {
     return 'יש להזין מספר חדרים תקין.';
+  }
+  if (draft.availableRooms.length < 1) return 'יש להוסיף לפחות חדר פנוי אחד.';
+  if (draft.availableRooms.length > draft.bedrooms) return 'מספר החדרים הפנויים לא יכול להיות גדול ממספר החדרים בדירה.';
+  if (draft.availableRooms.some((room) => !Number.isInteger(room.monthlyPrice) || room.monthlyPrice < 1)) {
+    return 'יש להזין מחיר חודשי תקין לכל חדר פנוי.';
   }
   if (!draft.availableFrom || Number.isNaN(Date.parse(draft.availableFrom))) {
     return 'יש לבחור תאריך כניסה.';

@@ -1,6 +1,8 @@
 import type { Tables } from '@/types/database';
 
-type Apartment = Tables<'apartments'>;
+// Filters run against the safe public projection, never the owner record that
+// contains an exact address and coordinates.
+type Apartment = Tables<'apartments_public'>;
 
 interface BaseFilter {
   id: string;
@@ -52,7 +54,11 @@ export const APARTMENT_FILTERS: FilterDef[] = [
     step: 100,
     default: [0, 6000],
     format: (v) => `₪${v.toLocaleString()}`,
-    predicate: (apt, [min, max]) => apt.price >= min && apt.price <= max,
+    predicate: (apt, [min, max]) => {
+      const lowestRoomPrice = apt.min_room_price ?? apt.price;
+      const highestRoomPrice = apt.max_room_price ?? apt.price;
+      return lowestRoomPrice <= max && highestRoomPrice >= min;
+    },
   },
   {
     id: 'bedrooms',

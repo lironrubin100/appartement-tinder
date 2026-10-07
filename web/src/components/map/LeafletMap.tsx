@@ -9,7 +9,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import type { Tables } from '@/types/database';
 
-type Apartment = Tables<'apartments'>;
+type Apartment = Tables<'apartments_public'>;
 
 // Beer Sheva city center — this is where Shutaf launches (DECISIONS.md L3).
 const BEER_SHEVA_CENTER: [number, number] = [31.2530, 34.7915];
@@ -21,13 +21,18 @@ const CLUSTER_MAX_ZOOM = 14;
 // Leaflet uses for click hit-testing — actually covers the visible pill.
 // A CSS-transform-positioned auto-width tag leaves a 0x0 hit target.
 function priceIcon(apt: Apartment, isSelected: boolean) {
+  const roomPrice = apt.min_room_price ?? apt.price;
+  const roomPriceLabel = apt.max_room_price && apt.max_room_price !== roomPrice
+    ? `₪${roomPrice.toLocaleString()}+`
+    : `₪${roomPrice.toLocaleString()}`;
+
   return L.divIcon({
     className: '',
     html: `<div
       data-testid="apartment-marker"
       data-apartment-id="${apt.id}"
       role="button"
-      aria-label="${apt.title.replace(/"/g, '&quot;')}, ₪${apt.price.toLocaleString()}"
+      aria-label="${apt.title.replace(/"/g, '&quot;')}, ${roomPriceLabel} לחדר"
       style="
       width:100%;height:100%;
       display:flex;align-items:center;justify-content:center;
@@ -39,7 +44,7 @@ function priceIcon(apt: Apartment, isSelected: boolean) {
       white-space:nowrap;
       box-shadow:0 2px 6px rgba(0,0,0,.3);
       border:2px solid white;
-    ">₪${apt.price.toLocaleString()}</div>`,
+    ">${roomPriceLabel}</div>`,
     iconSize: [64, 28],
     iconAnchor: [32, 28],
   });
