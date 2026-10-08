@@ -8,7 +8,9 @@ export type AvailableRoomDraft = {
 
 export type ListingDraft = {
   title: string;
-  location: string;
+  address: string;
+  latitude: number;
+  longitude: number;
   bedrooms: number;
   billsIncluded: boolean;
   availableRooms: AvailableRoomDraft[];
@@ -19,7 +21,13 @@ export type ListingDraft = {
 
 export function validateListingDraft(draft: ListingDraft): string | null {
   if (!draft.title.trim()) return 'יש להזין כותרת למודעה.';
-  if (!draft.location.trim()) return 'יש להזין אזור או כתובת לדירה.';
+  if (!draft.address.trim()) return 'יש להזין את הכתובת המדויקת של הדירה.';
+  if (!Number.isFinite(draft.latitude) || draft.latitude < -90 || draft.latitude > 90) {
+    return 'יש להזין קו רוחב תקין עבור מיקום הדירה.';
+  }
+  if (!Number.isFinite(draft.longitude) || draft.longitude < -180 || draft.longitude > 180) {
+    return 'יש להזין קו אורך תקין עבור מיקום הדירה.';
+  }
   if (!Number.isInteger(draft.bedrooms) || draft.bedrooms < 1 || draft.bedrooms > 20) {
     return 'יש להזין מספר חדרים תקין.';
   }
