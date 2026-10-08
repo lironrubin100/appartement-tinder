@@ -1,10 +1,14 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { LISTING_PHOTO_MAX, LISTING_PHOTO_MIN, validateListingDraft } from '@/lib/listings/validation';
+import { publishListing } from '@/lib/listings/actions';
+import { resizeImage } from '@/utils/photos';
 
 export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: boolean }) {
+  const router = useRouter();
   const [photos, setPhotos] = useState<File[]>([]);
   const [roomPrices, setRoomPrices] = useState<string[]>(['']);
   const [bedrooms, setBedrooms] = useState('');
@@ -39,7 +43,7 @@ export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: bool
     setMessage('');
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!hasPrivatePhone) {
       setMessage('לפני הפרסום יש להוסיף מספר טלפון פרטי בהגדרות הפרופיל.');
@@ -49,7 +53,9 @@ export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: bool
     const formData = new FormData(form);
     const validationError = validateListingDraft({
       title: String(formData.get('title') ?? ''),
-      location: String(formData.get('location') ?? ''),
+      address: String(formData.get('address') ?? ''),
+      latitude: Number(formData.get('latitude')),
+      longitude: Number(formData.get('longitude')),
       bedrooms: Number(formData.get('bedrooms')),
       billsIncluded: formData.get('billsIncluded') === 'on',
       availableRooms: roomPrices.map((monthlyPrice) => ({ monthlyPrice: Number(monthlyPrice) })),
@@ -57,8 +63,23 @@ export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: bool
       description: String(formData.get('description') ?? ''),
       photos,
     });
-    if (validationError) setMessage(validationError);
-    else setMessage('הפרטים תקינים. הפרסום יופעל לאחר השלמת שמירת המודעה והתמונות.');
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
+
+    setMessage('מעלים תמונות ומפרסמים את המודעה…');
+    formData.delete('photos');
+    const compressedPhotos = await Promise.all(
+      photos.map(async (photo) => new File([await resizeImage(photo)], `${photo.name.replace(/\.[^.]+$/, '')}.jpg`, { type: 'image/jpeg' }))
+    );
+    compressedPhotos.forEach((photo) => formData.append('photos', photo));
+    const result = await publishListing(formData);
+    if (result.error) {
+      setMessage(result.error);
+      return;
+    }
+    router.push('/my-listings?published=1');
   }
 
   return (
@@ -73,7 +94,11 @@ export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: bool
             <Input name="bedrooms" label="מספר חדרים בדירה" placeholder="3" type="number" min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
             <Input name="availableFrom" label="תאריך כניסה" type="date" required />
           </div>
-          <Input name="location" label="אזור או כתובת" placeholder="שכונה / רחוב" required maxLength={200} helperText="הכתובת המדויקת נשארת פרטית. במודעה יוצג אזור משוער בלבד." />
+          <Input name="address" label="כתובת מדויקת" placeholder="רחוב ומספר" required maxLength={200} helperText="הכתובת המדויקת נשארת פרטית. במודעה יוצג אזור משוער בלבד." />
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Input name="latitude" label="קו רוחב" placeholder="31.2520" type="number" step="any" required helperText="לדיוק המפה בלבד; הוא לא יוצג לציבור." />
+            <Input name="longitude" label="קו אורך" placeholder="34.7915" type="number" step="any" required helperText="לדיוק המפה בלבד; הוא לא יוצג לציבור." />
+          </div>
 
           <fieldset className="space-y-3 rounded-shutaf-md border border-card-border p-4">
             <legend className="text-sm font-medium text-ink">חדרים פנויים ומחיר</legend>
@@ -126,7 +151,7 @@ export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: bool
               <span className="font-medium text-ink">בחירת תמונות</span>
               <span className="mt-1 text-sm text-muted-text">JPG, PNG או WebP · עד 12MB לתמונה</span>
             </label>
-            <input id="photos" type="file" accept="image/*" multiple onChange={handlePhotoChange} className="sr-only" aria-label="בחירת תמונות לדירה" />
+            <input id="photos" name="photos" type="file" accept="image/*" multiple onChange={handlePhotoChange} className="sr-only" aria-label="בחירת תמונות לדירה" />
             {photos.length > 0 && <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {photos.map((photo, index) => <figure key={`${photo.name}-${photo.lastModified}-${index}`} className="relative overflow-hidden rounded-shutaf-md border border-card-border">
                 <img src={photoUrls[index]} alt={`תמונה ${index + 1}: ${photo.name}`} className="aspect-[3/2] w-full object-cover" />
