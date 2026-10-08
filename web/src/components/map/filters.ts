@@ -42,8 +42,9 @@ export type FilterDef = RangeFilter | SelectFilter | ToggleFilter | DateFilter;
 export type FilterValue = FilterDef['default'];
 
 // Edit this array to add, remove, or tune a filter — nothing else on the map
-// page needs to change. Starting set is DECISIONS.md D13's proposal: "Price
-// range, bedrooms, sublet, available-from. Four filters, no more."
+// page needs to change. Keep the controls focused on the choices people make
+// before opening an apartment: room price, apartment size, bills, sublet, and
+// availability.
 export const APARTMENT_FILTERS: FilterDef[] = [
   {
     id: 'price',
@@ -84,6 +85,13 @@ export const APARTMENT_FILTERS: FilterDef[] = [
     label: 'סאבלט בלבד',
     default: false,
     predicate: (apt, value) => !value || apt.is_sublet,
+  },
+  {
+    id: 'billsIncluded',
+    type: 'toggle',
+    label: 'חשבונות כלולים',
+    default: false,
+    predicate: (apt, value) => !value || apt.bills_included,
   },
   {
     id: 'availableBy',
