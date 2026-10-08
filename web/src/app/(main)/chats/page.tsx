@@ -35,7 +35,7 @@ export default function ChatsPage() {
       <div className="max-w-2xl mx-auto bg-white">
         {/* Header */}
         <div className="border-b border-card-border px-6 py-8 sticky top-0 bg-white z-10">
-          <h1 className="text-3xl font-bold text-ink">צ'אטים</h1>
+          <h1 className="text-3xl font-bold text-ink">צ׳אטים</h1>
         </div>
 
         {/* Conversations List */}

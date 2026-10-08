@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Badge } from '../ui/Badge';
 
 interface FilterOption {
   id: string;

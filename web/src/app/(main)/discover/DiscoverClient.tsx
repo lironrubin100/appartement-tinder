@@ -1,7 +1,6 @@
 'use client';
 
 import { SwipeCard, TagFilter } from '@/components/discovery';
-import { Button } from '@/components/ui';
 
 export default function DiscoverPage() {
   return (

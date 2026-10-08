@@ -37,8 +37,13 @@ export default async function ProfilePage() {
     .eq('profile_id', user.id)
     .maybeSingle();
 
+  const today = new Date();
   const age = privateProfile?.birth_date
-    ? Math.floor((Date.now() - new Date(privateProfile.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    ? Math.max(0, today.getUTCFullYear() - new Date(privateProfile.birth_date).getUTCFullYear() - (
+      today < new Date(`${today.getUTCFullYear()}-${new Date(privateProfile.birth_date).getUTCMonth() + 1}-${new Date(privateProfile.birth_date).getUTCDate()}`)
+        ? 1
+        : 0
+    ))
     : null;
 
   const setTags = TAG_COLUMNS.filter((key) => profile[key]);

@@ -185,7 +185,7 @@ test.describe('Map', () => {
     await waitForMap(page);
 
     const priceFilter = page.getByTestId('filter-price');
-    const [minInput, maxInput] = await priceFilter.locator('input').all();
+    const [, maxInput] = await priceFilter.locator('input').all();
     await maxInput.fill('2500');
     await maxInput.dispatchEvent('change');
 

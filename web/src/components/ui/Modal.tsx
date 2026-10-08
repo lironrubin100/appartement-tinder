@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -33,9 +33,6 @@ export function Modal({
   // what transform/overflow/stacking-context ancestors the caller sits under
   // (e.g. a Leaflet map pane) — without this a caller-side ancestor can trap
   // the overlay and render it in normal flow instead of on top.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -45,7 +42,7 @@ export function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   return createPortal(
     // z-[1001]: Leaflet's own control panes sit at z-index 1000, above

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Avatar } from '../ui/Avatar';
 import { Badge } from '../ui/Badge';
 import { Heart, X } from 'lucide-react';
 
