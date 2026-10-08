@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { MapPin, Heart, MessageCircle } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
@@ -62,10 +63,13 @@ export function ListingCard({
       {/* Image */}
       <div className="relative bg-neutral-bg-soft h-40 flex items-center justify-center overflow-hidden group">
         {image ? (
-          <img
+          <Image
             src={image}
             alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            fill
+            unoptimized
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-orange-soft to-neutral-bg flex items-center justify-center">

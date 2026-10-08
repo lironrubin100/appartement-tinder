@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button, Input } from '@/components/ui';
 import { LISTING_PHOTO_MAX, LISTING_PHOTO_MIN, validateListingDraft } from '@/lib/listings/validation';
 import { publishListing } from '@/lib/listings/actions';
@@ -154,7 +155,7 @@ export default function ComposeForm({ hasPrivatePhone }: { hasPrivatePhone: bool
             <input id="photos" name="photos" type="file" accept="image/*" multiple onChange={handlePhotoChange} className="sr-only" aria-label="בחירת תמונות לדירה" />
             {photos.length > 0 && <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {photos.map((photo, index) => <figure key={`${photo.name}-${photo.lastModified}-${index}`} className="relative overflow-hidden rounded-shutaf-md border border-card-border">
-                <img src={photoUrls[index]} alt={`תמונה ${index + 1}: ${photo.name}`} className="aspect-[3/2] w-full object-cover" />
+                <Image src={photoUrls[index]} alt={`תמונה ${index + 1}: ${photo.name}`} fill unoptimized sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
                 <button type="button" onClick={() => removePhoto(index)} className="absolute end-2 top-2 rounded-full bg-white/95 px-2 py-1 text-xs font-semibold text-ink shadow" aria-label={`הסרת תמונה ${index + 1}`}>הסרה</button>
               </figure>)}
             </div>}

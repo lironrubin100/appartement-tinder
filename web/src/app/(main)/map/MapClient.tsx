@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Heart, MapPin, MessageCircle } from 'lucide-react';
 import { ListingCard } from '@/components/discovery';
 import { Badge, Button, Modal } from '@/components/ui';
@@ -130,11 +131,9 @@ export default function MapPage() {
         {selected && (
           <div data-testid="apartment-detail">
             {selected.photos[0] && (
-              <img
-                src={selected.photos[0]}
-                alt={selected.title}
-                className="w-full h-48 object-cover rounded-shutaf-md mb-4"
-              />
+              <div className="relative mb-4 h-48 overflow-hidden rounded-shutaf-md">
+                <Image src={selected.photos[0]} alt={selected.title} fill unoptimized sizes="(max-width: 768px) 100vw, 448px" className="object-cover" />
+              </div>
             )}
             <div className="flex items-start justify-between gap-4 mb-2">
               <h2 className="text-xl font-bold text-ink">{selected.title}</h2>

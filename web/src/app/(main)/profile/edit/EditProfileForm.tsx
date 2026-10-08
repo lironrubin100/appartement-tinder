@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { Button, Input, Badge } from '@/components/ui';
 import { TAG_CATEGORIES, type TagKey } from '@/utils/profileTags';
@@ -154,7 +155,7 @@ export function EditProfileForm({
                   key={photo.id}
                   className="relative aspect-[4/5] rounded-shutaf-md overflow-hidden bg-neutral-bg-soft"
                 >
-                  <img src={photo.url} alt="" className="w-full h-full object-cover" />
+                  <Image src={photo.url} alt="" fill unoptimized sizes="(max-width: 768px) 50vw, 33vw" className="object-cover" />
                   <div className="absolute inset-x-0 bottom-0 flex justify-between p-1 bg-black/40">
                     <button type="button" onClick={() => movePhoto(i, -1)} className="text-white text-xs px-2">
                       ◀

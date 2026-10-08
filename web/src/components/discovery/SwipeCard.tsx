@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Badge } from '../ui/Badge';
 import { Heart, X } from 'lucide-react';
 
@@ -34,10 +35,13 @@ export function SwipeCard({
       {/* Image Section */}
       <div className="relative bg-neutral-bg-soft h-80 flex items-center justify-center overflow-hidden">
         {photo ? (
-          <img
+          <Image
             src={photo}
             alt={name}
-            className="w-full h-full object-cover"
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 100vw, 384px"
+            className="object-cover"
           />
         ) : (
           <div className="w-24 h-24 rounded-full bg-orange-soft flex items-center justify-center text-orange text-4xl font-bold">

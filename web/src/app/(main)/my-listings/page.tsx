@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
 
@@ -47,7 +48,7 @@ export default async function MyListingsPage() {
         <ul className="space-y-3">
           {listings.map((listing) => (
             <li key={listing.id} className="flex items-center gap-4 rounded-2xl border border-card-border bg-white p-4">
-              {listing.photos[0] ? <img src={listing.photos[0]} alt="" className="h-20 w-24 rounded-xl object-cover" /> : <div className="h-20 w-24 rounded-xl bg-neutral-bg-soft" />}
+              {listing.photos[0] ? <Image src={listing.photos[0]} alt="" width={96} height={80} unoptimized className="h-20 w-24 rounded-xl object-cover" /> : <div className="h-20 w-24 rounded-xl bg-neutral-bg-soft" />}
               <div className="min-w-0 flex-1">
                 <h2 className="truncate font-semibold text-ink">{listing.title}</h2>
                 <p className="text-sm text-muted-text">{listing.address ?? 'מיקום לא צוין'}</p>

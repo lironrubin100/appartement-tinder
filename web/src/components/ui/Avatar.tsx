@@ -1,11 +1,14 @@
-import React from 'react';
+import Image from 'next/image';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
-interface AvatarProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface AvatarProps {
   size?: AvatarSize;
   initials?: string;
   verified?: boolean;
+  src?: string | null;
+  alt?: string;
+  className?: string;
 }
 
 const sizeClasses = {
@@ -29,22 +32,24 @@ export function Avatar({
   src,
   alt,
   className,
-  ...props
 }: AvatarProps) {
   const sizeClass = sizeClasses[size];
   const ringSize = sizeRing[size];
+  const imageSrc = src ?? undefined;
 
   return (
     <div className={`relative inline-block ${ringSize} ${className || ''}`}>
-      {src ? (
-        <img
-          src={src}
+      {imageSrc ? (
+        <Image
+          src={imageSrc}
           alt={alt || 'Avatar'}
+          fill
+          unoptimized
+          sizes="80px"
           className={`
-            ${sizeClass} rounded-full object-cover
+            rounded-full object-cover
             bg-neutral-bg border border-card-border
           `}
-          {...props}
         />
       ) : (
         <div
