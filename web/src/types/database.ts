@@ -802,6 +802,7 @@ export type Database = {
           public_location_label: string
           status: string
           title: string
+          interest_count: number
         }
         Relationships: []
       }
@@ -888,6 +889,10 @@ export type Database = {
     }
     Functions: {
       accept_like: { Args: { p_like_id: string }; Returns: string }
+      toggle_apartment_save_and_interest: {
+        Args: { p_apartment_id: string }
+        Returns: { saved: boolean; interest_count: number }[]
+      }
       am_pro: { Args: never; Returns: boolean }
       blocked_with: { Args: { other: string }; Returns: boolean }
       is_conversation_member: { Args: { cid: string }; Returns: boolean }

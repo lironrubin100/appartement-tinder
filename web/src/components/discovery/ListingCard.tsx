@@ -18,6 +18,7 @@ interface ListingCardProps {
   interestedCount?: number;
   isNew?: boolean;
   saved?: boolean;
+  savePending?: boolean;
   onSave?: (id: string) => void;
   onMessage?: (id: string) => void;
   onClick?: () => void;
@@ -39,6 +40,7 @@ export function ListingCard({
   interestedCount = 0,
   isNew = false,
   saved = false,
+  savePending = false,
   onSave,
   onMessage,
   onClick,
@@ -78,8 +80,9 @@ export function ListingCard({
           }}
           aria-label={saved ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
           aria-pressed={saved}
+          disabled={savePending}
           data-testid="favorite-toggle"
-          className="absolute top-3 inset-e-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+          className="absolute top-3 inset-e-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow disabled:cursor-wait disabled:opacity-60"
         >
           <Heart
             className={`w-5 h-5 ${saved ? 'fill-gold text-gold' : 'text-muted-text'}`}

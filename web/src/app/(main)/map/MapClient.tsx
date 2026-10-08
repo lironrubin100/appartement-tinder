@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Heart, MapPin, MessageCircle } from 'lucide-react';
 import { ListingCard } from '@/components/discovery';
@@ -32,7 +32,8 @@ export default function MapPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { isSaved, toggle } = useFavorites();
+  const { isSaved, isPending, toggle } = useFavorites();
+  const [saveError, setSaveError] = useState<string | null>(null);
   const { values, setValue, filtered } = useApartmentFilters(apartments);
 
   useEffect(() => {
@@ -47,6 +48,19 @@ export default function MapPage() {
   }, []);
 
   const selected = apartments.find((a) => a.id === selectedId) ?? null;
+  const handleSave = useCallback(async (apartmentId: string) => {
+    setSaveError(null);
+    const result = await toggle(apartmentId);
+    if (!result.ok) {
+      setSaveError(result.message);
+      return;
+    }
+    setApartments((current) => current.map((apartment) => (
+      apartment.id === apartmentId
+        ? { ...apartment, interest_count: result.interestCount }
+        : apartment
+    )));
+  }, [toggle]);
   const selectedMinRoomPrice = selected?.min_room_price ?? selected?.price;
   const selectedMaxRoomPrice = selected?.max_room_price ?? selected?.price;
   const selectedPriceLabel = selectedMinRoomPrice === selectedMaxRoomPrice
@@ -59,6 +73,11 @@ export default function MapPage() {
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] p-4 md:p-8">
       <FilterBar filters={APARTMENT_FILTERS} values={values} onChange={setValue} resultCount={filtered.length} />
+      {saveError && (
+        <p role="alert" className="mb-4 text-sm text-error" aria-live="polite">
+          {saveError}
+        </p>
+      )}
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Map */}
@@ -88,6 +107,7 @@ export default function MapPage() {
                 maxRoomPrice={apt.max_room_price}
                 availableRoomCount={apt.available_room_count}
                 billsIncluded={apt.bills_included}
+                interestedCount={apt.interest_count}
                 image={apt.photos[0]}
                 location={publicAreaLabel()}
                 bedrooms={apt.bedrooms}
@@ -95,7 +115,8 @@ export default function MapPage() {
                 tags={apt.is_sublet ? ['סאבלט'] : []}
                 isNew={isNewListing(apt.created_at)}
                 saved={isSaved(apt.id)}
-                onSave={toggle}
+                savePending={isPending(apt.id)}
+                onSave={handleSave}
                 onMessage={(id) => console.log('Message:', id)}
                 onClick={() => setSelectedId(apt.id)}
               />
@@ -118,11 +139,12 @@ export default function MapPage() {
             <div className="flex items-start justify-between gap-4 mb-2">
               <h2 className="text-xl font-bold text-ink">{selected.title}</h2>
               <button
-                onClick={() => toggle(selected.id)}
+                onClick={() => handleSave(selected.id)}
                 aria-label={isSaved(selected.id) ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
                 aria-pressed={isSaved(selected.id)}
+                disabled={isPending(selected.id)}
                 data-testid="favorite-toggle"
-                className="p-2 bg-white rounded-full shadow-md shrink-0"
+                className="p-2 bg-white rounded-full shadow-md shrink-0 disabled:cursor-wait disabled:opacity-60"
               >
                 <Heart
                   className={`w-5 h-5 ${isSaved(selected.id) ? 'fill-gold text-gold' : 'text-muted-text'}`}

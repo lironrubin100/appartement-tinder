@@ -3,79 +3,75 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
-const LOCAL_KEY = 'shutaf:favorites';
 const supabase = createClient();
 
-function readLocal(): Set<string> {
-  if (typeof window === 'undefined') return new Set();
-  try {
-    return new Set(JSON.parse(localStorage.getItem(LOCAL_KEY) ?? '[]'));
-  } catch {
-    return new Set();
-  }
-}
+type ToggleResult =
+  | { ok: true; saved: boolean; interestCount: number }
+  | { ok: false; message: string };
 
-function writeLocal(ids: Set<string>) {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(Array.from(ids)));
-}
-
-// ponytail: no sign-in flow exists yet anywhere in the app. Anonymous auth
-// gives each device a stable auth.uid() so `saves` stays RLS-scoped per user
-// without building a login screen. If the Supabase project has anonymous
-// sign-ins disabled, this silently falls back to a localStorage-only list.
-// Upgrade path: once real auth ships, migrate local saves into the `saves`
-// table on first sign-in.
 export function useFavorites() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [userId, setUserId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
 
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
-      let uid = session?.user?.id ?? null;
-
+      const uid = session?.user?.id;
       if (!uid) {
-        const { data, error } = await supabase.auth.signInAnonymously();
-        if (!error) uid = data.user?.id ?? null;
+        if (!cancelled) setReady(true);
+        return;
       }
 
-      if (cancelled) return;
-
-      if (uid) {
-        setUserId(uid);
-        const { data } = await supabase.from('saves').select('apartment_id').eq('user_id', uid);
-        if (!cancelled) setFavorites(new Set((data ?? []).map((r) => r.apartment_id)));
-      } else {
-        setFavorites(readLocal());
+      const { data, error } = await supabase
+        .from('saves')
+        .select('apartment_id')
+        .eq('user_id', uid);
+      if (!cancelled && !error) {
+        setFavorites(new Set((data ?? []).map((save) => save.apartment_id)));
       }
       if (!cancelled) setReady(true);
     }
 
-    init();
+    void init();
     return () => { cancelled = true; };
   }, []);
 
-  const toggle = useCallback(async (apartmentId: string) => {
-    setFavorites((prev) => {
-      const isSaved = prev.has(apartmentId);
-      const next = new Set(prev);
-      if (isSaved) next.delete(apartmentId); else next.add(apartmentId);
+  const toggle = useCallback(async (apartmentId: string): Promise<ToggleResult> => {
+    if (pendingIds.has(apartmentId)) {
+      return { ok: false, message: 'הפעולה כבר מתבצעת' };
+    }
 
-      if (userId) {
-        if (isSaved) {
-          supabase.from('saves').delete().eq('apartment_id', apartmentId).eq('user_id', userId);
-        } else {
-          supabase.from('saves').insert({ apartment_id: apartmentId, user_id: userId });
-        }
-      } else {
-        writeLocal(next);
-      }
+    setPendingIds((current) => new Set(current).add(apartmentId));
+    const { data, error } = await supabase.rpc('toggle_apartment_save_and_interest', {
+      p_apartment_id: apartmentId,
+    });
+    setPendingIds((current) => {
+      const next = new Set(current);
+      next.delete(apartmentId);
       return next;
     });
-  }, [userId]);
 
-  return { favorites, ready, isSaved: (id: string) => favorites.has(id), toggle };
+    const result = data?.[0];
+    if (error || !result) {
+      return { ok: false, message: 'לא הצלחנו לעדכן את המודעה. נסי שוב.' };
+    }
+
+    setFavorites((current) => {
+      const next = new Set(current);
+      if (result.saved) next.add(apartmentId); else next.delete(apartmentId);
+      return next;
+    });
+    return { ok: true, saved: result.saved, interestCount: Number(result.interest_count) };
+  }, [pendingIds]);
+
+  return {
+    favorites,
+    ready,
+    isSaved: (id: string) => favorites.has(id),
+    isPending: (id: string) => pendingIds.has(id),
+    toggle,
+  };
 }

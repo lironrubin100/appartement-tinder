@@ -253,7 +253,8 @@ select
   room_prices.highest_price as max_room_price,
   room_prices.available_room_count,
   bills_included, bedrooms, is_sublet, available_from, description, photos,
-  status, created_at
+  status, created_at,
+  (select count(*) from apartment_interests i where i.apartment_id = apartments.id) as interest_count
 from apartments
 join lateral (
   select
@@ -374,6 +375,54 @@ create policy own_saves on saves for all to authenticated
          or exists (select 1 from group_members gm
                     where gm.group_id = saves.group_id and gm.user_id = auth.uid()))
   with check (user_id = auth.uid());
+
+-- A heart changes two user-owned records: a private save and the public
+-- interest counter. Do this atomically so a network failure cannot leave one
+-- updated without the other.
+create or replace function toggle_apartment_save_and_interest(
+  p_apartment_id uuid
+)
+returns table (saved boolean, interest_count bigint)
+language plpgsql security definer set search_path = public as $fn$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if v_user_id is null then
+    raise exception 'authentication required';
+  end if;
+
+  if not exists (
+    select 1 from apartments a
+    where a.id = p_apartment_id
+      and a.status = 'active'
+      and a.lister_id is distinct from v_user_id
+      and not blocked_with(a.lister_id)
+      and exists (
+        select 1 from apartment_rooms r
+        where r.apartment_id = a.id and r.is_available
+      )
+  ) then
+    raise exception 'listing is unavailable';
+  end if;
+
+  if exists (select 1 from saves where apartment_id = p_apartment_id and user_id = v_user_id) then
+    delete from saves where apartment_id = p_apartment_id and user_id = v_user_id;
+    delete from apartment_interests where apartment_id = p_apartment_id and user_id = v_user_id;
+    saved := false;
+  else
+    insert into saves (apartment_id, user_id) values (p_apartment_id, v_user_id)
+      on conflict (apartment_id, user_id) do nothing;
+    insert into apartment_interests (apartment_id, user_id) values (p_apartment_id, v_user_id)
+      on conflict (apartment_id, user_id) do nothing;
+    saved := true;
+  end if;
+
+  select count(*) into interest_count from apartment_interests where apartment_id = p_apartment_id;
+  return next;
+end;
+$fn$;
+revoke all on function toggle_apartment_save_and_interest(uuid) from public, anon;
+grant execute on function toggle_apartment_save_and_interest(uuid) to authenticated;
 
 -- ------------------------------------------------- safety
 create policy own_blocks on blocks for all to authenticated
