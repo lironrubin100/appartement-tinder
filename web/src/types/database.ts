@@ -446,27 +446,82 @@ export type Database = {
           },
         ]
       }
+      listing_inquiries: {
+        Row: {
+          apartment_id: string
+          conversation_id: string | null
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          apartment_id: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          apartment_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_inquiries_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_inquiries_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: true
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_inquiries_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
           conversation_id: string
           created_at: string
           id: string
-          sender_id: string
+          kind: string
+          sender_id: string | null
         }
         Insert: {
           body: string
           conversation_id: string
           created_at?: string
           id?: string
-          sender_id: string
+          kind?: string
+          sender_id?: string | null
         }
         Update: {
           body?: string
           conversation_id?: string
           created_at?: string
           id?: string
-          sender_id?: string
+          kind?: string
+          sender_id?: string | null
         }
         Relationships: [
           {
@@ -888,7 +943,9 @@ export type Database = {
       }
     }
     Functions: {
+      accept_listing_inquiry: { Args: { p_inquiry_id: string }; Returns: string }
       accept_like: { Args: { p_like_id: string }; Returns: string }
+      create_listing_inquiry: { Args: { p_apartment_id: string }; Returns: string }
       toggle_apartment_save_and_interest: {
         Args: { p_apartment_id: string }
         Returns: { saved: boolean; interest_count: number }[]

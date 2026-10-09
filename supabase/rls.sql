@@ -362,6 +362,66 @@ end $fn$;
 revoke all on function accept_like(uuid) from public, anon;
 grant execute on function accept_like(uuid) to authenticated;
 
+-- Apartment contact is deliberately separate from a heart. The RPCs make
+-- acceptance atomic: inquiry status, conversation membership and the system
+-- notice cannot drift apart.
+create or replace function create_listing_inquiry(p_apartment_id uuid)
+returns uuid
+language plpgsql security definer set search_path = public as $fn$
+declare
+  v_requester_id uuid := auth.uid();
+  v_inquiry_id uuid;
+begin
+  if v_requester_id is null then raise exception 'authentication required'; end if;
+  if not exists (
+    select 1 from apartments a
+    where a.id = p_apartment_id and a.status = 'active'
+      and a.lister_id is not null and a.lister_id is distinct from v_requester_id
+      and not blocked_with(a.lister_id)
+  ) then raise exception 'listing is unavailable for contact'; end if;
+  insert into listing_inquiries (apartment_id, requester_id)
+  values (p_apartment_id, v_requester_id)
+  on conflict (apartment_id, requester_id) do update
+    set updated_at = listing_inquiries.updated_at
+  returning id into v_inquiry_id;
+  return v_inquiry_id;
+end;
+$fn$;
+
+create or replace function accept_listing_inquiry(p_inquiry_id uuid)
+returns uuid
+language plpgsql security definer set search_path = public as $fn$
+declare
+  v_owner_id uuid := auth.uid();
+  v_inquiry listing_inquiries%rowtype;
+  v_lister_id uuid;
+  v_conversation_id uuid;
+begin
+  if v_owner_id is null then raise exception 'authentication required'; end if;
+  select i into v_inquiry
+  from listing_inquiries i join apartments a on a.id = i.apartment_id
+  where i.id = p_inquiry_id for update of i;
+  select lister_id into v_lister_id from apartments where id = v_inquiry.apartment_id;
+  if v_inquiry.id is null or v_lister_id is distinct from v_owner_id then raise exception 'not your inquiry'; end if;
+  if v_inquiry.status = 'accepted' and v_inquiry.conversation_id is not null then return v_inquiry.conversation_id; end if;
+  if v_inquiry.status <> 'pending' then raise exception 'inquiry is no longer pending'; end if;
+  insert into conversations default values returning id into v_conversation_id;
+  insert into conversation_members (conversation_id, user_id)
+  values (v_conversation_id, v_lister_id), (v_conversation_id, v_inquiry.requester_id);
+  insert into messages (conversation_id, sender_id, kind, body)
+  values (v_conversation_id, null, 'system', 'הפנייה אושרה. הכתובת המדויקת זמינה כעת בכרטיס למטה.');
+  update listing_inquiries
+  set status = 'accepted', conversation_id = v_conversation_id, updated_at = now()
+  where id = v_inquiry.id;
+  return v_conversation_id;
+end;
+$fn$;
+
+revoke all on function create_listing_inquiry(uuid) from public, anon;
+grant execute on function create_listing_inquiry(uuid) to authenticated;
+revoke all on function accept_listing_inquiry(uuid) from public, anon;
+grant execute on function accept_listing_inquiry(uuid) to authenticated;
+
 -- ------------------------------------------------- map social
 -- Deliberately own-rows-only. If clients could read every interest row they
 -- could join it to profiles themselves and the Pro unblur would be worthless.

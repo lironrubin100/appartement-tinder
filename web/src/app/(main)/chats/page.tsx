@@ -1,68 +1,54 @@
-'use client';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createServerClient } from '@/utils/supabase/server';
 
-import { Avatar } from '@/components/ui';
+export default async function ChatsPage() {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-export default function ChatsPage() {
-  const conversations = [
-    {
-      id: '1',
-      name: 'Sarah Cohen',
-      initials: 'SC',
-      lastMessage: 'That sounds great! When can we meet?',
-      timestamp: '2026-08-20 14:32',
-      unread: 2,
-    },
-    {
-      id: '2',
-      name: 'Apartment Listing',
-      initials: 'AL',
-      lastMessage: 'Your inquiry has been received',
-      timestamp: '2026-08-20 12:15',
-      unread: 0,
-    },
-    {
-      id: '3',
-      name: 'Group: Summer Place',
-      initials: 'SP',
-      lastMessage: 'Mira: Should we schedule a viewing?',
-      timestamp: '2026-08-19 18:45',
-      unread: 3,
-    },
-  ];
+  const { data: memberships } = await supabase
+    .from('conversation_members')
+    .select('conversation_id')
+    .eq('user_id', user.id);
+  const conversationIds = (memberships ?? []).map((membership) => membership.conversation_id);
+  const { data: inquiries } = conversationIds.length
+    ? await supabase.from('listing_inquiries').select('conversation_id, apartment_id').in('conversation_id', conversationIds)
+    : { data: [] };
+  const apartmentIds = [...new Set((inquiries ?? []).map((inquiry) => inquiry.apartment_id))];
+  const { data: apartments } = apartmentIds.length
+    ? await supabase.from('apartments_public').select('id, title').in('id', apartmentIds)
+    : { data: [] };
+  const { data: messages } = conversationIds.length
+    ? await supabase.from('messages').select('conversation_id, body, created_at').in('conversation_id', conversationIds).order('created_at', { ascending: false })
+    : { data: [] };
+
+  const inquiryByConversation = Object.fromEntries(
+    (inquiries ?? []).filter((inquiry) => inquiry.conversation_id).map((inquiry) => [inquiry.conversation_id as string, inquiry.apartment_id]),
+  );
+  const titleByApartment = Object.fromEntries((apartments ?? []).map((apartment) => [apartment.id, apartment.title]));
+  const latestByConversation = Object.fromEntries((messages ?? []).map((message) => [message.conversation_id, message]));
+  const sortedConversationIds = [...conversationIds].sort((first, second) => {
+    const firstTime = latestByConversation[first]?.created_at ?? '';
+    const secondTime = latestByConversation[second]?.created_at ?? '';
+    return secondTime.localeCompare(firstTime);
+  });
 
   return (
-    <div className="w-full bg-page-bg min-h-[calc(100vh-80px)]">
-      <div className="max-w-2xl mx-auto bg-white">
-        {/* Header */}
-        <div className="border-b border-card-border px-6 py-8 sticky top-0 bg-white z-10">
-          <h1 className="text-3xl font-bold text-ink">צ׳אטים</h1>
-        </div>
-
-        {/* Conversations List */}
-        <div className="divide-y divide-card-border">
-          {conversations.map((conv) => (
-            <button
-              key={conv.id}
-              className="w-full px-4 py-4 hover:bg-neutral-bg-soft transition-colors text-start flex items-center gap-4"
-            >
-              <Avatar initials={conv.initials} size="md" />
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-ink">{conv.name}</h3>
-                  <span className="text-xs text-muted-text">{conv.timestamp}</span>
-                </div>
-                <p className="text-sm text-muted-text truncate">{conv.lastMessage}</p>
-              </div>
-
-              {conv.unread > 0 && (
-                <div className="w-6 h-6 rounded-full bg-orange text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                  {conv.unread}
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
+    <div className="min-h-[calc(100vh-80px)] bg-page-bg">
+      <div className="mx-auto max-w-2xl bg-white">
+        <header className="border-b border-card-border px-6 py-8"><h1 className="text-3xl font-bold text-ink">צ׳אטים</h1></header>
+        {!sortedConversationIds.length ? (
+          <section className="p-8 text-center"><h2 className="font-semibold text-ink">עדיין אין שיחות</h2><p className="mt-2 text-sm text-muted-text">אחרי שבעל/ת נכס יאשרו פנייה, השיחה תופיע כאן.</p></section>
+        ) : (
+          <ul className="divide-y divide-card-border">
+            {sortedConversationIds.map((conversationId) => {
+              const apartmentId = inquiryByConversation[conversationId];
+              const latest = latestByConversation[conversationId];
+              return <li key={conversationId}><Link href={`/chats/${conversationId}`} className="block px-6 py-4 transition-colors hover:bg-neutral-bg-soft"><div className="flex items-center justify-between gap-4"><h2 className="font-semibold text-ink">{apartmentId ? titleByApartment[apartmentId] ?? 'פנייה על דירה' : 'שיחה'}</h2>{latest && <time className="shrink-0 text-xs text-muted-text">{new Date(latest.created_at).toLocaleDateString('he-IL')}</time>}</div><p className="mt-1 truncate text-sm text-muted-text">{latest?.body ?? 'השיחה נפתחה'}</p></Link></li>;
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

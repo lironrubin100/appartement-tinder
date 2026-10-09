@@ -197,6 +197,9 @@ create table conversations (
   created_at timestamptz not null default now()
 );
 
+alter table listing_inquiries
+  add column conversation_id uuid unique references conversations on delete set null;
+
 create table conversation_members (
   conversation_id uuid references conversations on delete cascade,
   user_id         uuid references profiles on delete cascade,
@@ -207,9 +210,14 @@ create table conversation_members (
 create table messages (
   id              uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references conversations on delete cascade,
-  sender_id       uuid not null references profiles on delete cascade,
+  sender_id       uuid references profiles on delete cascade,
+  kind            text not null default 'user' check (kind in ('user', 'system')),
   body            text not null check (char_length(body) between 1 and 2000),
-  created_at      timestamptz not null default now()
+  created_at      timestamptz not null default now(),
+  check (
+    (kind = 'user' and sender_id is not null)
+    or (kind = 'system' and sender_id is null)
+  )
 );
 create index on messages (conversation_id, created_at desc);
 

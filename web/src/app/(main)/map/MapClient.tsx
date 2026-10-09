@@ -13,6 +13,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useApartmentFilters } from '@/hooks/useApartmentFilters';
 import type { Tables } from '@/types/database';
 import { publicAreaLabel } from '@/lib/listings/locationPrivacy';
+import { createListingInquiry } from '@/lib/listings/inquiries';
 
 type Apartment = Tables<'apartments_public'>;
 
@@ -35,6 +36,7 @@ export default function MapPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { isSaved, isPending, toggle } = useFavorites();
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [contactMessage, setContactMessage] = useState<string | null>(null);
   const { values, setValue, filtered } = useApartmentFilters(apartments);
 
   useEffect(() => {
@@ -62,6 +64,13 @@ export default function MapPage() {
         : apartment
     )));
   }, [toggle]);
+  const handleContact = useCallback(async (apartmentId: string) => {
+    setContactMessage(null);
+    const result = await createListingInquiry(apartmentId);
+    setContactMessage(result.ok
+      ? 'הפנייה נשלחה לבעל/ת הנכס. לאחר אישור תיפתח שיחה פרטית.'
+      : result.message);
+  }, []);
   const selectedMinRoomPrice = selected?.min_room_price ?? selected?.price;
   const selectedMaxRoomPrice = selected?.max_room_price ?? selected?.price;
   const selectedPriceLabel = selectedMinRoomPrice === selectedMaxRoomPrice
@@ -77,6 +86,11 @@ export default function MapPage() {
       {saveError && (
         <p role="alert" className="mb-4 text-sm text-error" aria-live="polite">
           {saveError}
+        </p>
+      )}
+      {contactMessage && (
+        <p role="status" className="mb-4 text-sm text-muted-text" aria-live="polite">
+          {contactMessage}
         </p>
       )}
 
@@ -118,7 +132,7 @@ export default function MapPage() {
                 saved={isSaved(apt.id)}
                 savePending={isPending(apt.id)}
                 onSave={handleSave}
-                onMessage={(id) => console.log('Message:', id)}
+                onMessage={handleContact}
                 onClick={() => setSelectedId(apt.id)}
               />
             ))}
@@ -172,16 +186,16 @@ export default function MapPage() {
               </p>
             )}
             <p className="mb-3 rounded-shutaf-md bg-neutral-bg-soft px-3 py-2 text-xs text-muted-text">
-              המיקום במפה מוצג כאזור כללי בלבד. הכתובת המדויקת תישלח בצ׳אט לאחר שהמודעה תאושר עבורך.
+              המיקום במפה מוצג כאזור כללי בלבד. הכתובת המדויקת תהיה זמינה בצ׳אט רק לאחר שבעל/ת הנכס יאשרו את הפנייה.
             </p>
             {selected.description && <p className="text-body-text mb-4">{selected.description}</p>}
             <Button
               variant="primary"
               className="w-full"
-              onClick={() => console.log('Message:', selected.id)}
+              onClick={() => handleContact(selected.id)}
             >
               <MessageCircle className="w-4 h-4 ms-2" />
-              שלח הודעה
+              יצירת קשר עם בעל/ת הנכס
             </Button>
           </div>
         )}
