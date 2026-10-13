@@ -194,8 +194,12 @@ create index on likes (to_user);
 create table conversations (
   id         uuid primary key default gen_random_uuid(),
   group_id   uuid references groups on delete cascade,
+  -- Denormalized Inbox preview; maintained by refresh_conversation_preview.
+  last_message_at timestamptz,
+  last_message_body text,
   created_at timestamptz not null default now()
 );
+create index on conversations (last_message_at desc nulls last);
 
 create table conversation_members (
   conversation_id uuid references conversations on delete cascade,
@@ -203,6 +207,7 @@ create table conversation_members (
   last_read_at    timestamptz not null default now(),
   primary key (conversation_id, user_id)
 );
+create index on conversation_members (user_id, conversation_id);
 
 create table messages (
   id              uuid primary key default gen_random_uuid(),

@@ -285,16 +285,22 @@ export type Database = {
           created_at: string
           group_id: string | null
           id: string
+          last_message_at: string | null
+          last_message_body: string | null
         }
         Insert: {
           created_at?: string
           group_id?: string | null
           id?: string
+          last_message_at?: string | null
+          last_message_body?: string | null
         }
         Update: {
           created_at?: string
           group_id?: string | null
           id?: string
+          last_message_at?: string | null
+          last_message_body?: string | null
         }
         Relationships: [
           {
@@ -889,6 +895,18 @@ export type Database = {
     }
     Functions: {
       accept_like: { Args: { p_like_id: string }; Returns: string }
+      list_chat_inbox: {
+        Args: never
+        Returns: {
+          conversation_id: string
+          display_name: string
+          last_message_at: string | null
+          last_message_body: string | null
+          other_user_id: string
+          photo_url: string | null
+          unread_count: number
+        }[]
+      }
       toggle_apartment_save_and_interest: {
         Args: { p_apartment_id: string }
         Returns: { saved: boolean; interest_count: number }[]

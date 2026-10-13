@@ -327,7 +327,7 @@ create policy read_conversations on conversations for select to authenticated
 create policy read_conv_members on conversation_members for select to authenticated
   using (is_conversation_member(conversation_id));
 create policy update_own_read_marker on conversation_members for update to authenticated
-  using (user_id = auth.uid());
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy read_messages on messages for select to authenticated
   using (is_conversation_member(conversation_id));
 create policy send_message on messages for insert to authenticated
