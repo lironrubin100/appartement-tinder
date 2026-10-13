@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Orchestrator"
+  short_description: "Plan large work before agents, worktrees, and Git handoffs"
+  default_prompt: "Use $project-orchestrator to coordinate this project. First decide whether the request is implementation-ready; if vague, explain what is missing and propose a bounded read-only discovery pass or concrete options. Use separate worktrees only for independent implementation tasks."
