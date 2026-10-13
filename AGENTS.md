@@ -19,7 +19,15 @@ You are acting as a Staff-Level Solutions Architect and Lead Developer. We are b
 *   **Unified Account:** A single user account handles all personas via a Bumble-style mode switch. 
 
 ## 4. Execution Workflow
-1.  **Check `DECISIONS.md`:** Always verify the architectural constraints before writing code.
-2.  **Plan:** Write a brief, bulleted plan.
-3.  **Implement:** Build in vertical slices.
-4.  **Verify:** Check syntax and logic.
+1. **Required workflow skill:** Before planning or changing code, read `.agents/skills/shutaf-development-workflow/SKILL.md` in full and follow it. It is the delivery process for this repository.
+2. **Check `DECISIONS.md`:** Always verify the architectural constraints before writing code.
+3. **Plan:** Write a brief, bulleted plan.
+4. **Implement:** Build in the smallest independently deployable slice.
+5. **Verify:** Run the checks required by the workflow skill and report the result.
+
+## 5. Delivery policy
+
+* Every code change belongs to one focused branch and one focused pull request.
+* Use the delivery classification and naming rules in the required workflow skill: `foundation/`, `feat/`, `fix/`, or `chore/`.
+* Do not begin implementation while a required decision is `OPEN` or `RESEARCH`; either work around it without changing its scope or ask for a decision.
+* `DECISIONS.md` remains authoritative over the workflow skill, PR descriptions, code, and all other documentation.
