@@ -6,10 +6,10 @@ import { ArrowRight, Send } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui';
 
-type Message = { id: string; sender_id: string; body: string; created_at: string };
+type Message = { id: string; sender_id: string | null; kind: string; body: string; created_at: string };
 
-export default function ChatThread({ conversationId, currentUserId, otherUserName, initialMessages }: {
-  conversationId: string; currentUserId: string; otherUserName: string; initialMessages: Message[];
+export default function ChatThread({ conversationId, currentUserId, otherUserName, exactAddress, initialMessages }: {
+  conversationId: string; currentUserId: string; otherUserName: string; exactAddress: string | null; initialMessages: Message[];
 }) {
   const [messages, setMessages] = useState(initialMessages);
   const [body, setBody] = useState('');
@@ -47,7 +47,7 @@ export default function ChatThread({ conversationId, currentUserId, otherUserNam
     const supabase = createClient();
     const { data, error: insertError } = await supabase.from('messages')
       .insert({ conversation_id: conversationId, sender_id: currentUserId, body: trimmedBody })
-      .select('id, sender_id, body, created_at').single();
+      .select('id, sender_id, kind, body, created_at').single();
     if (insertError) setError('לא הצלחנו לשלוח את ההודעה. נסה שוב.');
     else if (data) {
       setMessages((current) => [...current, data]);
@@ -63,8 +63,10 @@ export default function ChatThread({ conversationId, currentUserId, otherUserNam
         <h1 className="font-semibold text-ink">{otherUserName}</h1>
       </header>
       <div className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 space-y-3">
+        {exactAddress && <section className="rounded-shutaf-md border border-success/30 bg-success/10 p-4" data-testid="exact-address-card"><p className="text-sm font-semibold text-ink">הכתובת המדויקת</p><p className="mt-1 text-ink">{exactAddress}</p></section>}
         {messages.map((message) => {
           const isOwn = message.sender_id === currentUserId;
+          if (message.kind === 'system') return <p key={message.id} className="mx-auto w-fit rounded-full bg-neutral-bg-soft px-4 py-2 text-center text-sm text-muted-text">{message.body}</p>;
           return <div key={message.id} className={`flex ${isOwn ? 'justify-start' : 'justify-end'}`}>
             <p className={`max-w-[80%] rounded-shutaf-lg px-4 py-3 text-sm whitespace-pre-wrap ${isOwn ? 'bg-orange text-white' : 'bg-white text-ink border border-card-border'}`}>{message.body}</p>
           </div>;

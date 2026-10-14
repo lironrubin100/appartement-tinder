@@ -121,7 +121,7 @@ This file is the **ABSOLUTE SINGLE SOURCE OF TRUTH**. If `PRD.md`, `ARCHITECTURE
 | F1 | Realtime or polling | OPEN | Supabase Realtime. Polling at a few hundred concurrent users costs more than the socket. | J8, K3 |
 | F2 | Read receipts, typing indicators | OPEN | Read receipts yes, typing no. Typing indicators triple realtime traffic for decoration. | J8 |
 | F3 | Message types | OPEN | Text + listing card (E8). Images in v2 — they add storage, moderation and abuse surface. | E8, J9, H4 |
-| F4 | Can you message a lister without matching? | OPEN | Yes. An apartment enquiry is not a roommate match and should not need one. | C9, C6 |
+| F4 | Can you message a lister without matching? | DECIDED | Yes. An authenticated renter may send an in-app listing inquiry without a roommate match. The owner must accept it before a private chat opens and the exact address is released. | C9, C6 |
 | F5 | Unmatch / leave conversation | OPEN | Leave hides the thread for you and stops notifications; it does not delete the other person's copy. | H1 |
 | F6 | Message retention | OPEN | Keep indefinitely, delete with the account. | B7, M2 |
 | F7 | Push notification triggers and copy | OPEN | New like, new message, listing you saved was taken. Nothing else. Web has no native push — see L5. | L5, K2 |
