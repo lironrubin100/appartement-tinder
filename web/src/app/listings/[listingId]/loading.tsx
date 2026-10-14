@@ -1,0 +1,1 @@
+export default function Loading() { return <div className="mx-auto w-full max-w-4xl space-y-5 p-6" role="status" aria-label="Loading / טוען"><div className="h-10 w-2/3 animate-pulse rounded-xl bg-neutral-bg" /><div className="aspect-[3/2] animate-pulse rounded-2xl bg-neutral-bg" /></div>; }

@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+import React, { useId } from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -15,15 +16,21 @@ export function Input({
   className,
   ...props
 }: InputProps) {
+  const generatedId = useId();
+  const id = props.id ?? generatedId;
+  const descriptionId = `${id}-description`;
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-ink mb-2">
+        <label htmlFor={id} className="block text-sm font-medium text-ink mb-2">
           {label}
         </label>
       )}
       <div className="relative flex items-center">
         <input
+          id={id}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={error || helperText ? descriptionId : undefined}
           className={`
             w-full px-4 py-2.5 rounded-shutaf-md
             border border-card-border bg-white
@@ -42,8 +49,8 @@ export function Input({
           </div>
         )}
       </div>
-      {error && <p className="text-sm text-error mt-1">{error}</p>}
-      {helperText && !error && <p className="text-sm text-muted-text mt-1">{helperText}</p>}
+      {error && <p id={descriptionId} className="text-sm text-error mt-1">{error}</p>}
+      {helperText && !error && <p id={descriptionId} className="text-sm text-muted-text mt-1">{helperText}</p>}
     </div>
   );
 }

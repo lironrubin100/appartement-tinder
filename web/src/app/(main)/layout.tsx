@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
 import { BottomNav } from '@/components/navigation';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 
 export default async function MainLayout({
   children,
@@ -24,6 +25,7 @@ export default async function MainLayout({
   if (!profile || !profile.onboarded) redirect('/onboarding');
 
   const isLister = profile.mode === 'lister';
+  const en = (await headers()).get('x-shutaf-locale') === 'en';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -31,7 +33,7 @@ export default async function MainLayout({
       <main className="flex-1 pb-24 md:pb-0">
         {isLister && (
           <div className="border-b border-card-border bg-white px-4 py-3">
-            <Link href="/my-listings" className="font-medium text-orange">המודעות שלי</Link>
+            <Link href={en ? '/en/my-listings' : '/my-listings'} className="font-medium text-orange">{en ? 'My listings' : 'המודעות שלי'}</Link>
           </div>
         )}
         {children}

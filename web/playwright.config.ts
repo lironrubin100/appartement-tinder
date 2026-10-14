@@ -7,6 +7,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
   },
   webServer: {
     command: 'npm run dev',

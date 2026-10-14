@@ -3,7 +3,6 @@
 import { createServerClient } from '@/utils/supabase/server';
 import { validateListingDraft } from './validation';
 import { revalidatePath } from 'next/cache';
-import { publicAreaLabel } from './locationPrivacy';
 
 export type PublishListingResult = { error: string } | { error: null; listingId: string };
 
@@ -36,17 +35,15 @@ export async function publishListing(formData: FormData): Promise<PublishListing
   const validationError = validateListingDraft(draft);
   if (validationError) return { error: validationError };
 
-  // A listing id is created before upload only for a collision-free storage
-  // prefix. The storage policy permits only the current user's top-level
-  // folder; no phone number is written to the listing.
+  // Photo URLs use an anonymous listing UUID. Storage owner_id enforces access
+  // without exposing the account ID in public photo paths.
   const listingId = crypto.randomUUID();
   const uploadedPaths: string[] = [];
   const photoUrls: string[] = [];
-  let apartmentCreated = false;
 
   try {
     for (const [index, photo] of photos.entries()) {
-      const path = `${user.id}/${listingId}/${index + 1}.jpg`;
+      const path = `${listingId}/${index + 1}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from('apartment-photos')
         .upload(path, photo, { contentType: 'image/jpeg', upsert: false });
@@ -55,60 +52,28 @@ export async function publishListing(formData: FormData): Promise<PublishListing
       photoUrls.push(supabase.storage.from('apartment-photos').getPublicUrl(path).data.publicUrl);
     }
 
-    // The listing stays paused until both its room rows and photo gallery are
-    // present. This prevents a partially-created apartment from appearing in
-    // apartments_public if a later write fails.
-    const { error: apartmentError } = await supabase.from('apartments').insert({
-      id: listingId,
-      lister_id: user.id,
-      source: 'user',
-      title: draft.title.trim(),
-      address: draft.address.trim(),
-      lat: draft.latitude,
-      lng: draft.longitude,
-      price: Math.min(...draft.availableRooms.map((room) => room.monthlyPrice)),
-      bedrooms: draft.bedrooms,
-      bills_included: draft.billsIncluded,
-      available_from: draft.availableFrom,
-      description: draft.description.trim() || null,
-      photos: photoUrls,
-      public_location_label: publicAreaLabel(),
-      status: 'paused',
+    const { data: publishedId, error: apartmentError } = await supabase.rpc('publish_apartment', {
+      p_listing_id: listingId,
+      p_draft: {
+        title: draft.title.trim(), address: draft.address.trim(),
+        latitude: draft.latitude, longitude: draft.longitude,
+        bedrooms: draft.bedrooms, billsIncluded: draft.billsIncluded,
+        availableFrom: draft.availableFrom, description: draft.description.trim(),
+        photos: photoUrls, roomPrices: draft.availableRooms.map((room) => room.monthlyPrice),
+      },
     });
     if (apartmentError) throw apartmentError;
-    apartmentCreated = true;
-
-    const { error: roomsError } = await supabase.from('apartment_rooms').insert(
-      draft.availableRooms.map((room, index) => ({
-        apartment_id: listingId,
-        label: `חדר פנוי ${index + 1}`,
-        monthly_price: room.monthlyPrice,
-        available_from: draft.availableFrom,
-        is_available: true,
-      }))
-    );
-    if (roomsError) throw roomsError;
-
-    const { error: activateError } = await supabase
-      .from('apartments')
-      .update({ status: 'active' })
-      .eq('id', listingId)
-      .eq('lister_id', user.id);
-    if (activateError) throw activateError;
+    if (publishedId !== listingId) throw new Error('Publish did not return listing');
   } catch (error) {
     // An upload may complete before a later database write fails. It is safe
     // to remove only paths under this user's new listing prefix.
     if (uploadedPaths.length) await supabase.storage.from('apartment-photos').remove(uploadedPaths);
-    // A paused parent is still a real database record. Delete it if one of
-    // the dependent writes failed; cascading removes any rooms already made.
-    if (apartmentCreated) {
-      await supabase.from('apartments').delete().eq('id', listingId).eq('lister_id', user.id);
-    }
     console.error('Could not publish listing', error);
     return { error: 'לא הצלחנו לפרסם את המודעה. נסו שוב בעוד רגע.' };
   }
 
   revalidatePath('/my-listings');
+  revalidatePath('/en/my-listings');
   revalidatePath('/map');
   revalidatePath('/discover');
   return { error: null, listingId };

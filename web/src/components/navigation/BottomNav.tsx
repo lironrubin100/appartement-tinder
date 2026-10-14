@@ -14,31 +14,32 @@ interface NavItem {
 
 export function BottomNav() {
   const pathname = usePathname();
+  const en = pathname?.startsWith('/en/');
 
   const navItems: NavItem[] = [
     {
-      label: 'פרופיל',
+      label: en ? 'Profile' : 'פרופיל',
       href: '/profile',
       icon: <User className="w-6 h-6" />,
     },
     {
-      label: 'חיפוש',
+      label: en ? 'Discover' : 'חיפוש',
       href: '/discover',
       icon: <Sparkles className="w-6 h-6" />,
     },
     {
-      label: 'מפה',
+      label: en ? 'Map' : 'מפה',
       href: '/map',
       icon: <Map className="w-6 h-6" />,
     },
     {
-      label: 'הוסף',
-      href: '/compose',
+      label: en ? 'Add' : 'הוסף',
+      href: en ? '/en/compose' : '/compose',
       icon: <Plus className="w-6 h-6" />,
       badge: undefined, // Plus doesn't get a badge
     },
     {
-      label: 'צ\'אט',
+      label: en ? 'Chats' : 'צ\'אט',
       href: '/chats',
       icon: <MessageCircle className="w-6 h-6" />,
     },

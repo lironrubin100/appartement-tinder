@@ -982,6 +982,11 @@ export type Database = {
       }
     }
     Functions: {
+      get_public_listing: {
+        Args: { p_listing_id: string }
+        Returns: { id: string; title: string; public_location_label: string; min_room_price: number; max_room_price: number; available_room_count: number; bills_included: boolean; bedrooms: number; is_sublet: boolean; available_from: string | null; description: string | null; photos: string[] }[]
+      }
+      publish_apartment: { Args: { p_listing_id: string; p_draft: Json }; Returns: string }
       accept_like: { Args: { p_like_id: string }; Returns: string }
       accept_listing_inquiry: { Args: { p_inquiry_id: string }; Returns: string }
       create_listing_inquiry: { Args: { p_apartment_id: string }; Returns: string }

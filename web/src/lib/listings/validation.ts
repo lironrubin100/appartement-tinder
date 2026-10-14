@@ -21,6 +21,7 @@ export type ListingDraft = {
 
 export function validateListingDraft(draft: ListingDraft): string | null {
   if (!draft.title.trim()) return 'יש להזין כותרת למודעה.';
+  if (draft.title.trim().length > 100 || draft.address.trim().length > 200 || draft.description.length > 2000) return 'יש לקצר את פרטי המודעה.';
   if (!draft.address.trim()) return 'יש להזין את הכתובת המדויקת של הדירה.';
   if (!Number.isFinite(draft.latitude) || draft.latitude < -90 || draft.latitude > 90) {
     return 'יש להזין קו רוחב תקין עבור מיקום הדירה.';
