@@ -7,6 +7,16 @@ description: Plan and coordinate large software projects using focused audits, i
 
 Help the user run large engineering work without needing a terminal or direct Git expertise. Treat the user as the product owner: they choose outcomes and approve publication; Codex manages the operational detail and explains meaningful decisions in plain language.
 
+## Keep a shared work register
+
+Before a broad audit, locate the primary checkout using the first entry from `git worktree list --porcelain`. Read its `PROJECT_STATUS.md`, the relevant `docs/workstreams/<work-id>.md`, and the current checkout's instructions. The primary register is shared operational state across local worktrees; a branch-local copy may be stale. Product decisions still come from `DECISIONS.md`.
+
+If no register exists and ongoing project work needs one, create a small status index and one handoff per outcome in the primary checkout. At task start, record the intended outcome, owning chat/worktree, branch or detached HEAD, decision dependencies and acceptance criteria. At meaningful checkpoints and before the final reply, update changed files, verified behavior with dated evidence, remaining work, live migrations, and exact commit/push/PR/merge/deployment state. Record blocked or interrupted work as well as completed work. Keep separate workstreams in separate handoff files to reduce edit collisions.
+
+When provided, refresh the project's Git inventory script after creating/switching/completing/integrating/archiving worktrees or branches. A Git snapshot is not feature verification. Detached worktrees and uncommitted edits must remain visible; do not label a contained commit's local edits as merged.
+
+For a new chat, check only HEAD, local changes and any live dependency relevant to the recorded task. Resume from its handoff. Audit the affected area when records are missing, stale or inconsistent; audit the whole project only when the user asks or the scope genuinely requires it. Do not infer that old branches work from their names or commit messages. End with a link to the updated register. Updating documentation does not grant permission to commit, push, merge or deploy.
+
 ## Do not guess through ambiguity
 
 Before delegating or editing, classify the request as **implementation-ready** or **not yet implementation-ready**. It is ready only when the intended user outcome, product area, acceptance criteria, and meaningful constraints are clear enough to review the result.
