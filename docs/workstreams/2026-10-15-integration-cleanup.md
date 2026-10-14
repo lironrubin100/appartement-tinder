@@ -7,5 +7,5 @@
 - Verified implementation snapshot: `5f3bc7f` — `Complete public apartment, publication and owner management journeys`.
 - Recheck: production build passed; TypeScript/targeted ESLint passed; expanded real Chrome/Supabase suite **3 passed in 30.6s**. Covers resident and lister posting, both locales, absolute canonical/OG metadata, existing pending-inquiry controls, outsider isolation, rented exclusion and the actual Map screen. No mocked routes.
 - Cleanup: temporary QA users/listings/photos all confirmed zero. No new live migration was applied by this verification task.
-- Publication: local-main integration is being completed; no push or Vercel deployment is authorized by this record. Final local commit IDs and cleanup outcome are recorded in PROJECT_STATUS and WORKTREE_CLEANUP.
+- Publication: implementation 5f3bc7f and work-register 1a11dd5 are integrated into local master. Five old merged local branch names plus the temporary integration branch were retired. Seven redundant worktree registrations were removed. No push or Vercel deployment was performed. Remaining unfinished/locked work is preserved and classified in WORKTREE_CLEANUP.
 - Next development: [three proposed MVP journeys](../MVP_NEXT_SLICES.md); user asked for information before development, so none of those proposals was implemented here.

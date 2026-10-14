@@ -18,7 +18,7 @@ All seven checkouts were clean, inactive in the app, had no process using their 
 
 Used `git worktree remove` without force. Windows retained empty directory shells for 7a00, 7f16 and 8f45 after Git removed their checkout contents and registrations; these are not registered worktrees and contain no remaining files. No dirty worktree was removed.
 
-The five former branch names above and the temporary verified-listing branch can be deleted locally once local master contains their commits. Remote branches are not part of this local cleanup.
+The five former branch names above and temporary codex/verified-listing-slices were deleted safely after checking ancestry in local master. Final count: **5 local branches and 7 worktrees**. All unmerged branches were retained. Remote branches were not deleted.
 
 ## Work to retain and its next step
 
@@ -37,4 +37,4 @@ The five former branch names above and the temporary verified-listing branch can
 
 Keep a short-lived feature branch/worktree while its outcome is active. Once reviewed, verified and merged, remove the redundant checkout and delete the merged local branch. Deleting a branch name does not remove its already-merged commits from master. Keep unfinished work explicitly marked pending; archive a recoverable snapshot before removing unique or uncommitted work. A worktree is a folder, a branch is a history pointer, and a chat is a separate record.
 
-The generated [inventory](WORKTREE_INVENTORY.md) is the current Git count. PROJECT_STATUS and the handoffs describe what actually works. Counts and local publication state are finalized after integration; old remote branch names do not prove remaining development work.
+The generated [inventory](WORKTREE_INVENTORY.md) is the current Git count. PROJECT_STATUS and the handoffs describe what actually works. Counts and local publication state were finalized after integration; old remote branch names do not prove remaining development work.
