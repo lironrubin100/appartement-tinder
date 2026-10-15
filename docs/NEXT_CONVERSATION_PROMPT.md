@@ -10,7 +10,7 @@ Current product direction:
 - Introductions have no minimum text, with twenty sent per UTC day. Pass persists for thirty days; blocking is symmetric. Only active apartments may newly accept inquiries; exact address is private until owner acceptance.
 - Apple signup is deferred. Do not use it as a blocker or implement it in this task.
 
-Baseline: resident/group/inquiry migrations 20261015084833, 20261015084841 and 20261015084850 are applied. Fresh production-server acceptance passed eight real Chrome tests; all temporary users/profiles/listings/groups/Storage objects were cleaned and audited zero. A separate forward test verified the reusable QA helpers and also cleaned all fixtures. Confirm the recorded master commit/push in PROJECT_STATUS.md; never infer deployment from a push. Do not reapply migrations because an old checkout lacks their files.
+Baseline: implementation c80e9b2 was merged and pushed to GitHub master on 15 October 2026. Resident/group/inquiry migrations 20261015084833, 20261015084841 and 20261015084850 are applied. Fresh production-server acceptance passed eight real Chrome tests; all temporary users/profiles/listings/groups/Storage objects were cleaned and audited zero. A separate forward test verified the reusable QA helpers and also cleaned all fixtures. Confirm the recorded master commit/push in PROJECT_STATUS.md; never infer deployment from a push. Do not reapply migrations because an old checkout lacks their files.
 
 Then develop these three vertical slices sequentially, using docs/NEXT_MVP_FEATURES.md as the bounded work order:
 1. Usable block/report flow from profiles/chats to persisted report review, with real symmetric blocking and privacy checks.

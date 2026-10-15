@@ -6,12 +6,12 @@ Updated: 15 October 2026 (Asia/Jerusalem). This is the shared operational regist
 
 | Capability | Verification | Where the code is | Integration / deployment |
 | --- | --- | --- | --- |
-| Public apartment page in Hebrew and English, photos, per-room prices, private location, share metadata | Real guest browser + SQL privacy checks; invalid/missing/rented IDs return HTTP 404 | Implementation snapshot 5f3bc7f | Merged into local master; no push/deployment |
-| Publish apartment and rooms, then confirmation with View listing | Real compressed photo uploads; corrupt-image recovery; atomic-write failure rollback; Hebrew/English | Implementation snapshot 5f3bc7f | Merged into local master; no push/deployment |
-| Owner dashboard, price ranges and mark-rented action | Real two-account authorization; persistence and cancel/confirm; disappears from public reads | Implementation snapshot 5f3bc7f | Merged into local master; no push/deployment |
-| Resident draft/profile/photo/traits, persistent login and return to intended destination | Fresh real Chrome onboarding, reload, public/private projection and locale tests | codex/resident-journeys, acceptance complete | Commit/integration/push next |
-| Individuals/Groups discovery, introductions, personal and configurable group chats | Fresh separate browser accounts; recipient acceptance, live delivery/reload, consent, admission votes, capacity and private history | codex/resident-journeys, acceptance complete | Three live migrations applied; integration next |
-| Public listing → sign-in return → persistent inquiry → owner acceptance → private address/chat | Fresh guest/renter/owner/outsider browser and ordinary-client checks | codex/resident-journeys, acceptance complete | Three live migrations applied; integration next |
+| Public apartment page in Hebrew and English, photos, per-room prices, private location, share metadata | Real guest browser + SQL privacy checks; invalid/missing/rented IDs return HTTP 404 | Implementation snapshot 5f3bc7f | Merged and pushed to GitHub master in c80e9b2; Vercel build started |
+| Publish apartment and rooms, then confirmation with View listing | Real compressed photo uploads; corrupt-image recovery; atomic-write failure rollback; Hebrew/English | Implementation snapshot 5f3bc7f | Merged and pushed to GitHub master in c80e9b2; Vercel build started |
+| Owner dashboard, price ranges and mark-rented action | Real two-account authorization; persistence and cancel/confirm; disappears from public reads | Implementation snapshot 5f3bc7f | Merged and pushed to GitHub master in c80e9b2; Vercel build started |
+| Resident draft/profile/photo/traits, persistent login and return to intended destination | Fresh real Chrome onboarding, reload, public/private projection and locale tests | Implementation snapshot c80e9b2 | Merged and pushed to GitHub master in c80e9b2 |
+| Individuals/Groups discovery, introductions, personal and configurable group chats | Fresh separate browser accounts; recipient acceptance, live delivery/reload, consent, admission votes, capacity and private history | Implementation snapshot c80e9b2 | Three live migrations applied; merged/pushed in c80e9b2 |
+| Public listing → sign-in return → persistent inquiry → owner acceptance → private address/chat | Fresh guest/renter/owner/outsider browser and ordinary-client checks | Implementation snapshot c80e9b2 | Three live migrations applied; merged/pushed in c80e9b2 |
 
 These are local acceptance results from 15 October, not a claim about the deployed app. [Full verification](docs/LISTING_SLICES_VERIFICATION.md).
 
@@ -19,7 +19,7 @@ These are local acceptance results from 15 October, not a claim about the deploy
 
 | Work ID | Outcome / state | Location | Next step |
 | --- | --- | --- | --- |
-| [2026-10-15-resident-journeys](docs/workstreams/2026-10-15-resident-journeys.md) | Three migrations applied; eight real browser acceptance tests passed; QA cleanup audited zero; reusable testing workflow verified | Existing d5e9, codex/resident-journeys | Commit, merge and push verified work |
+| [2026-10-15-resident-journeys](docs/workstreams/2026-10-15-resident-journeys.md) | Three migrations applied; eight real browser acceptance tests passed; QA cleanup audited zero; reusable testing workflow verified | Existing d5e9, codex/resident-journeys | Completed and pushed; use the next-feature handoff |
 | [2026-10-15-listing-slices](docs/workstreams/2026-10-15-listing-slices.md) | Three reverified apartment journeys; implementation 5f3bc7f integrated into local master | C:/Users/User/.codex/worktrees/d5e9/appartement tinder; listing snapshot integrated on main; d5e9 now hosts resident-journeys | Choose the next MVP journey and resolve its open decisions |
 | [2026-10-15-work-register](docs/workstreams/2026-10-15-work-register.md) | Shared index, handoff workflow and Git inventory | Main checkout documents + d5e9 source + user-level orchestrator skill | Update this index and the owning handoff during future work |
 
@@ -37,7 +37,7 @@ Existing local work in c8ce, 4344, onboarding-flow and map-completeness has no c
 
 - The MVP uses Supabase project npbduvjnqnbydolmdpsc under J12. Migrations 20261014210721_listing_journeys and 20261014211718_listing_photo_ownership were applied by the listing-slices workstream. The detailed handoff explains their effects and compatibility. Do not apply duplicate migrations because a stale branch lacks their files.
 - Resident/group/inquiry migrations 20261015084833, 20261015084841 and 20261015084850 were approved and applied. The dependent UI passed fresh acceptance against these versions.
-- Verified application snapshot: 5f3bc7f; work-register snapshot: 1a11dd5. Both were integrated into local master on 15 October after production-build verification. No push, PR or Vercel deployment has been performed. The preserved nested map experiment still has local changes.
+- Verified application snapshot: c80e9b2 includes the earlier apartment snapshot 5f3bc7f and resident/group implementation. Fast-forwarded local master and pushed to GitHub on 15 October; remote SHA confirmed c80e9b2e8c372ca5a926602ed16ea3342bbc85fc. No PR was created. Vercel automatic production deployment dpl_8CY6gLxmF4uiuRsXSMbwuoWdHLUL started BUILDING from that exact commit. The preserved nested map experiment still has local changes.
 - Four temporary QA accounts and their profiles/listings/photos were removed and zero remaining QA rows/objects were confirmed. Fixture passwords were removed from disk.
 - Read cached Git facts as a snapshot. Neither a commit present in origin/master nor a successful local test proves that Vercel is running that version.
 
@@ -49,7 +49,7 @@ Existing local work in c8ce, 4344, onboarding-flow and map-completeness has no c
 4. Refresh Git facts with node scripts/project-status.mjs --write --shared from a linked checkout. This reads Git and writes Markdown only. Add new outcomes to the table above only with actual verification evidence.
 5. If a record is stale, investigate its affected area. A whole-project audit is reserved for an explicit audit request or a scope that needs one. Never treat an old note as confirmed-current without the relevant narrow checks.
 
-The user-level project-orchestrator skill and primary AGENTS.md describe this lifecycle. The register is available across local worktrees on this computer. The register is committed on local master. GitHub/cloud chats will need an authorized push or an attached copy.
+The user-level project-orchestrator skill and primary AGENTS.md describe this lifecycle. The register is available across local worktrees on this computer. The register is committed on local master. The current register and handoffs were pushed with the verified implementation; future changes still need their own authorized publication.
 
 ## Resident acceptance and reusable testing
 
@@ -58,3 +58,7 @@ The user explicitly approved the shared MVP migration and requested a master pus
 [Testing workflow](docs/TESTING.md) is maintained in the project and linked from both repository and user-level project-orchestrator skills. Helpers prepare nine isolated confirmed users via connector SQL, validate ordinary sign-in, prevent silent acceptance skips, remove owner Storage uploads and scope cleanup to exact fixture IDs. A separate helper forward test signed in all nine new users, removed two real fixture uploads and audited all cleanup counts zero. Both skill copies validated. Future agents should execute this workflow rather than hand the user a manual checklist.
 
 Apple signup is deferred. No full Google OAuth round trip, concurrency/load proof, full older-screen translation or public-launch approval is claimed. Integration and deployment are recorded separately below when completed.
+
+## Final integration checkpoint
+
+Implementation c80e9b2 was committed on codex/resident-journeys, fast-forwarded into local master and pushed successfully; GitHub remote SHA was independently confirmed. Six local branches and seven worktrees remain, with no additional checkout created. The nested map experiment was preserved. No blanket merge or deletion of old unverified work occurred. Both user-level and repository project-orchestrator skills contain the autonomous testing workflow. Next development starts with docs/NEXT_CONVERSATION_PROMPT.md and the three recommendations in docs/NEXT_MVP_FEATURES.md.

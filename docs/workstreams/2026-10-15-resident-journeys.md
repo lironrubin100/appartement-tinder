@@ -1,6 +1,6 @@
 # Resident discovery and three MVP journeys
 
-Updated 15 October 2026 (Asia/Jerusalem). Status: user explicitly approved the shared-database changes; all three migrations applied. Fresh multi-account acceptance passed; all QA data cleaned. Commit/integration/push follows this checkpoint.
+Updated 15 October 2026 (Asia/Jerusalem). Status: user explicitly approved the shared-database changes; all three migrations applied. Fresh multi-account acceptance passed; all QA data cleaned. Implementation c80e9b2 is merged and pushed to GitHub master.
 
 Owner: current chat; existing d5e9 checkout; branch `codex/resident-journeys`, base `2c6de4a`. One implementation writer; two bounded read-only audits. No additional worktree. Read-only follow-up review found legacy introduction indexes and a concurrent acceptance race; both were addressed. Follow-up agents then hit their usage limit; no claim of a completed independent final review.
 
@@ -49,8 +49,12 @@ Reproduce using `docs/TESTING.md`: from web, `npm ci`, `npm run test:db`, prepar
 
 ## Exact next step
 
-Commit the verified implementation and testing workflow, integrate into local master while preserving the nested map experiment, and push as requested. Apple signup is explicitly deferred under updated B1; do not block on it. No complete Google OAuth round trip, load/concurrency proof, full older-screen translation or public-launch approval is claimed.
+Completed: committed c80e9b2, fast-forwarded local master, pushed to GitHub and confirmed the remote SHA. The nested map experiment was preserved. Next development uses docs/NEXT_CONVERSATION_PROMPT.md after resolving the next slices' OPEN choices. Apple signup is explicitly deferred under updated B1; do not block on it. No complete Google OAuth round trip, load/concurrency proof, full older-screen translation or public-launch approval is claimed.
 
 `docs/NEXT_MVP_FEATURES.md` selects block/report, apartment-card sharing and atomic listing editing. `docs/NEXT_CONVERSATION_PROMPT.md` is the next-chat prompt. Keep them synchronized with final Git/verification state before handoff.
 
 At this checkpoint: six local branches and seven worktrees; no new worktree was added. Main holds the earlier verified apartment integration; resident integration/push is next. See the final integration record below when present.
+
+## Final integration record
+
+15 October 2026: implementation c80e9b2e8c372ca5a926602ed16ea3342bbc85fc committed, merged with --ff-only and pushed to origin/master; remote SHA confirmed. Vercel automatic production build dpl_8CY6gLxmF4uiuRsXSMbwuoWdHLUL started from that exact commit. No PR or manual promotion. Six local branches/seven worktrees remain. Source, eight-test acceptance, both QA cleanup audits, schema state, skill validation and next-work handoff are now recorded.
