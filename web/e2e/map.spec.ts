@@ -39,6 +39,22 @@ test.describe('Map', () => {
     expect(coveredByMap).toBe(cardCount);
   });
 
+  test('uses CARTO Positron tiles with required attribution', async ({ page }) => {
+    await waitForMap(page);
+
+    const attribution = page.locator('.leaflet-control-attribution');
+    await expect(attribution).toContainText('OpenStreetMap');
+    await expect(attribution).toContainText('CARTO');
+    await expect(attribution.getByRole('link', { name: 'OpenStreetMap' })).toHaveAttribute(
+      'href',
+      'https://www.openstreetmap.org/copyright'
+    );
+    await expect(attribution.getByRole('link', { name: 'CARTO' })).toHaveAttribute(
+      'href',
+      'https://carto.com/attributions'
+    );
+  });
+
   test('clicking a pin opens a fully visible, in-viewport detail card', async ({ page }) => {
     await waitForMap(page);
 
