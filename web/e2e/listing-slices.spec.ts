@@ -2,20 +2,21 @@ import { test, expect, type BrowserContext } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/types/database';
 import { createServerClient } from '@supabase/ssr';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 
 // Real Supabase integration. No mocked routes or service credentials in browsers.
 // The connected database tool prepares isolated QA accounts; this suite uses
 // ordinary owner permissions and removes its uploaded photos on completion.
-const env = Object.fromEntries(readFileSync('.env.local', 'utf8').split(/\r?\n/)
+const env = Object.fromEntries((existsSync('.env.local') ? readFileSync('.env.local', 'utf8') : '').split(/\r?\n/)
   .filter((line) => /^[A-Z_]+=/.test(line)).map((line) => {
     const at = line.indexOf('=');
     return [line.slice(0, at), line.slice(at + 1).replace(/^['"]|['"]$/g, '')];
   }));
 const url = env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const fixtures: { id: string; email: string; password: string }[] = JSON.parse(readFileSync('.env.qa.local', 'utf8'));
+const fixtures: { id: string; email: string; password: string }[] = (existsSync('.env.qa.local') ? JSON.parse(readFileSync('.env.qa.local', 'utf8')) : []);
+test.skip(fixtures.length < 4, 'Requires isolated QA accounts in ignored .env.qa.local');
 const clients: SupabaseClient<Database>[] = [];
 let nextFixture = 0;
 const listingIds: string[] = [];
@@ -26,7 +27,7 @@ async function account(context: BrowserContext, name: string, mode = 'lister') {
   const client = createServerClient<Database>(url, anonKey, { cookies: { getAll: () => cookies, setAll: (values) => { cookies.splice(0, cookies.length, ...values); } } });
   const signedIn = await client.auth.signInWithPassword({ email, password });
   if (signedIn.error) throw new Error(`QA sign-in failed: ${signedIn.error.message}`);
-  const profileUpdate = await client.from('profiles').update({ name, mode }).eq('id', id);
+  const profileUpdate = await client.rpc('save_onboarding', {p_name:name,p_resident:mode!=='lister',p_birth_date:mode!=='lister'?'2000-01-01':null,p_phone:'0500000000',p_agency:'',p_bio:'QA profile',p_tags:{},p_complete:true});
   if (profileUpdate.error) throw profileUpdate.error;
   await context.addCookies(cookies.map(({ name: cookieName, value }) => ({ name: cookieName, value, domain: 'localhost', path: '/', sameSite: 'Lax' as const })));
   clients.push(client);

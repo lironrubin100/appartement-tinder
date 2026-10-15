@@ -1,35 +1,33 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { createServerClient } from '@/utils/supabase/server';
 import DiscoverClient from './DiscoverClient';
-import { tagOptionLabel, type TagKey } from '@/utils/profileTags';
-
-const DISPLAY_TAGS: TagKey[] = ['cleanliness', 'sleep_schedule', 'social_guests'];
+import { localePath } from '@/utils/navigation';
 
 export default async function DiscoverPage() {
-  const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  const { data: profile } = await supabase.from('profiles').select('mode').eq('id', user.id).maybeSingle();
-  if (profile?.mode === 'lister') redirect('/my-listings');
-  const [{ data: candidates }, { data: sentLikes }] = await Promise.all([
-    supabase.from('profiles_public').select('*').neq('id', user.id).limit(30),
-    supabase.from('likes').select('to_user').eq('from_user', user.id).not('to_user', 'is', null),
+  const locale =
+    (await headers()).get('x-shutaf-locale') === 'en' ? 'en' : 'he';
+  const client = await createServerClient();
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+  if (!user) redirect(localePath('/login', locale));
+  const { data: profile } = await client
+    .from('profiles')
+    .select('mode')
+    .eq('id', user.id)
+    .maybeSingle();
+  if (profile?.mode === 'lister') redirect(localePath('/my-listings', locale));
+  const [people, groups] = await Promise.all([
+    client.rpc('discover_individuals', {}),
+    client.rpc('discover_groups', {}),
   ]);
-  const seenIds = new Set((sentLikes ?? []).flatMap((like) => like.to_user ? [like.to_user] : []));
-  const cards = (candidates ?? []).flatMap((candidate) => {
-    if (!candidate.id || !candidate.name || seenIds.has(candidate.id)) return [];
-    return [{
-      id: candidate.id,
-      name: candidate.name,
-      age: candidate.age,
-      photo: candidate.photo_url,
-      bio: candidate.bio ?? '',
-      tags: DISPLAY_TAGS.flatMap((key) => {
-        const label = tagOptionLabel(key, candidate[key]);
-        return label ? [{ label }] : [];
-      }),
-      verified: candidate.public_badges?.includes('student_verified') ?? false,
-    }];
-  });
-  return <DiscoverClient currentUserId={user.id} candidates={cards} />;
+  if (people.error || groups.error) throw new Error('Could not load discovery');
+  return (
+    <DiscoverClient
+      people={people.data ?? []}
+      groups={groups.data ?? []}
+      locale={locale}
+    />
+  );
 }

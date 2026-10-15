@@ -1,4 +1,6 @@
-# Next MVP slices: proposals, not implementation
+# Next MVP slices: original assessment
+
+Approved for implementation on 15 October 2026, with resident modes replaced by Individuals/Groups views. Read [the active handoff](workstreams/2026-10-15-resident-journeys.md) for current decisions, source and verification. The remainder preserves the original assessment; it is not current task status.
 
 Assessed 15 October 2026 against fetched `origin/master` at `8daa268` plus verified listing implementation `5f3bc7f`. The user requested recommendations now and development later. Do not start these or resolve OPEN decisions without the user's next instruction.
 

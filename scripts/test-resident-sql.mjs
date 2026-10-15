@@ -1,0 +1,120 @@
+import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+process.on('uncaughtException', error => { console.error(error.message, error.detail ?? '', error.where ?? ''); process.exit(1); });
+
+// Run against a disposable, in-memory Postgres engine. Never connects to Supabase.
+const require = createRequire(new URL('../web/package.json', import.meta.url));
+const { PGlite } = await import(pathToFileURL(process.env.PGLITE_MODULE || require.resolve('@electric-sql/pglite')).href);
+const db = new PGlite();
+const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+await db.exec(`create role anon; create role authenticated; create schema auth; create schema storage;
+create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+create table storage.buckets(id text primary key,name text,public boolean);
+create table storage.objects(id uuid primary key,bucket_id text,name text);
+create function storage.foldername(text) returns text[] language sql as $$ select string_to_array($1,'/') $$;`);
+await db.exec(await read('supabase/schema.sql'));
+// The legacy bootstrap retains one revoke for a column moved to profile_private.
+await db.exec((await read('supabase/rls.sql')).replace('revoke update (student_email_verified_at) on profiles from authenticated;', ''));
+await db.exec('grant usage on schema public,auth to authenticated; grant all on all tables in schema public to authenticated;');
+let foundation = await read('supabase/migrations/20261013000100_chat_inbox_foundation.sql');
+foundation = foundation.slice(0, foundation.indexOf('-- Postgres Changes')) + 'commit;';
+for (const sql of [foundation,
+  await read('supabase/migrations/20261014205238_listing_inquiry_conversations.sql'),
+  await read('supabase/migrations/20261013213103_profile_passes_and_like_validation.sql'),
+  await read('supabase/migrations/20261015084833_resident_journeys.sql'),
+  await read('supabase/migrations/20261015084841_group_conversations.sql'),
+  await read('supabase/migrations/20261015084850_inquiry_acceptance_guards.sql')]) await db.exec(sql);
+
+const ids = Array.from({ length: 25 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
+for (const id of ids) await db.query('insert into auth.users(id) values($1)', [id]);
+async function as(i) { await db.exec('reset role'); await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids[i]]); await db.exec('set role authenticated'); }
+async function rpc(sql, params = []) { return (await db.query(sql, params)).rows[0]; }
+async function rejected(sql, params = []) { await assert.rejects(() => db.query(sql, params)); }
+for (let i = 0; i < ids.length; i++) {
+  await as(i);
+  await rpc("select public.save_onboarding($1,true,'2000-01-01','private-phone','','hello','{\"cleanliness\":\"clean\"}',true)", [`Resident ${i}`]);
+}
+await as(0);
+const publicProfile = await rpc('select * from public.profiles_public where id=$1', [ids[1]]);
+assert.equal(publicProfile.name, 'Resident 1'); assert.ok(!('birth_date' in publicProfile)); assert.ok(!('phone' in publicProfile));
+assert.equal((await db.query('select * from public.profile_private where profile_id=$1', [ids[1]])).rows.length, 0);
+await rejected('update public.profiles set onboarded=false where id=$1', [ids[0]]);
+await rejected('update public.profile_private set student_email_verified_at=now() where profile_id=$1', [ids[0]]);
+await rejected("select public.send_introduction($1,null,'','invalid:phone:value')", [ids[1]]);
+const like = await rpc("select public.send_introduction($1,null,'','bio') id", [ids[1]]);
+await as(2); await rejected('select public.accept_like($1)', [like.id]);
+await as(1); const personal = await rpc('select public.accept_like($1) id', [like.id]);
+assert.equal((await rpc('select public.accept_like($1) id', [like.id])).id, personal.id);
+await as(0);
+const group = await rpc("select public.create_group_from_chats('Our group',$1,'admin') id", [[ids[1]]]);
+await db.query("insert into public.messages(conversation_id,sender_id,body) values($1,$2,'before joining')", [group.id, ids[0]]);
+await as(1);
+const invite = await rpc('select * from public.list_group_invites()');
+assert.equal(invite.group_name, 'Our group');
+await rpc('select public.respond_group_invite($1,true)', [invite.id]);
+assert.equal((await db.query('select body from public.messages where conversation_id=$1', [group.id])).rows.length, 0);
+assert.equal((await rpc('select * from public.list_chat_inbox() where conversation_id=$1', [group.id])).last_message_body, null);
+await rejected('select last_message_body from public.conversations where id=$1', [group.id]);
+await rejected('update public.conversation_members set visible_after_seq=0 where user_id=$1', [ids[1]]);
+await db.query("insert into public.messages(conversation_id,sender_id,body) values($1,$2,'after joining')", [group.id, ids[1]]);
+assert.equal((await db.query('select body from public.messages where conversation_id=$1', [group.id])).rows[0].body, 'after joining');
+await as(2);
+assert.equal((await db.query('select * from public.messages where conversation_id=$1', [group.id])).rows.length, 0);
+assert.equal((await db.query('select * from public.groups')).rows.length, 0);
+const foundGroup = await rpc('select * from public.discover_groups()');
+assert.equal(foundGroup.name, 'Our group');
+const groupLike = await rpc("select public.send_introduction(null,$1,'hi','bio') id", [foundGroup.id]);
+await as(1); await rejected('select public.decide_group_introduction($1)', [groupLike.id]);
+await as(0); await rpc("select public.configure_group($1,'majority')", [foundGroup.id]);
+assert.equal((await rpc('select public.decide_group_introduction($1) id', [groupLike.id])).id, null);
+await as(1); assert.equal((await rpc('select public.decide_group_introduction($1) id', [groupLike.id])).id, group.id);
+await as(2); assert.equal((await db.query('select * from public.messages where conversation_id=$1', [group.id])).rows.length, 0);
+await rpc("select public.pass_discovery($1,'individual')", [ids[3]]);
+assert.equal((await db.query('select * from public.discover_individuals() where id=$1', [ids[3]])).rows.length, 0);
+await db.exec('reset role'); await db.query("update public.discovery_passes set created_at=now()-interval '31 days' where from_user=$1", [ids[2]]);
+await as(2); assert.equal((await db.query('select * from public.discover_individuals() where id=$1', [ids[3]])).rows.length, 1);
+await db.query('insert into public.blocks(blocker_id,blocked_id) values($1,$2)', [ids[2], ids[0]]);
+assert.equal((await db.query('select * from public.list_chat_inbox() where conversation_id=$1', [group.id])).rows.length, 0);
+await rejected("insert into public.messages(conversation_id,sender_id,body) values($1,$2,'blocked')", [group.id, ids[2]]);
+await as(0); assert.equal((await db.query('select * from public.list_chat_inbox() where conversation_id=$1', [group.id])).rows.length, 0);
+await as(2); await db.query('delete from public.blocks where blocker_id=$1 and blocked_id=$2', [ids[2], ids[0]]);
+await as(0); await rpc("select public.configure_group($1,'any_member')", [foundGroup.id]);
+await as(3); const fourth = await rpc("select public.send_introduction(null,$1,'','bio') id", [foundGroup.id]);
+await as(1); assert.equal((await rpc('select public.decide_group_introduction($1) id', [fourth.id])).id, group.id);
+await as(5); const fifth = await rpc("select public.send_introduction(null,$1,'','bio') id", [foundGroup.id]);
+await as(1); await rejected('select public.decide_group_introduction($1)', [fifth.id]);
+await as(0); await rpc('select public.remove_group_member($1,$2)', [foundGroup.id, ids[3]]);
+await as(3); assert.equal((await db.query('select * from public.messages where conversation_id=$1', [group.id])).rows.length, 0);
+
+// Apartment inquiry acceptance: availability, ownership, idempotency and address isolation.
+await as(7);
+const apartment = await rpc("insert into public.apartments(lister_id,source,title,address,lat,lng,price,bedrooms) values($1,'user','Local fixture','Private exact address',31.25,34.79,2000,3) returning id", [ids[7]]);
+await as(6); const inquiry = await rpc('select public.create_listing_inquiry($1) id', [apartment.id]);
+assert.equal((await db.query('select * from public.listing_address_access where apartment_id=$1', [apartment.id])).rows.length, 0);
+await rejected("update public.listing_inquiries set status='accepted' where id=$1", [inquiry.id]);
+await as(8); await rejected('select public.accept_listing_inquiry($1)', [inquiry.id]);
+await as(7); await db.query("update public.apartments set status='taken' where id=$1", [apartment.id]);
+await rejected('select public.accept_listing_inquiry($1)', [inquiry.id]);
+await db.query("update public.apartments set status='active' where id=$1", [apartment.id]);
+const viewing = await rpc('select public.accept_listing_inquiry($1) id', [inquiry.id]);
+assert.equal((await rpc('select public.accept_listing_inquiry($1) id', [inquiry.id])).id, viewing.id);
+await as(6); assert.equal((await rpc('select address from public.listing_address_access where apartment_id=$1', [apartment.id])).address, 'Private exact address');
+await as(8); assert.equal((await db.query('select * from public.listing_address_access where apartment_id=$1', [apartment.id])).rows.length, 0);
+
+// Incomplete drafts stay private; invalid completion rolls all profile writes back.
+await db.exec('reset role'); const draftId = '00000000-0000-4000-8000-999999999999';
+await db.query('insert into auth.users(id) values($1)', [draftId]);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)", [draftId]); await db.exec('set role authenticated');
+await rpc("select public.save_onboarding('Draft',true,null,'','','draft bio','{}',false)");
+await rejected("select public.save_onboarding('Invalid replacement',true,null,'','','','{}',true)");
+assert.equal((await rpc('select name,onboarded from public.profiles where id=$1', [draftId])).name, 'Draft');
+await as(0); assert.equal((await db.query('select * from public.profiles_public where id=$1', [draftId])).rows.length, 0);
+await as(4);
+for (const id of ids.filter(id => id !== ids[4]).slice(0, 20)) await rpc("select public.send_introduction($1,null,'','bio')", [id]);
+await rejected("select public.send_introduction($1,null,'','bio')", [ids[24]]);
+await rejected("insert into public.likes(from_user,to_user,message) values($1,$2,'bypass')", [ids[4], ids[24]]);
+console.log('PASS: migrations, private drafts/atomic completion, trait validation, optional introductions, idempotent acceptance, invitation consent, admin/any-member/majority, four-member cap/removal, history/preview boundaries, outsider isolation, pass expiry, symmetric blocking, daily quota, inquiry owner/availability/address checks and direct-write denial.');
+await db.close();

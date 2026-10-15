@@ -77,6 +77,10 @@ Integrate one branch at a time. Recheck the next branch against the updated main
 
 If verification is incomplete, state it clearly. Do not call a change complete or production-ready after static checks alone; name the exact remaining verification and whether it blocks integration, deployment, or only launch.
 
+## Run verification autonomously
+
+For implementation or a request to check whether features work, read [the testing workflow](references/testing-workflow.md) and the repository's testing runbook before running tests. Execute the available local and real browser/database checks yourself, create isolated fixtures within existing authorization, and verify cleanup. Missing QA accounts or a service-role key is a setup problem to investigate, not an automatic request for manual testing. Record actual pass/fail/skip evidence in the shared work register. Escalate only a specific dependency that cannot be resolved with available tools and permissions.
+
 ## Git communication
 
 Use plain language before each meaningful Git action:

@@ -3,19 +3,37 @@ import Link from 'next/link';
 import { createServerClient } from '@/utils/supabase/server';
 import { Avatar, Button, Badge } from '@/components/ui';
 import { signOut } from './actions';
-import { tagOptionLabel } from '@/utils/profileTags';
-import { ModeSwitcher } from './ModeSwitcher';
+import { localizedTagLabel } from '@/utils/profileTags';
+import { headers } from 'next/headers';
+import { localePath } from '@/utils/navigation';
 
 const TAG_COLUMNS = [
-  'gender_dynamic', 'cleanliness', 'sleep_schedule', 'social_guests',
-  'noise_tolerance', 'music_vibe', 'climate', 'smoking', 'kitchen_dietary',
-  'cooking_dynamics', 'pets', 'weekend_routine', 'relationship_status',
-  'study_habits', 'financial_splitting', 'miluim_reserve_duty',
+  'gender_dynamic',
+  'cleanliness',
+  'sleep_schedule',
+  'social_guests',
+  'noise_tolerance',
+  'music_vibe',
+  'climate',
+  'smoking',
+  'kitchen_dietary',
+  'cooking_dynamics',
+  'pets',
+  'weekend_routine',
+  'relationship_status',
+  'study_habits',
+  'financial_splitting',
+  'miluim_reserve_duty',
 ] as const;
 
 export default async function ProfilePage() {
+  const locale =
+    (await headers()).get('x-shutaf-locale') === 'en' ? 'en' : 'he';
+  const en = locale === 'en';
   const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/login');
@@ -39,11 +57,17 @@ export default async function ProfilePage() {
 
   const today = new Date();
   const age = privateProfile?.birth_date
-    ? Math.max(0, today.getUTCFullYear() - new Date(privateProfile.birth_date).getUTCFullYear() - (
-      today < new Date(`${today.getUTCFullYear()}-${new Date(privateProfile.birth_date).getUTCMonth() + 1}-${new Date(privateProfile.birth_date).getUTCDate()}`)
-        ? 1
-        : 0
-    ))
+    ? Math.max(
+        0,
+        today.getUTCFullYear() -
+          new Date(privateProfile.birth_date).getUTCFullYear() -
+          (today <
+          new Date(
+            `${today.getUTCFullYear()}-${new Date(privateProfile.birth_date).getUTCMonth() + 1}-${new Date(privateProfile.birth_date).getUTCDate()}`
+          )
+            ? 1
+            : 0)
+      )
     : null;
 
   const setTags = TAG_COLUMNS.filter((key) => profile[key]);
@@ -53,9 +77,14 @@ export default async function ProfilePage() {
       <div className="max-w-2xl mx-auto bg-white">
         {/* Header */}
         <div className="border-b border-card-border px-6 py-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-ink">הפרופיל שלי</h1>
-          <Link href="/profile/edit" className="text-sm text-orange hover:underline">
-            ✎ עריכת פרופיל
+          <h1 className="text-3xl font-bold text-ink">
+            {en ? 'My profile' : 'הפרופיל שלי'}
+          </h1>
+          <Link
+            href={localePath('/profile/edit', locale)}
+            className="text-sm text-orange hover:underline"
+          >
+            {en ? 'Edit profile' : '✎ עריכת פרופיל'}
           </Link>
         </div>
 
@@ -65,70 +94,91 @@ export default async function ProfilePage() {
             <Avatar
               initials={profile.name.slice(0, 2)}
               size="xl"
-              verified={profile.is_verified && profile.public_badges.includes('student_verified')}
+              verified={
+                profile.is_verified &&
+                profile.public_badges.includes('student_verified')
+              }
               src={profile.photo_url ?? undefined}
             />
             <div>
               <h2 className="text-2xl font-bold text-ink">{profile.name}</h2>
               <p className="text-body-text">
-                {age !== null ? `בן/בת ${age}` : 'גיל לא הוגדר'}
+                {age !== null
+                  ? en
+                    ? `${age} years old`
+                    : `בן/בת ${age}`
+                  : en
+                    ? 'Age not set'
+                    : 'גיל לא הוגדר'}
               </p>
-              {privateProfile?.student_email_verified_at && profile.public_badges.includes('student_verified') && (
-                <Badge variant="success" className="mt-2">
-                  מאומת כסטודנט
-                </Badge>
-              )}
-              {privateProfile?.student_email_verified_at && !profile.public_badges.includes('student_verified') && (
-                <p className="text-sm text-muted-text mt-2">האימות שלך פרטי</p>
-              )}
+              {privateProfile?.student_email_verified_at &&
+                profile.public_badges.includes('student_verified') && (
+                  <Badge variant="success" className="mt-2">
+                    {en ? 'Verified student' : 'מאומת כסטודנט'}
+                  </Badge>
+                )}
+              {privateProfile?.student_email_verified_at &&
+                !profile.public_badges.includes('student_verified') && (
+                  <p className="text-sm text-muted-text mt-2">
+                    {en ? 'Your verification is private' : 'האימות שלך פרטי'}
+                  </p>
+                )}
             </div>
           </div>
 
           {/* Bio */}
           <div>
-            <h3 className="font-semibold text-ink mb-2">ביו</h3>
+            <h3 className="font-semibold text-ink mb-2">
+              {en ? 'About me' : 'ביו'}
+            </h3>
             <p className="text-body-text">
-              {profile.bio || 'עדיין לא הוספת ביו.'}
+              {profile.bio ||
+                (en ? 'No bio added yet.' : 'עדיין לא הוספת ביו.')}
             </p>
-          </div>
-
-          {/* Mode Selector */}
-          <div className="border-b border-card-border pb-6">
-            <h3 className="font-semibold text-ink mb-3">מצב נוכחי</h3>
-            <ModeSwitcher userId={profile.id} currentMode={profile.mode} />
           </div>
 
           {/* Tags */}
           <div>
-            <h3 className="font-semibold text-ink mb-3">התגים שלי</h3>
+            <h3 className="font-semibold text-ink mb-3">
+              {en ? 'My lifestyle' : 'התגים שלי'}
+            </h3>
             {setTags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {setTags.map((key) => (
-                  <Badge key={key}>{tagOptionLabel(key, profile[key])}</Badge>
+                  <Badge key={key}>
+                    {localizedTagLabel(key, profile[key], locale)}
+                  </Badge>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-text text-sm">עדיין לא הוספת תגיות.</p>
+              <p className="text-muted-text text-sm">
+                {en ? 'No traits added yet.' : 'עדיין לא הוספת תגיות.'}
+              </p>
             )}
           </div>
 
           {/* Settings */}
           <Link
-            href="/settings"
+            href={localePath('/settings', locale)}
             className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors border-b border-card-border"
           >
-            <span className="font-semibold text-ink">⚙️ הגדרות</span>
+            <span className="font-semibold text-ink">
+              {en ? 'Settings' : '⚙️ הגדרות'}
+            </span>
             <span className="text-muted-text">›</span>
           </Link>
 
           {/* Danger Zone */}
           <div className="space-y-3">
             <Button variant="danger" className="w-full">
-              🗑️ מחק חשבון
+              {en ? 'Delete account' : '🗑️ מחק חשבון'}
             </Button>
             <form action={signOut}>
-              <button type="submit" className="w-full text-error text-sm hover:underline">
-                התנתק
+              <button
+                type="submit"
+                className="w-full text-error text-sm hover:underline"
+              >
+                {en ? 'Sign out' : 'התנתק'}
               </button>
             </form>
           </div>

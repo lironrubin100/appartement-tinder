@@ -3,18 +3,22 @@ import { createServerClient } from '@/utils/supabase/server';
 import { BottomNav } from '@/components/navigation';
 import Link from 'next/link';
 import { headers } from 'next/headers';
+import { authPath, safeReturnTo } from '@/utils/navigation';
 
 export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const requestHeaders = await headers();
+  const locale = requestHeaders.get('x-shutaf-locale') === 'en' ? 'en' : 'he';
+  const returnTo = safeReturnTo(requestHeaders.get('x-shutaf-path'));
   const supabase = await createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect('/login');
+  if (!user) redirect(authPath('login', returnTo, locale));
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -22,7 +26,8 @@ export default async function MainLayout({
     .eq('id', user.id)
     .maybeSingle();
 
-  if (!profile || !profile.onboarded) redirect('/onboarding');
+  if (!profile || !profile.onboarded)
+    redirect(authPath('onboarding', returnTo, locale));
 
   const isLister = profile.mode === 'lister';
   const en = (await headers()).get('x-shutaf-locale') === 'en';
@@ -33,7 +38,12 @@ export default async function MainLayout({
       <main className="flex-1 pb-24 md:pb-0">
         {isLister && (
           <div className="border-b border-card-border bg-white px-4 py-3">
-            <Link href={en ? '/en/my-listings' : '/my-listings'} className="font-medium text-orange">{en ? 'My listings' : 'המודעות שלי'}</Link>
+            <Link
+              href={en ? '/en/my-listings' : '/my-listings'}
+              className="font-medium text-orange"
+            >
+              {en ? 'My listings' : 'המודעות שלי'}
+            </Link>
           </div>
         )}
         {children}

@@ -19,17 +19,17 @@ export function BottomNav() {
   const navItems: NavItem[] = [
     {
       label: en ? 'Profile' : 'פרופיל',
-      href: '/profile',
+      href: en ? '/en/profile' : '/profile',
       icon: <User className="w-6 h-6" />,
     },
     {
       label: en ? 'Discover' : 'חיפוש',
-      href: '/discover',
+      href: en ? '/en/discover' : '/discover',
       icon: <Sparkles className="w-6 h-6" />,
     },
     {
       label: en ? 'Map' : 'מפה',
-      href: '/map',
+      href: en ? '/en/map' : '/map',
       icon: <Map className="w-6 h-6" />,
     },
     {
@@ -39,14 +39,14 @@ export function BottomNav() {
       badge: undefined, // Plus doesn't get a badge
     },
     {
-      label: en ? 'Chats' : 'צ\'אט',
-      href: '/chats',
+      label: en ? 'Chats' : "צ'אט",
+      href: en ? '/en/chats' : '/chats',
       icon: <MessageCircle className="w-6 h-6" />,
     },
   ];
 
   const isActive = (href: string) => {
-    if (href === '/compose') return false; // Plus never gets active state
+    if (href.endsWith('/compose')) return false; // Plus never gets active state
     return pathname?.startsWith(href);
   };
 

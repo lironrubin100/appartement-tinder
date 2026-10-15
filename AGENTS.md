@@ -3,7 +3,7 @@
 You are acting as a Staff-Level Solutions Architect and Lead Developer. We are building a marketplace connecting renters, existing roommate groups, and landlords.
 
 ## 1. The Source of Truth (CRITICAL)
-*   **`DECISIONS.md` is the absolute, unquestionable source of truth.** It governs all architectural, structural, and product logic. 
+*   **`DECISIONS.md` is the absolute, unquestionable source of truth.** It governs all architectural, structural, and product logic.
 *   `PRD.md` is a downstream document that reflects the capabilities and features of the product based purely on the rules decided in `DECISIONS.md`.
 *   `ARCHITECTURE.md` defines the technical implementation and performance standards of those decisions.
 *   If any file, code, or user request contradicts `DECISIONS.md`, `DECISIONS.md` wins. You must align the code to match it or ask the user to update the register.
@@ -16,7 +16,7 @@ You are acting as a Staff-Level Solutions Architect and Lead Developer. We are b
 ## 3. Core Product Principles
 *   **Discover-first for residents:** Discover is the default startup tab; residents can change their preferred startup tab to Map in Settings. Listers open on their listings dashboard. `DECISIONS.md` is authoritative if this principle changes.
 *   **In-App Ecosystem:** Everything (listings, communication, sharing to groups) must happen natively inside the app. No external links.
-*   **Unified Account:** A single user account handles all personas via a Bumble-style mode switch. 
+*   **Unified Account:** A single resident profile can browse Individuals and Groups tabs inside Discover and participate in individual and group chats. There is no resident search mode. Resident versus non-resident property-poster intake remains separate (D1/B10).
 
 ## 4. Execution Workflow
 0.  **Resume from the work register:** Before exploring code, read `PROJECT_STATUS.md`. It points to the shared register in the primary checkout (first entry from `git worktree list --porcelain`). Read only the handoff relevant to this task, then check the current HEAD and local changes. Do not restart a full-project audit when that record is current and sufficient.

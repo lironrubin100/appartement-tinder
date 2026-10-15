@@ -23,7 +23,7 @@ graph TB
     end
 
     subgraph supa["Supabase — eu-central-1"]
-        Auth["Auth<br/>Google / Apple"]
+        Auth["Auth<br/>Google / email; Apple deferred"]
         RPC["RPCs<br/>feed, viewport, accept_like"]
         DB[("Postgres<br/>+ RLS")]
         RT["Realtime<br/>one channel per conversation"]
@@ -179,9 +179,9 @@ Sourced from the design handoff (`design_handoff_shutaf_design_system/`). These 
 
 Minimum state the app needs per screen group — a starting point for whatever state/data-fetching layer gets picked (React Query, Zustand, plain Server Components + `fetch`, etc. — not yet decided):
 
-- **Session/user**: current mode (Solo/Group/Room-Filler/Lister), residency (resident vs. non-resident/no-profile), verification status, language preference.
+- **Session/user**: residency (resident vs. non-resident property poster; no resident search mode), verification status, language preference.
 - **Profile**: one value per structured category (single-select) — 31 categories total (16 renter + 15 apartment), per `DECISIONS.md` C1/C2.
-- **Map/Discover**: viewport bounds → pin query, favorited listing IDs, Discover looking-mode (individual vs. group), swipe queue and decisions.
+- **Map/Discover**: viewport bounds → pin query, favorited listing IDs, Discover tab (Individuals or Groups, independent of account and group membership), swipe queue and decisions.
 - **Group**: member list (≤4), shared budget, shared tags (computed from members, not stored — see `DECISIONS.md` E6).
 - **Chats**: pending likes queue, active thread list, per-thread message history, unread counts.
 - **Composer**: draft listing fields, required-field validation state, publish status.

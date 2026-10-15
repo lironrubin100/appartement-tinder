@@ -3,15 +3,13 @@
 ## 1. Executive Summary
 A real-time web and mobile marketplace designed to eliminate friction in the rental market by allowing renters to form groups *before* securing a lease. The app functions as a live database connecting solo renters, existing roommate groups, and landlords. It is a completely enclosed ecosystem: all listings, communications, and group sharing happen strictly inside the app.
 
-## 2. Target Personas (User Modes)
-The first onboarding fork is **residency, not persona**: "Will you be living here?" Anyone who will live in the apartment must complete a full profile before posting or matching; anyone posting on behalf of a property they won't live in gets an account-only intake (name, phone, agency — no profile). Within "living here," a single account dynamically switches its "Mode" (similar to Bumble / Bumble BFF) at any time via a persistent mode-switcher in Profile:
-1. **The Solo Renter:** Looking for an apartment or looking to join a group.
-2. **The Formed Group:** Up to 4 matched users looking for an apartment together.
-3. **The Room-Filler:** Renters currently living in an apartment looking for a final roommate to fill an empty room. They create one apartment listing and add the room or rooms currently available, each with its own rent.
-4. **The Lister (Landlord/Realtor):** Account-only, no profile. Has a dedicated dashboard ("My listings") instead of Discover access.
+## 2. People and groups
+The first onboarding fork is **residency**: anyone who will live in the apartment completes a personal profile before posting or matching. Non-resident property posters complete account-only intake (name, phone, optional agency) and use My Listings.
+
+Residents have no Solo/Group/Room-Filler search mode. They switch freely between **Individuals** and **Groups** tabs within Discover. Joining a group preserves their personal profile and individual conversations. Residents can also list available rooms in their existing apartment.
 
 ## 3. Core Features & App Architecture
-The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destinations — Profile, Discover, Map, Plus (post a listing), Chats — rendered as a fixed bottom bar on mobile and free to take another shape on desktop. Residents (Solo/Group/Room-Filler) open on Discover by default and can choose Discover or Map as their startup tab in Settings. Lister-mode accounts open on My Listings.
+The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destinations — Profile, Discover, Map, Plus (post a listing), Chats — rendered as a fixed bottom bar on mobile and free to take another shape on desktop. Residents open on Discover by default and can choose Discover or Map as their startup tab in Settings. Non-resident property posters open on My Listings.
 
 ### Map (The Apartment Feed)
 *   **Geographical Map:** Shows available apartments. For performance, map pins are lightweight, displaying only the flat rent price and location.
@@ -24,6 +22,7 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 ### Discover (The Roommate Feed) [DEFAULT ENTRY POINT for residents]
 *   **Structured Profiles:** Users are scored and filtered based on structured lifestyle categories (not free-form text).
 *   **Interaction Model:** Users send a "Like" attached to a specific trait or bio element, along with an optional message. The receiving user must accept the like to open a chat (Accept-a-Like model).
+*   **Two views:** Individuals and Groups tabs inside Discover, with no account-mode change.
 *   **Dynamic Group Cards:** Formed Groups are displayed as a swipeable card. The group's card is dynamically computed and generated from the individual profiles of its members.
 
 ### Plus (Post a Listing)
@@ -32,16 +31,16 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 
 ### Chats & Groups
 *   **Accepting Matches:** Inbound likes sit here pending acceptance.
-*   **Group Controls:** 1-on-1 chats can be upgraded to official Groups (max 4 members).
-*   **In-App Ecosystem:** Users can share favorited map listings directly into the group chat for review.
+*   **Group Controls:** Accepted individual connections can form a separate group conversation (up to four members), with invitations accepted by the invitees. Personal conversations remain available. The admin selects admin approval, any-member approval or majority voting for group introductions. New members see new messages only.
+*   **Conversations:** Individual and group conversations appear in Chats. Apartment sharing into either conversation and contacting landlords as a group are future capabilities.
 
 ### Profile & Status
-*   The control center: a persistent mode-switcher row ("Currently: [mode]"), a "Your tags" summary of structured lifestyle categories, and verification status. Language, notifications, privacy, and account deletion live in a separate **Settings** screen, not Profile itself.
+*   The control center: a personal profile, a "Your tags" summary of structured lifestyle categories, and verification status. Language, notifications, privacy, and account deletion live in a separate **Settings** screen, not Profile itself.
 *   Public profile fields are display name, photo, age (not birth date), lifestyle tags, bio, and badges the user chooses to show. Phone, email, budget, and exact move-in date stay private. One optional phone number is kept per account and is never printed on the public listing; enquiries stay in-app. Listings show a stable approximate map pin, 500m from the precise point; their exact address is released only after the poster accepts an in-app enquiry. Each public listing represents an apartment and shows its available room or rooms, their individual monthly price, and whether bills are included; rooms do not appear as standalone listings.
 *   Residents default to Discover and can select Discover or Map as the startup tab in Settings. Listers open on My Listings.
 
 ### Lister Dashboard [DEFAULT ENTRY POINT for Lister mode]
-*   Replaces Discover/Map browsing for Lister-mode accounts: "My listings" with per-listing status (Active + interested count, or Rented).
+*   Replaces Discover/Map browsing for Non-resident property posters: "My listings" with per-listing status (Active + interested count, or Rented).
 
 ## 4. The Matching Engine
 Matching uses structured, filterable, indexed categories (columns in the database) — a **31-category taxonomy** (16 renter-lifestyle + 15 apartment-characteristic categories: Gender Dynamic, Cleanliness, Sleep Schedule, Social & Guests, Noise Tolerance, Music/Vibe, Climate Control, Smoking Policy, Kitchen & Dietary, Cooking Dynamics, Pet Ownership, Weekend Routine, Relationship Status, Study Habits, Financial Splitting, Reserve Duty/Miluim, plus Proximity to BGU, AC, Security & Safety, Water Heating, Furnishing, Hand-Me-Downs, Outdoor Space, Laundry, Accessibility, Parking, Pet Rules, Kitchen Setup, Hidden Costs, Internet, Roommate Cap — see `DECISIONS.md` C2 for the full list). Each renter selects one value per lifestyle category via a grouped tag picker (Lifestyle / Apartment preferences / Logistics).

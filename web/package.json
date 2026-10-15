@@ -7,7 +7,12 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:db": "node ../scripts/test-resident-sql.mjs",
+    "test:acceptance": "node scripts/qa-fixtures.mjs check && playwright test e2e/listing-slices.spec.ts e2e/resident-auth-guest.spec.ts e2e/resident-live.spec.ts --workers=1",
+    "qa:prepare": "node scripts/qa-fixtures.mjs prepare",
+    "qa:storage": "node scripts/qa-fixtures.mjs storage",
+    "qa:forget": "node scripts/qa-fixtures.mjs forget"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -23,6 +28,7 @@
     "react-leaflet-cluster": "^4.1.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
