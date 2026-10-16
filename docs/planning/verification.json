@@ -52,7 +52,16 @@
   ],
   "application_checks_rerun": false,
   "live_migrations_queried_or_applied": false,
-  "publication": "Package8304667 pushed/remote confirmed; cleanup and lifecycle followup under current authorized publication",
+  "publication": {
+    "package_commit": "830466700812864b765d367b180d7233f5cb4c61",
+    "cleanup_commit": "0fd75bffeafc677aefc119702d894976e2ee7c42",
+    "remote_master_confirmed": true,
+    "primary_fast_forwarded": true,
+    "primary_planning_check": "passed",
+    "primary_selector_tests_passed": 6,
+    "primary_initial_packet": "SL00.1",
+    "manual_deployment_performed": false
+  },
   "prior_checkpoint": {
     "date": "2026-10-15",
     "negative_probes": [

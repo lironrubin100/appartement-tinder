@@ -69,3 +69,10 @@
 - Owner additionally requested worktree consolidation and prevention of future accumulation. Eleven inactive worktrees retired,13->2 registered. Recovery root is ARCHIVED_WORK; source/index checks passed and no active executor besides current chat found. Unique drafts retained, not passed off as integrated code. Three merged local branches removed; four unique historical branch refs retained. Current bd33 deliberately kept while this chat runs.
 - AGENTS section6 requires reuse by default, explicit isolation owner/cleanup condition, verified integration/archive before retirement and inventory maintenance. Removed accidental nested-worktree gitlink and ignored future nested checkouts. Future next-feature agent reads archive-to-packet map.
 - Followup checks: selector regressions6/6 and planning26/114/142/21, source syntax and staged whitespace; no application runtime suite required for docs/dispatch/metadata-only changes. Actual followup push and final primary SHA recorded in shared checkpoint after publication.
+
+
+## Publication and primary-checkout verification
+
+17 October2026: workflow package8304667 and cleanup/lifecycle commit0fd75bffeafc677aefc119702d894976e2ee7c42 were pushed to origin/master; git ls-remote confirmed the cleanup SHA. Primary project was fast-forwarded to that exact version with original shared-record backups preserved. Planning checker passes26 slices/114 legacy IDs/142 decisions/21 packets on the primary Windows checkout; selector regression6/6 passes there, and next-work --json returns start SL00.1. Current bd33 is clean at source before this evidence-only followup; retained deliberately while its owner chat is active. No app feature implementation, hosted database change or manual deployment in this maintenance task.
+
+A new project chat can say work on the next feature. Reuse primary; AGENTS/START_NEXT_WORK select and maintain packet progress. Archived unfinished source is mapped for selective reuse, not counted as integrated.
