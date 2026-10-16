@@ -7,6 +7,7 @@
 - Parent: SL00. Local contract ready; no prerequisite packet. Required decisions J11/J12/K5; K3/J8 provider capacity are context/release evidence.
 - Outcome: identify actual source, owned local backend and existing tests so subsequent work repairs missing behavior rather than rebuilding shipped features.
 - Read: primary PROJECT_STATUS and relevant handoff, current HEAD/diff, web/package.json, docs/TESTING.md and LOCAL_TESTING_WORKFLOW.md. Compare cached integration source without resetting/copying dirty changes.
+- Prior drafts: consult ARCHIVED_WORK.md for retired M01/M07/safety and migration evidence; recover only missing approved deltas, not whole stale branches. This cleanup did not imply those features were integrated.
 - Scope: inspect existing test helpers and target guards; find local runtime availability; run available static/PGlite checks. Do not create hosted resources, mutate shared config or replay live migrations.
 - Commands from web: `npm run test:db`; `npm exec --no -- tsc --noEmit`; `npm run build`; use `npm exec --no -- eslint <affected-files>` only for changed files or established baseline targets. Record absent dependencies/tooling as absent; no surprise paid install. Build environment failure is not successful build.
 - Guard: browser/DB mutation only after fixture helper confirms isolated intended target. An environment variable name or Preview URL is not sufficient. Existing acceptance helper may target shared backend: inspect before invocation.

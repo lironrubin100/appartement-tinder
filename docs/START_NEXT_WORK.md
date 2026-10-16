@@ -16,6 +16,8 @@ Use the project's current checkout containing this tracked planning package. It 
 4. For each predecessor marked verified, read its handoff and confirm the required artifacts actually exist in the chosen source/backend. Source SHA/worktree/diff evidence is not proof code has been integrated elsewhere. If artifact absent or stale, record `verification-incomplete` and reconcile narrowly; do not silently continue or redo working features.
 5. Confirm no other active chat owns this packet/files in shared status. Resume your incomplete work; do not steal another active executor's packet. Selection is not a concurrent lock. Default is one executor and one coherent packet at a time.
 
+Reuse the current/primary checkout; do not create a worktree for each packet. Read [ARCHIVED_WORK](ARCHIVED_WORK.md) and WORKTREE_CLEANUP.md before looking for older draft code: retired drafts are recoverable, not missing and not automatically integrated. If isolation genuinely requires another checkout, register its owner and cleanup condition first and retire it after integration/archive as AGENTS requires.
+
 ## Execute, verify, continue
 
 Create/update `docs/workstreams/<work-id>.md` before editing. Write the bounded outcome, source/backend/allowed actions and packet test cases. Mark the packet `in-progress` in planning/execution-state.json with handoff path and absolute worktree; shared status points to it. Reuse existing verified implementation, repair only observed gaps. Follow EXECUTION_PROTOCOL and TESTING including ordinary-user authorization, persistence, real browser journeys, language/phone checks where relevant and exact fixture cleanup. Choose routine implementation details within approved contracts without asking the owner.

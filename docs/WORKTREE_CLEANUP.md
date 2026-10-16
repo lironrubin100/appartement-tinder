@@ -1,3 +1,21 @@
+# Current worktree consolidation
+
+17 October 2026. **13 registered worktrees reduced to2**: primary project checkout and the currently active planning chat (bd33). Eleven inactive checkouts were retired after verified recoverable archival; three already-merged local branch names were removed. Six local branches remain, including four historical unmerged refs retained for recovery; these are pointers, not extra checkouts. No remote branch was deleted.
+
+The plan/automatic next-feature workflow was pushed to master at8304667 and the primary checkout fast-forwarded to it. Further lifecycle/cleanup records are in this followup and the owning handoff. No unfinished feature was blindly merged into the app.
+
+See [ARCHIVED_WORK](ARCHIVED_WORK.md) for the exact recovery root, draft-to-packet map and reconstruction procedure. Complete history bundle verified; every copied file SHA256 compared; all six nonempty tracked patches checked against original bases using private alternate indexes. Meaningful ignored configuration preserved privately, generated caches omitted.
+
+The retired d31d registration was removed although Windows retained an empty directory shell. It has no code or registered worktree; do not kill the desktop app merely to remove an empty shell. The old map lock owner PID23068 was absent, no other active project executor was found, and that stale lock was removed for retirement.
+
+The primary accidentally tracked the nested map worktree as a gitlink. This followup removes that pointer and ignores .claude/worktrees, preventing accidental nested checkout tracking. Current bd33 belongs to this active chat and is retained rather than deleting its working directory while executing. Future feature work should reuse the primary checkout; no new worktree is required.
+
+## Mandatory lifecycle from now on
+
+AGENTS section6 and START_NEXT_WORK govern: reuse existing checkout; create isolation only for a named need, with owner/packet/cleanup condition recorded first; integrate verified work or preserve a verified recovery archive; remove redundant checkout and merged branch; update inventory/handoff. Never silently abandon a checkout or delete another active owner's work. Archived drafts are not runtime-verified features.
+
+## Historical15October record — superseded counts and retained-location recommendations
+
 # Branch and worktree cleanup
 
 15 October 2026. Original inventory: 10 local branches and 14 linked/main worktrees. The temporary integration branch is also counted while verification is in progress.

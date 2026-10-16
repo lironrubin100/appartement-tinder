@@ -79,6 +79,8 @@ Unknown is not not-built. Code existence is not journey acceptance. Historical a
 
 ## Finish/handoff
 
+Worktree maintenance is part of done: reuse existing checkout by default; no automatic per-feature worktree. New isolation needs an owner/packet/reason and cleanup condition before creation. Verify integration or a private recoverable archive before removing unused checkout, preserve meaningful ignored files, and refresh inventory. Never abandon a disposable checkout silently or delete another active executor's source. See AGENTS.md section6 and WORKTREE_CLEANUP.md.
+
 Update owning handoff and shared status navigation: outcome, files, decision IDs, actual evidence/date, source/backend/migrations, uncommitted changes and exact publication state, blockers and next action. Refresh inventory per AGENTS.md. Show reviewable diff/result before any approval-dependent external step. Do not end after merely explaining a subtopic when authorized independent work remains.
 
 ## New ideas during implementation

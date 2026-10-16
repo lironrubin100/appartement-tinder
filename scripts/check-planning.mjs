@@ -129,6 +129,7 @@ const documents = [
   'docs/WORK_PLAN.md', 'docs/EXECUTION_PACKETS.md',
   'docs/REMAINING_MVP_PACKETS.md',
   'docs/START_NEXT_WORK.md',
+  'docs/ARCHIVED_WORK.md', 'docs/WORKTREE_CLEANUP.md',
   'docs/specs/TECHNICAL_DEFAULTS.md', 'docs/specs/POSTER_OUTREACH.md',
   'docs/specs/TAXONOMY.md',
 ];

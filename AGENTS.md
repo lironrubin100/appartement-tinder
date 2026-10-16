@@ -41,3 +41,13 @@ New post-MVP ideas are captured/updated by stable IDEA ID in `ROADMAP.md`, prese
 The ordered plan is `docs/WORK_PLAN.md`; bounded dispatch packets are `docs/EXECUTION_PACKETS.md` with readiness in `docs/planning/packets.json`. Ready packets may cover a settled subset of an unresolved parent slice; context research is not a local policy blocker. Do not promote the whole parent to ready or skip packet-specific runtime/release gates. Technical defaults are in `docs/specs/TECHNICAL_DEFAULTS.md`; apartment-bound poster outreach is in `docs/specs/POSTER_OUTREACH.md`.
 
 Required MVP SL00–SL16 are now packetized into 21 local packets (initial three plus `docs/REMAINING_MVP_PACKETS.md`). Owner priority: working product and university-funding demonstration; do not reopen settled decisions or delay independent implementation for cosmetic polish/general public-launch or legal discussion. Preserve concrete authorization/privacy correctness and record real activation blockers only when relevant.
+
+## 6. Worktree lifecycle — owner requirement
+
+Default to the existing primary checkout or a suitable current project worktree. “Next feature” is not a request to create another worktree. Check shared status/inventory first; one active executor normally needs one working checkout. Do not automatically create a worktree per slice, subtask or chat.
+
+Create another checkout only for a concrete isolation need that cannot be met safely in the existing one. Before creation record its owner, bounded packet, branch/base, reason and cleanup condition in the owning handoff/shared register. Avoid nested repositories/worktrees inside the project. Never add a checkout as a Git submodule/gitlink accidentally.
+
+At packet completion/interruption, account for the checkout: integrate only approved verified changes; remove clean redundant worktrees after confirming containment, or archive recoverably before removing unfinished ones. Preserve exact unique history, tracked diff, untracked work and meaningful ignored files (including private environment configuration) in a private archive and verify recovery. Do not push private files or treat archived drafts as integrated features. Record archive path/base/hash and map reusable drafts to their packets. Do not delete another active executor's checkout or the calling task's current checkout.
+
+Update docs/WORKTREE_INVENTORY.md and owning/shared handoff after cleanup. If the app created this chat in a disposable checkout, finish by leaving a clear cleanup owner/condition; do not spawn another checkout to escape it. See docs/WORKTREE_CLEANUP.md for current retirement/recovery records.

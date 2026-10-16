@@ -61,3 +61,11 @@
 - AGENTS/CLAUDE/GETTING_STARTED/BUILD_BLUEPRINT/WORK_PLAN/EXECUTION_PROTOCOL link automatic dispatch. A simple next-feature request authorizes approved reversible local work without requiring owner to choose packet. External publication still requires applicable authorization.
 - Checked17Oct: six selector regression tests pass, planning checker26/114/142/21 passes, selector returns start SL00.1, syntax and whitespace checks pass. No application runtime acceptance asserted.
 - Publication preflight: fresh origin/master exactly matches starting337d6b4; primary checkout has only shared status/inventory updates, this workstream untracked and unrelated historical BUILD_PLAN/new plan/nested worktree data. Preserve those changes during fast-forward. Publication result/source and primary update recorded after Git operation.
+
+
+## 17 October — publication confirmed and worktree cleanup
+
+- Package commit830466700812864b765d367b180d7233f5cb4c61 pushed normally to origin/master; git ls-remote confirmed exact SHA. Primary master fast-forwarded fromdebce0f to8304667; original shared status/inventory/older handoff copied to private2026-10-17-primary-before-ff-a3cb2022 before synchronization, and unrelated BUILD_PLAN/new plan data preserved. No force push, live DB change or manual deployment.
+- Owner additionally requested worktree consolidation and prevention of future accumulation. Eleven inactive worktrees retired,13->2 registered. Recovery root is ARCHIVED_WORK; source/index checks passed and no active executor besides current chat found. Unique drafts retained, not passed off as integrated code. Three merged local branches removed; four unique historical branch refs retained. Current bd33 deliberately kept while this chat runs.
+- AGENTS section6 requires reuse by default, explicit isolation owner/cleanup condition, verified integration/archive before retirement and inventory maintenance. Removed accidental nested-worktree gitlink and ignored future nested checkouts. Future next-feature agent reads archive-to-packet map.
+- Followup checks: selector regressions6/6 and planning26/114/142/21, source syntax and staged whitespace; no application runtime suite required for docs/dispatch/metadata-only changes. Actual followup push and final primary SHA recorded in shared checkpoint after publication.

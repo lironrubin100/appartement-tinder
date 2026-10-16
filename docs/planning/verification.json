@@ -52,7 +52,7 @@
   ],
   "application_checks_rerun": false,
   "live_migrations_queried_or_applied": false,
-  "publication": "Owner authorized publication; exact Git result in owning workstream",
+  "publication": "Package8304667 pushed/remote confirmed; cleanup and lifecycle followup under current authorized publication",
   "prior_checkpoint": {
     "date": "2026-10-15",
     "negative_probes": [
@@ -77,5 +77,16 @@
     "passed": 6,
     "initial_packet": "SL00.1",
     "read_only_selection": true
+  },
+  "worktree_consolidation": {
+    "before": 13,
+    "after": 2,
+    "retired": 11,
+    "archive_bundle_verified": true,
+    "copied_files_sha256_verified": true,
+    "tracked_patch_recovery_checks": 6,
+    "merged_local_branches_removed": 3,
+    "remote_branches_removed": 0,
+    "unverified_drafts_automatically_merged": false
   }
 }

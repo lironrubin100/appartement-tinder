@@ -4,6 +4,7 @@ node_modules/
 dist/
 *.log
 .worktrees/
+.claude/worktrees/
 
 # Local Supabase CLI cache
 supabase/.temp/
