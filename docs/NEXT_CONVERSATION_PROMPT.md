@@ -1,5 +1,7 @@
 # Prompt for the next Shutaf development conversation
 
+Historical handoff prompt, retained for evidence. The new planning entry point is [BUILD_BLUEPRINT.md](BUILD_BLUEPRINT.md) and the proposed dispatch catalog is [SLICES.md](SLICES.md). Do not automatically execute the three recommendations below as current scope; check canonical decisions and the active shared handoff. This prompt's dated implementation/test facts are not reverified by the planning task.
+
 Use the project-orchestrator skill. Work on Shutaf in `C:/Users/User/Desktop/appartement tinder`, or the active resident-journeys checkout recorded in PROJECT_STATUS.md if that work is still in progress.
 
 Start by reading the primary checkout's PROJECT_STATUS.md, docs/workstreams/2026-10-15-resident-journeys.md, docs/NEXT_MVP_FEATURES.md, docs/TESTING.md and the relevant DECISIONS.md rows. Confirm Git HEAD/local changes and the live migrations relevant to this task. Do not audit the entire project again or merge a stale branch wholesale. Preserve unrelated worktrees and the nested map experiment.

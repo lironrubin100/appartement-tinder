@@ -1,0 +1,583 @@
+{
+  "date": "2026-10-17",
+  "meaning": "Local planning readiness only; baseline/artifact/runtime evidence checked during execution",
+  "packets": [
+    {
+      "id": "SL00.1",
+      "parent": "SL00",
+      "state": "ready",
+      "depends_on": [],
+      "required_decisions": [
+        "J11",
+        "J12",
+        "K5"
+      ],
+      "context_decisions": [
+        "J8",
+        "K3"
+      ],
+      "contracts": [
+        "docs/EXECUTION_PACKETS.md",
+        "docs/LOCAL_TESTING_WORKFLOW.md"
+      ],
+      "live_gate": "No hosted mutation; local runtime availability to be recorded",
+      "release_gate": "Not a release packet"
+    },
+    {
+      "id": "SL01.1",
+      "parent": "SL01",
+      "state": "ready",
+      "depends_on": [
+        "SL00.1"
+      ],
+      "required_decisions": [
+        "B10",
+        "D1",
+        "D16",
+        "I9",
+        "I19",
+        "I22"
+      ],
+      "context_decisions": [
+        "C2"
+      ],
+      "contracts": [
+        "docs/EXECUTION_PACKETS.md",
+        "docs/specs/POSTER_OUTREACH.md"
+      ],
+      "live_gate": "Ordinary local-account/browser authorization acceptance",
+      "release_gate": "Hosted compatibility/deployment separate"
+    },
+    {
+      "id": "SL08.1",
+      "parent": "SL08",
+      "state": "ready",
+      "depends_on": [
+        "SL00.1"
+      ],
+      "required_decisions": [
+        "F1",
+        "F2",
+        "F5",
+        "F8",
+        "H1"
+      ],
+      "context_decisions": [
+        "J8",
+        "K3"
+      ],
+      "contracts": [
+        "docs/EXECUTION_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Two-browser delivery/read/reconnect and target guard",
+      "release_gate": "Hosted channel/permission regression separate"
+    },
+    {
+      "id": "SL00.2",
+      "parent": "SL00",
+      "state": "ready",
+      "depends_on": [
+        "SL00.1"
+      ],
+      "required_decisions": [
+        "J1",
+        "J2",
+        "J3",
+        "J4",
+        "J5",
+        "J6",
+        "J7",
+        "J10",
+        "J11",
+        "J12",
+        "J13",
+        "J14",
+        "C2"
+      ],
+      "context_decisions": [
+        "K3",
+        "J8"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md",
+        "docs/specs/TAXONOMY.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL01.2",
+      "parent": "SL01",
+      "state": "ready",
+      "depends_on": [
+        "SL00.2",
+        "SL01.1"
+      ],
+      "required_decisions": [
+        "B1",
+        "B2",
+        "B5",
+        "B6",
+        "B9",
+        "B10",
+        "C2",
+        "I9",
+        "I16",
+        "I19",
+        "I22"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md",
+        "docs/specs/TAXONOMY.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL02.1",
+      "parent": "SL02",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2"
+      ],
+      "required_decisions": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D9",
+        "D19",
+        "A5",
+        "J9",
+        "I4",
+        "I21"
+      ],
+      "context_decisions": [
+        "K3"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL03.1",
+      "parent": "SL03",
+      "state": "ready",
+      "depends_on": [
+        "SL02.1"
+      ],
+      "required_decisions": [
+        "D4",
+        "D5",
+        "D9",
+        "D13",
+        "D14",
+        "D17",
+        "A5",
+        "J2",
+        "J6",
+        "J15"
+      ],
+      "context_decisions": [
+        "K3"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL04.1",
+      "parent": "SL04",
+      "state": "ready",
+      "depends_on": [
+        "SL02.1",
+        "SL03.1"
+      ],
+      "required_decisions": [
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D9",
+        "D16",
+        "D18"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL05.1",
+      "parent": "SL05",
+      "state": "ready",
+      "depends_on": [
+        "SL03.1"
+      ],
+      "required_decisions": [
+        "G1",
+        "G2",
+        "G6"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL08.2",
+      "parent": "SL08",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2",
+        "SL08.1"
+      ],
+      "required_decisions": [
+        "F1",
+        "F2",
+        "F3",
+        "F5",
+        "F6",
+        "F8",
+        "H1"
+      ],
+      "context_decisions": [
+        "J8",
+        "K3"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL06.1",
+      "parent": "SL06",
+      "state": "ready",
+      "depends_on": [
+        "SL03.1",
+        "SL04.1",
+        "SL08.2"
+      ],
+      "required_decisions": [
+        "F4",
+        "D4",
+        "H1",
+        "D18",
+        "H7"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL06.2",
+      "parent": "SL06",
+      "state": "ready",
+      "depends_on": [
+        "SL06.1",
+        "SL01.1"
+      ],
+      "required_decisions": [
+        "B10",
+        "C7",
+        "D4",
+        "D16",
+        "F4",
+        "G1",
+        "G2",
+        "H1",
+        "I19"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL09.1",
+      "parent": "SL09",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2",
+        "SL08.2"
+      ],
+      "required_decisions": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5",
+        "E6",
+        "E9",
+        "E10",
+        "H1"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL10.1",
+      "parent": "SL10",
+      "state": "ready",
+      "depends_on": [
+        "SL03.1",
+        "SL08.2",
+        "SL09.1",
+        "SL05.1"
+      ],
+      "required_decisions": [
+        "E7",
+        "E8",
+        "F3",
+        "G1",
+        "H1"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL11.1",
+      "parent": "SL11",
+      "state": "ready",
+      "depends_on": [
+        "SL04.1",
+        "SL09.1",
+        "SL10.1"
+      ],
+      "required_decisions": [
+        "D18",
+        "E4",
+        "E10",
+        "F4"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL12.1",
+      "parent": "SL12",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2",
+        "SL08.2",
+        "SL09.1",
+        "SL04.1"
+      ],
+      "required_decisions": [
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H6",
+        "H7",
+        "D7",
+        "D10"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL13.1",
+      "parent": "SL13",
+      "state": "ready",
+      "depends_on": [
+        "SL06.2",
+        "SL08.2",
+        "SL12.1"
+      ],
+      "required_decisions": [
+        "F7",
+        "L5",
+        "I20",
+        "K2",
+        "J13"
+      ],
+      "context_decisions": [
+        "K3",
+        "J8"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL14.1",
+      "parent": "SL14",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2",
+        "SL08.2",
+        "SL09.1",
+        "SL12.1"
+      ],
+      "required_decisions": [
+        "B7",
+        "F6",
+        "E3",
+        "H3",
+        "J12"
+      ],
+      "context_decisions": [
+        "M1",
+        "M2"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL15.1",
+      "parent": "SL15",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2",
+        "SL00.2"
+      ],
+      "required_decisions": [
+        "B3",
+        "B4",
+        "B9"
+      ],
+      "context_decisions": [
+        "K3"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL07.1",
+      "parent": "SL07",
+      "state": "ready",
+      "depends_on": [
+        "SL01.2",
+        "SL08.2"
+      ],
+      "required_decisions": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "C9",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "B9",
+        "J1",
+        "J2",
+        "J3"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md",
+        "docs/specs/TAXONOMY.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL16.1",
+      "parent": "SL16",
+      "state": "ready",
+      "depends_on": [
+        "SL04.1",
+        "SL05.1",
+        "SL06.2",
+        "SL07.1",
+        "SL09.1",
+        "SL10.1",
+        "SL11.1",
+        "SL12.1",
+        "SL13.1",
+        "SL14.1",
+        "SL15.1"
+      ],
+      "required_decisions": [
+        "A9",
+        "A10",
+        "A11",
+        "J13",
+        "K5",
+        "L7",
+        "M3"
+      ],
+      "context_decisions": [
+        "K3",
+        "M1",
+        "M2",
+        "M5"
+      ],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
+      "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    }
+  ]
+}

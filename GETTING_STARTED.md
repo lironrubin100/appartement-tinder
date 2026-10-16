@@ -1,13 +1,13 @@
 # Getting Started with Shutaf — Live Prototype
 
-Your app is ready to run! Here's how to see it live.
+For current planning start with [the build blueprint](docs/BUILD_BLUEPRINT.md); for actual dated runtime evidence start with [PROJECT_STATUS.md](PROJECT_STATUS.md). Local run instructions below are a developer guide, not proof of production readiness. Read AGENTS.md and the owning handoff before changes.
 
 ## 🚀 Run Locally (Development Server)
 
 ### 1. Install dependencies
 ```bash
 cd web
-npm install
+npm ci
 ```
 
 ### 2. Start the dev server
@@ -22,7 +22,7 @@ The app opens at **http://localhost:3000** in your browser.
   - `🏠 מפה` → `/map` (apartment listings on a map)
   - `✨ חיפוש` → `/discover` (swipe through roommates, filter by tags)
   - `💬 צ'אט` → `/chats` (message threads)
-  - `👤 פרופיל` → `/profile` (your profile, settings, mode switcher)
+  - `👤 פרופיל` → `/profile` (your profile; Settings is separate; no resident account-mode switcher)
   - `➕ הוסף` → `/compose` (post a new listing — overlays on current screen)
 
 ### 4. Hot reload
@@ -178,9 +178,12 @@ npm install
 ## 📝 Notes
 
 - This is a **functional prototype**, not the final product
-- All data is hardcoded/placeholder
-- Backend logic (auth, matching, messaging) comes next
+- Historical setup note: use PROJECT_STATUS.md and the owning handoff for current verified capabilities; do not assume placeholder-only data.
+- Reconcile existing auth/matching/messaging implementation before choosing missing work.
 - Design is per DECISIONS.md — no changes without updating the register first
 
 Enjoy! 🚀
 
+# Continuing the MVP
+
+Say “work on the next feature” to the agent. AGENTS.md directs automatic selection through [START_NEXT_WORK](docs/START_NEXT_WORK.md) and `node scripts/next-work.mjs --json`. The agent maintains packet progress, evidence and shared status; the owner need not select IDs.

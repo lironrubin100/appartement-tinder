@@ -26,8 +26,8 @@ graph TB
         Auth["Auth<br/>Google / email; Apple deferred"]
         RPC["RPCs<br/>feed, viewport, accept_like"]
         DB[("Postgres<br/>+ RLS")]
-        RT["Realtime<br/>one channel per conversation"]
-        Store["Storage<br/>photos + blur derivatives"]
+        RT["Realtime<br/>account inbox + active thread"]
+        Store["Storage<br/>owned validated photos"]
     end
 
     Map --> RPC
@@ -53,27 +53,27 @@ graph TB
 | Layer | Choice | Why |
 |---|---|---|
 | Frontend | Next.js (App Router) on Vercel | Decided K1. Web-first platform to prioritize SEO and sharing. Mobile (React Native) is Phase 2. |
-| Styling | Tailwind + shadcn/ui | Fast, accessible components with built-in styling. **Open (I3):** the design handoff is a bespoke, illustration-heavy system (colored icon-per-tag, custom shadow/press states) — confirm this still means shadcn primitives under a heavy skin, not a rebuild from scratch. |
-| Backend | Supabase — Postgres, Auth, Realtime, Storage | Already provisioned, eu-central-1. Single DB environment for MVP to move fast. |
-| Errors / analytics | Sentry + PostHog | Track funnel to signed leases. |
+| Styling | Tailwind + existing components | Fast, accessible components with built-in styling. I3 decided: preserve existing components/tokens; add accessible primitives only for concrete need.
+| Backend | Supabase — Postgres, Auth, Realtime, Storage | Already provisioned, eu-central-1. Isolated development/QA local-first under free-only budget; existing hosted backend changes separately authorized (J12/K3). |
+| Errors / analytics | First-party minimal events + sanitized error IDs | J13: useful interactions/replies and declared outcomes; no mandatory external analytics. |
 
 ---
 
-## 3. Query Strategy & Performance (Resolved Options)
+## 3. Query Strategy & Performance (decision-gated proposals)
 
-Based on the architectural decisions, these are the mandated strategies for performance:
+J2-J7/J10 technical defaults are now decided; exact adapters/limits in docs/specs/TECHNICAL_DEFAULTS.md. J8 hosted capacity still needs evidence. Reconcile working code before any replacement; no mandatory PostGIS. Planning entry: docs/WORK_PLAN.md.
 
 ### 3.1 Map Viewport Rendering
-*   **The Model:** `map_listings(bounds, zoom)` RPC powered by PostGIS.
-*   **Why:** Instead of downloading 1,000 apartments with their photos and descriptions into the client memory at startup, the client asks the server only for pins visible on the screen. The payload is tiny (`id, lat, lng, price, is_favorited`). Clicking a pin runs a targeted query to fetch the heavy details.
+*   **Decided MVP model (J2/J6):** bounded viewport query using approximate public coordinates; no required PostGIS migration. `map_listings(bounds, zoom)` is a proposed contract, not an existing guaranteed API.
+*   **Why:** Instead of downloading 1,000 apartments with their photos and descriptions into the client memory at startup, the client asks the server only for pins visible on the screen. The payload is tiny (`id, approximate_lat, approximate_lng, price`; favorites separately user-scoped). Clicking a pin runs a targeted query to fetch the heavy details.
 
 ### 3.2 Discover Feed Pagination
 *   **The Model:** Server-side Keyset Pagination via RPC.
 *   **Why:** Passing an unbounded array of passed/liked profiles in the client URL string (`NOT IN (...)`) breaks at scale. The database must exclude past interactions internally using `NOT EXISTS` subqueries.
 
 ### 3.3 Hype Counters
-*   **The Model:** Trigger-maintained integer columns (`interest_count`).
-*   **Why:** Counting all likes via correlated subqueries (`count(*)`) on every map load is too slow. Triggers keep reads instantaneous.
+*   **The Model:** Indexed aggregates over unique active personal saves, plus available-room counts/ranges (J4).
+*   **Why:** Keep one authority and correct retry/unsave semantics; optimize only after measured query need with a reconciliation path.
 
 ### 3.4 Chat Previews
 *   **The Model:** A `last_message_id` reference on the `conversations` table.
@@ -94,7 +94,7 @@ Based on the architectural decisions, these are the mandated strategies for perf
 Four invariants. Each exists because the obvious implementation is wrong.
 
 **4.1 Hype identity is withheld server-side.**
-The apartment-interest view must withhold `user_id`, `name`, and `photo_url` together for non-Pro callers. This is distinct from the public Discover profile projection in B9.
+The personal-saver list and identities are private in MVP, regardless of account type. Only unique aggregate count is public (G1/G2). Free inbound invitations identify sender for consent; this never identifies who privately saved a listing. Future Pro visibility needs a separate explicit privacy decision.
 
 **4.2 `is_pro` and `is_verified` are revoked at the column level.**
 RLS cannot express "any column except these two".
@@ -105,7 +105,7 @@ Accepting a like creates a conversation, adds two members and posts a message. T
 **4.4 Profile privacy uses separate private data and an explicit public projection.**
 Contact details, birth date, budget, move-in date, and student email live in an owner-only `profile_private` row. Public profile reads go through an allowlisted projection that returns age (never birth date), profile fields, selected public badges, and no contact details. Direct reads of private fields are not granted to other authenticated users.
 
-Apartment addresses and exact coordinates are also private. `apartments_public` is the only public listing projection: it returns a server-computed 500m approximate pin and excludes the exact address, coordinates, contact information, and listing owner. `listing_address_access` returns the precise location only for a requester whose inquiry the owner has accepted.
+Apartment addresses and exact coordinates are also private. Public listing projections exclude exact address/coordinates, contact information and private owner data. The planned safe pin is persisted random displacement independent of public ID (TECHNICAL_DEFAULTS); the deterministic 500m source transform remains an identified migration/verification gap, not evidence the replacement is live. Private location reads require a valid accepted apartment-context grant (renter inquiry or accepted poster invitation), under D4 block/deletion rules.
 
 ---
 
@@ -177,12 +177,15 @@ Sourced from the design handoff (`design_handoff_shutaf_design_system/`). These 
 
 ## 7. Client-side state shape (from the design handoff)
 
-Minimum state the app needs per screen group — a starting point for whatever state/data-fetching layer gets picked (React Query, Zustand, plain Server Components + `fetch`, etc. — not yet decided):
+Minimum state the app needs per screen group — a starting point for whatever state/data-fetching layer gets picked (React Query, Zustand, plain Server Components + `fetch`, etc. — existing React/local/server state first; no mandatory new state library under I3):
 
 - **Session/user**: residency (resident vs. non-resident property poster; no resident search mode), verification status, language preference.
-- **Profile**: one value per structured category (single-select) — 31 categories total (16 renter + 15 apartment), per `DECISIONS.md` C1/C2.
+- **Profile**: approved structured facts/preferences, with nonexclusive facts separated rather than forcing every category into one single-select value. C1 inventory retained, C2 normalized baseline adopted 17 October, wording refinements allowed.
 - **Map/Discover**: viewport bounds → pin query, favorited listing IDs, Discover tab (Individuals or Groups, independent of account and group membership), swipe queue and decisions.
-- **Group**: member list (≤4), shared budget, shared tags (computed from members, not stored — see `DECISIONS.md` E6).
+- **Group**: up to four members per group, multiple memberships allowed; safe public lifestyle summary, no member-derived public budget. Optional explicitly entered group-search budget private to members (E1/E6). Chat cards use per-viewer personal saves, no group wishlist entity (E7).
 - **Chats**: pending likes queue, active thread list, per-thread message history, unread counts.
 - **Composer**: draft listing fields, required-field validation state, publish status.
-- **Monetization**: Unblur Pro subscription status gating profile visibility on the interested-list.
+- **Monetization (later)**: potential Pro entitlements require approved commercial policy; no paywall in initial MVP. Save-counter identity remains private under G1/G2, not exposed by frontend blur.
+
+
+17 October checkpoint: ordered dispatch [WORK_PLAN](docs/WORK_PLAN.md), bounded [EXECUTION_PACKETS](docs/EXECUTION_PACKETS.md). Nonresident posters browse safe people and send apartment-bound invitations; recipient acceptance precedes chat/address. Saver identities remain private. Technical/moderation defaults adopted; runtime evidence remains separate. DECISIONS.md wins.

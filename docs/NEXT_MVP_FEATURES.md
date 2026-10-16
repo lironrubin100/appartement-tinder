@@ -1,5 +1,7 @@
 # Three next MVP vertical slices
 
+Historical focused recommendation, retained as supporting domain evidence. For current comprehensive pilot planning and decision gates use [BUILD_BLUEPRINT.md](BUILD_BLUEPRINT.md), [SLICES.md](SLICES.md) and DECISIONS.md; later owner answers, including H3, supersede old OPEN descriptions below. No execution authorization comes from this file.
+
 Chosen 15 October 2026 from a focused inspection of the implemented marketplace, discovery and chat paths. These are recommendations for the next development conversation, not completed features or permission to silently resolve OPEN product decisions. Resident-journey acceptance passed all eight browser tests; consult PROJECT_STATUS.md for integration state. Apple signup is deferred by the user.
 
 ## 1. Block and report from a real interaction

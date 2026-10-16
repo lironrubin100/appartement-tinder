@@ -1,0 +1,864 @@
+{
+  "date": "2026-10-17",
+  "decision_source_sha256": "9fe48b2df6910302d5bf852d42f45b0afd665c37cd58a7bb50dd2036a7c137f3",
+  "meaning": "Generated coverage only. DECISIONS.md remains authority; primary slice assigns ownership, not approval or execution readiness.",
+  "counts": {
+    "decided": 130,
+    "open": 5,
+    "research": 7
+  },
+  "rows": [
+    {
+      "id": "A1",
+      "title": "One sentence: what is this product?",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "A2",
+      "title": "What is it explicitly **not**?",
+      "status": "DECIDED",
+      "primary_slice": "SL25"
+    },
+    {
+      "id": "A3",
+      "title": "The single job-to-be-done in the primary journey",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "A4",
+      "title": "Which tab does the app open on?",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "A5",
+      "title": "Geographic scope and how the boundary is enforced",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "A6",
+      "title": "Students only, or anyone?",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "A7",
+      "title": "Languages",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "A8",
+      "title": "Off-season behaviour (Nov–Feb the market is dead)",
+      "status": "DECIDED",
+      "primary_slice": "SL04"
+    },
+    {
+      "id": "A9",
+      "title": "Success metric for launch",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "A10",
+      "title": "Initial delivery target",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "A11",
+      "title": "Pilot enrollment access",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "B1",
+      "title": "Auth providers",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "B2",
+      "title": "Is a phone number collected? Required?",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "B3",
+      "title": "What earns the blue check",
+      "status": "DECIDED",
+      "primary_slice": "SL15"
+    },
+    {
+      "id": "B4",
+      "title": "Verification: automated or manual by you",
+      "status": "DECIDED",
+      "primary_slice": "SL15"
+    },
+    {
+      "id": "B5",
+      "title": "Minimum age and how it's enforced",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "B6",
+      "title": "Real-name policy",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "B7",
+      "title": "Account deletion and data retention",
+      "status": "DECIDED",
+      "primary_slice": "SL14"
+    },
+    {
+      "id": "B8",
+      "title": "Duplicate accounts and ban evasion",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "B9",
+      "title": "What is public on a profile vs private",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "B10",
+      "title": "**Non-resident intake (new — not previously in register)**",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "C1",
+      "title": "**Shape of the four friction axes** — free tags, forced choice, or weighted score",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C2",
+      "title": "The final vibe tag list (exact Hebrew copy, per structured axis)",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C3",
+      "title": "Feed ordering algorithm",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C4",
+      "title": "Filters the user controls",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C5",
+      "title": "**Gender filtering — in or out**",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C6",
+      "title": "Introduction message length",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C7",
+      "title": "Daily introduction allowance",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C8",
+      "title": "Pass behavior",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C9",
+      "title": "**Mutual match, or accept-a-like?**",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C10",
+      "title": "Auto-pause: rules and how a user comes back",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C11",
+      "title": "Can you see who liked you without Pro?",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C12",
+      "title": "Return of passed results",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "C13",
+      "title": "**Compatibility scoring mechanic**",
+      "status": "DECIDED",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "D0",
+      "title": "Where listings come from",
+      "status": "DECIDED",
+      "primary_slice": "SL17"
+    },
+    {
+      "id": "D1",
+      "title": "**Who can post**",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "D2",
+      "title": "Required fields on a listing",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "D3",
+      "title": "Photos: minimum, maximum, required?",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "D4",
+      "title": "**Address precision — exact pin or approximate?**",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "D5",
+      "title": "Price semantics: per room or whole apartment? Bills included?",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "D6",
+      "title": "Listing lifecycle: expiry and renewal",
+      "status": "DECIDED",
+      "primary_slice": "SL04"
+    },
+    {
+      "id": "D7",
+      "title": "Report-as-taken: threshold and consequence",
+      "status": "DECIDED",
+      "primary_slice": "SL04"
+    },
+    {
+      "id": "D8",
+      "title": "Sublet vs long-term: separate types or a flag?",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "D9",
+      "title": "**\"Whole apartment\" vs \"room in an apartment\" — same entity?**",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "D10",
+      "title": "Moderation: pre-approval or post-hoc?",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "D11",
+      "title": "Duplicate listing detection",
+      "status": "DECIDED",
+      "primary_slice": "SL23"
+    },
+    {
+      "id": "D12",
+      "title": "Can a listing be attached to a group (room-fillers)?",
+      "status": "DECIDED",
+      "primary_slice": "SL11"
+    },
+    {
+      "id": "D13",
+      "title": "Filter set on the map",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "D14",
+      "title": "Map clustering and zoom behaviour",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "D15",
+      "title": "**Hand-Me-Down Market (new — not previously in PRD/register)**",
+      "status": "DECIDED",
+      "primary_slice": "SL22"
+    },
+    {
+      "id": "D16",
+      "title": "**Lister dashboard (new — not previously in register)**",
+      "status": "DECIDED",
+      "primary_slice": "SL04"
+    },
+    {
+      "id": "D17",
+      "title": "**Map pin cluster — visual only (new)**",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "D18",
+      "title": "Group, inquiry and occupancy are independent",
+      "status": "DECIDED",
+      "primary_slice": "SL04"
+    },
+    {
+      "id": "D19",
+      "title": "Address not found in autocomplete",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "E1",
+      "title": "Group creation",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E2",
+      "title": "Group size",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E3",
+      "title": "Group management and admission",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E4",
+      "title": "What `open` / `closed` actually mean",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E5",
+      "title": "Are groups discoverable in Discover?",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E6",
+      "title": "Does a group have its own bio/photo, or is it derived from members?",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E7",
+      "title": "Shared wishlist mechanics",
+      "status": "DECIDED",
+      "primary_slice": "SL10"
+    },
+    {
+      "id": "E8",
+      "title": "Sharing a listing into a group chat",
+      "status": "DECIDED",
+      "primary_slice": "SL10"
+    },
+    {
+      "id": "E9",
+      "title": "Individual to group interactions",
+      "status": "DECIDED",
+      "primary_slice": "SL09"
+    },
+    {
+      "id": "E10",
+      "title": "Terminal state: what happens when a group signs a lease?",
+      "status": "DECIDED",
+      "primary_slice": "SL11"
+    },
+    {
+      "id": "F1",
+      "title": "Realtime or polling",
+      "status": "DECIDED",
+      "primary_slice": "SL08"
+    },
+    {
+      "id": "F2",
+      "title": "Read receipts, typing indicators",
+      "status": "DECIDED",
+      "primary_slice": "SL08"
+    },
+    {
+      "id": "F3",
+      "title": "Message types",
+      "status": "DECIDED",
+      "primary_slice": "SL10"
+    },
+    {
+      "id": "F4",
+      "title": "Can you message a lister without matching?",
+      "status": "DECIDED",
+      "primary_slice": "SL06"
+    },
+    {
+      "id": "F5",
+      "title": "Unmatch / leave conversation",
+      "status": "DECIDED",
+      "primary_slice": "SL08"
+    },
+    {
+      "id": "F6",
+      "title": "Message retention",
+      "status": "DECIDED",
+      "primary_slice": "SL14"
+    },
+    {
+      "id": "F7",
+      "title": "Push notification triggers and copy",
+      "status": "DECIDED",
+      "primary_slice": "SL13"
+    },
+    {
+      "id": "F8",
+      "title": "Message rate limits",
+      "status": "DECIDED",
+      "primary_slice": "SL08"
+    },
+    {
+      "id": "G1",
+      "title": "Who is counted in the hype counter?",
+      "status": "DECIDED",
+      "primary_slice": "SL05"
+    },
+    {
+      "id": "G2",
+      "title": "What exactly does Pro unblur?",
+      "status": "DECIDED",
+      "primary_slice": "SL20"
+    },
+    {
+      "id": "G3",
+      "title": "Pro price and billing rails",
+      "status": "RESEARCH",
+      "primary_slice": "SL20"
+    },
+    {
+      "id": "G4",
+      "title": "Other Pro features besides unblur",
+      "status": "OPEN",
+      "primary_slice": "SL20"
+    },
+    {
+      "id": "G5",
+      "title": "Free tier limits",
+      "status": "DECIDED",
+      "primary_slice": "SL20"
+    },
+    {
+      "id": "G6",
+      "title": "When Pro ships",
+      "status": "DECIDED",
+      "primary_slice": "SL20"
+    },
+    {
+      "id": "H1",
+      "title": "Blocking",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "H2",
+      "title": "Report categories and what each triggers",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "H3",
+      "title": "Who reviews reports, and how fast",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "H4",
+      "title": "Automated checks on photos and text",
+      "status": "DECIDED",
+      "primary_slice": "SL27"
+    },
+    {
+      "id": "H5",
+      "title": "Minors",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "H6",
+      "title": "Harassment escalation and bans",
+      "status": "DECIDED",
+      "primary_slice": "SL12"
+    },
+    {
+      "id": "H7",
+      "title": "In-person meeting safety guidance",
+      "status": "DECIDED",
+      "primary_slice": "SL06"
+    },
+    {
+      "id": "I1",
+      "title": "Product name",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I2",
+      "title": "Hebrew/RTL typography — typeface and numerals",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I3",
+      "title": "Component library",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I4",
+      "title": "Navigation: buttons, order, platform shape",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "I5",
+      "title": "How the thumb-zone rule is enforced",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I6",
+      "title": "How \"one primary action per screen\" is enforced",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I7",
+      "title": "Empty state for every screen",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I8",
+      "title": "Loading and error states",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I9",
+      "title": "**Onboarding: exact steps, order, what is mandatory**",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "I10",
+      "title": "Accessibility baseline",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I11",
+      "title": "Dark mode",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I12",
+      "title": "Motion and animation language",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I13",
+      "title": "Photo aspect ratios and cropping",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I14",
+      "title": "Logo",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I15",
+      "title": "Colour palette",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I16",
+      "title": "Language & direction",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I17",
+      "title": "Bidirectional layout rule",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "I18",
+      "title": "Default locale & URL shape",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "I19",
+      "title": "**Resident discovery without search modes**",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "I20",
+      "title": "**Settings as its own screen (new)**",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "I21",
+      "title": "**Publish confirmation screen (new)**",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "I22",
+      "title": "**Resident startup tab preference (new)**",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "J1",
+      "title": "Final entity model",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J2",
+      "title": "**Feed query strategy and pagination**",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J3",
+      "title": "Where filtering happens: client, RLS, or RPC",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J4",
+      "title": "Counters: computed, cached, or triggered?",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J5",
+      "title": "Index plan",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J6",
+      "title": "**PostGIS — revisit at scale**",
+      "status": "DECIDED",
+      "primary_slice": "SL24"
+    },
+    {
+      "id": "J7",
+      "title": "What moves into server-side RPCs",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J8",
+      "title": "Realtime channel design and connection limits",
+      "status": "RESEARCH",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J9",
+      "title": "Photo/image pipeline: upload, resize, CDN, blur derivative",
+      "status": "DECIDED",
+      "primary_slice": "SL02"
+    },
+    {
+      "id": "J10",
+      "title": "Caching strategy",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J11",
+      "title": "How schema changes ship",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J12",
+      "title": "Environments",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J13",
+      "title": "Error tracking and analytics",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "J14",
+      "title": "API rate limiting",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "J15",
+      "title": "SEO & public listing URLs",
+      "status": "DECIDED",
+      "primary_slice": "SL03"
+    },
+    {
+      "id": "J16",
+      "title": "Data fetching strategy",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "K1",
+      "title": "Web stack and hosting",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "K2",
+      "title": "PWA: install prompt, offline behaviour",
+      "status": "DECIDED",
+      "primary_slice": "SL13"
+    },
+    {
+      "id": "K3",
+      "title": "**Supabase free vs Pro — where does free stop being viable?**",
+      "status": "RESEARCH",
+      "primary_slice": "SL24"
+    },
+    {
+      "id": "K4",
+      "title": "Domain name",
+      "status": "OPEN",
+      "primary_slice": "SL25"
+    },
+    {
+      "id": "K5",
+      "title": "CI/CD and preview deploys",
+      "status": "DECIDED",
+      "primary_slice": "SL00"
+    },
+    {
+      "id": "K6",
+      "title": "When the native app happens, and how code is shared",
+      "status": "DECIDED",
+      "primary_slice": "SL21"
+    },
+    {
+      "id": "L1",
+      "title": "Pre-launch waitlist: where does it live?",
+      "status": "DECIDED (approach)",
+      "primary_slice": "SL25"
+    },
+    {
+      "id": "L2",
+      "title": "What the WhatsApp group is for after launch",
+      "status": "OPEN",
+      "primary_slice": "SL25"
+    },
+    {
+      "id": "L3",
+      "title": "Launch-day supply target and the fallback if it misses",
+      "status": "OPEN",
+      "primary_slice": "SL17"
+    },
+    {
+      "id": "L4",
+      "title": "Referral / invite mechanics",
+      "status": "DECIDED",
+      "primary_slice": "SL25"
+    },
+    {
+      "id": "L5",
+      "title": "Lifecycle notifications and emails",
+      "status": "DECIDED",
+      "primary_slice": "SL13"
+    },
+    {
+      "id": "L6",
+      "title": "Support channel",
+      "status": "OPEN",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "L7",
+      "title": "Analytics events to instrument",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "M1",
+      "title": "Terms of service and privacy policy",
+      "status": "RESEARCH",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "M2",
+      "title": "Israeli Privacy Protection Law obligations",
+      "status": "RESEARCH",
+      "primary_slice": "SL14"
+    },
+    {
+      "id": "M3",
+      "title": "Cookie and tracking consent",
+      "status": "DECIDED",
+      "primary_slice": "SL16"
+    },
+    {
+      "id": "M4",
+      "title": "Age gate",
+      "status": "DECIDED",
+      "primary_slice": "SL01"
+    },
+    {
+      "id": "M5",
+      "title": "**Gender filtering and anti-discrimination law**",
+      "status": "RESEARCH",
+      "primary_slice": "SL07"
+    },
+    {
+      "id": "M6",
+      "title": "Real-estate brokerage licensing",
+      "status": "RESEARCH",
+      "primary_slice": "SL20"
+    }
+  ]
+}

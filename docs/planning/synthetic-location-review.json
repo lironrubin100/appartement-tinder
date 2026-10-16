@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-15",
+  "source": "supabase/migrations/20261007000100_listing_location_privacy.sql:15-21",
+  "type": "synthetic algebraic reconstruction test; not a live exploit",
+  "assumption": "Direction known from the published listing-ID hash algorithm. Hash implementation/access not tested here.",
+  "finding": "Given angle and radius, the published coordinate transform is algebraically invertible.",
+  "results": [
+    {
+      "synthetic_input": {
+        "lat": 31.25,
+        "lng": 34.79,
+        "angle": 37
+      },
+      "public_point": {
+        "lat": 31.2535871160171,
+        "lng": 34.79316182976936
+      },
+      "recovered": {
+        "lat": 31.25,
+        "lng": 34.79
+      },
+      "error_metres": 0
+    },
+    {
+      "synthetic_input": {
+        "lat": 32.08,
+        "lng": 34.78,
+        "angle": 173
+      },
+      "public_point": {
+        "lat": 32.07554192350143,
+        "lng": 34.780646026447236
+      },
+      "recovered": {
+        "lat": 32.08,
+        "lng": 34.78
+      },
+      "error_metres": 0
+    },
+    {
+      "synthetic_input": {
+        "lat": 31.2,
+        "lng": 34.75,
+        "angle": 291
+      },
+      "public_point": {
+        "lat": 31.201609629669175,
+        "lng": 34.745097727547574
+      },
+      "recovered": {
+        "lat": 31.2,
+        "lng": 34.75
+      },
+      "error_metres": 0
+    }
+  ]
+}

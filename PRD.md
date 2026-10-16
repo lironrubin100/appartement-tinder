@@ -15,9 +15,9 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 *   **Geographical Map:** Shows available apartments. For performance, map pins are lightweight, displaying only the flat rent price and location.
 *   **Details on Demand:** Tapping a pin dynamically loads the full listing details, photos, and descriptions.
 *   **Favorites (Wishlist):** Users can save apartments. Favorited apartments render with a distinct star icon and a yellow aura on the map.
-*   **The "Hype" Engine:** Listings feature an "I'm Interested" button.
+*   **Interest counter:** A private personal save contributes one unique current saver to the aggregate interested count. Saving does not send an inquiry or expose saver identities. No separate third interested button required (G1).
 *   **Apartment listings with available rooms:** A listing represents an apartment. The poster adds one or more currently available rooms with individual monthly prices, and marks whether bills are included. A room is never a separate public listing.
-*   **Hand-Me-Down Market:** A leaving roommate can list furniture directly on their apartment's listing (e.g. "bed frame + mattress, 300 ₪"). The incoming roommate messages the seller to arrange pickup during move-in — no separate marketplace, no Facebook/Yad2 handoff.
+*   **Hand-Me-Down Market (post-MVP):** Preserve the future idea of apartment-attached furniture, with in-app seller contact; deferred explicitly in D15. No general resale marketplace in MVP.
 
 ### Discover (The Roommate Feed) [DEFAULT ENTRY POINT for residents]
 *   **Structured Profiles:** Users are scored and filtered based on structured lifestyle categories (not free-form text).
@@ -32,25 +32,28 @@ The app ships in Hebrew (default, RTL) and English (LTR). It exposes five destin
 ### Chats & Groups
 *   **Accepting Matches:** Inbound likes sit here pending acceptance.
 *   **Group Controls:** Accepted individual connections can form a separate group conversation (up to four members), with invitations accepted by the invitees. Personal conversations remain available. The admin selects admin approval, any-member approval or majority voting for group introductions. New members see new messages only.
-*   **Conversations:** Individual and group conversations appear in Chats. Apartment sharing into either conversation and contacting landlords as a group are future capabilities.
+*   **Conversations:** Individual/group chats include text, safe apartment cards, read receipts and authorized ephemeral typing. Each viewer can privately save a shared apartment independently; no separate shared wishlist (E7/E8/F2/F3). Contacting landlords as a group remains future.
 
 ### Profile & Status
 *   The control center: a personal profile, a "Your tags" summary of structured lifestyle categories, and verification status. Language, notifications, privacy, and account deletion live in a separate **Settings** screen, not Profile itself.
-*   Public profile fields are display name, photo, age (not birth date), lifestyle tags, bio, and badges the user chooses to show. Phone, email, budget, and exact move-in date stay private. One optional phone number is kept per account and is never printed on the public listing; enquiries stay in-app. Listings show a stable approximate map pin, 500m from the precise point; their exact address is released only after the poster accepts an in-app enquiry. Each public listing represents an apartment and shows its available room or rooms, their individual monthly price, and whether bills are included; rooms do not appear as standalone listings.
+*   Public profile: first name/last initial, photo, age (not DOB), disclosed lifestyle facts, bio and opted-in badges. Contact/budget/exact move-in remain private. Phone optional for resident, required nonresident poster, never public. Approximate map point; exact address after accepted inquiry, remains after room unavailable, no ordinary owner revoke control. Rooms remain apartment-owned per-room prices (B2/B9/D4/D5).
 *   Residents default to Discover and can select Discover or Map as the startup tab in Settings. Listers open on My Listings.
 
 ### Lister Dashboard [DEFAULT ENTRY POINT for Lister mode]
 *   Replaces Discover/Map browsing for Non-resident property posters: "My listings" with per-listing status (Active + interested count, or Rented).
 
 ## 4. The Matching Engine
-Matching uses structured, filterable, indexed categories (columns in the database) — a **31-category taxonomy** (16 renter-lifestyle + 15 apartment-characteristic categories: Gender Dynamic, Cleanliness, Sleep Schedule, Social & Guests, Noise Tolerance, Music/Vibe, Climate Control, Smoking Policy, Kitchen & Dietary, Cooking Dynamics, Pet Ownership, Weekend Routine, Relationship Status, Study Habits, Financial Splitting, Reserve Duty/Miluim, plus Proximity to BGU, AC, Security & Safety, Water Heating, Furnishing, Hand-Me-Downs, Outdoor Space, Laundry, Accessibility, Parking, Pet Rules, Kitchen Setup, Hidden Costs, Internet, Roommate Cap — see `DECISIONS.md` C2 for the full list). Each renter selects one value per lifestyle category via a grouped tag picker (Lifestyle / Apartment preferences / Logistics).
+Matching uses structured resident facts/preferences and apartment facts, not free-form matching text. Preserve C1's 31-category inventory while C2's actual labels/options are refined. Progressive minimum onboarding I9 is name/age/photo/bio plus cleanliness/sleep/guests/smoking; remaining fields can be completed later. Multi-fact categories must not force mutually compatible facts into one exclusive answer.
 
-**Compatibility score**: a two-tier match shown before either side opens a chat. **Non-negotiable** categories (e.g. budget, smoking, pets) must match exactly — a hard gate. **Flexible** categories (e.g. cleanliness, sleep schedule, social & guests) are scored by closeness and combined into a single match percentage.
+**Compatibility score**: provisional C3/C13 explained flexible lifestyle ranking, with optional free no-smoking/no-pets constraints and explicit missing-information coverage. Private budget/apartment suitability is separate. Group baseline uses the lowest sufficiently supported member fit. C2 normalized options adopted, wording refinements allowed; advanced strict controls are a future Pro hypothesis, not a current paywall.
 
 ## 5. Monetization Strategy
-*   **The "Unblur" Pro Tier:** Premium users can pay to unblur interested profiles on the apartment hype counter.
+*   Free-only MVP. Advanced filters, area monitors and professional tools remain business hypotheses in docs/BUSINESS_MODEL.md. Private saver identity is not an approved Pro entitlement (G1/G2).
 
 ## 6. Technical Constraints
 *   **Tech Stack:** Web-first (Next.js PWA) to prioritize SEO and sharing, with React Native (Expo) coming in Phase 2.
 *   **Enclosed Ecosystem:** No external links to Facebook or Yad2. All listings are native UGC.
-*   **Performance:** Lightweight map payloads (lat/lng/price only) with PostGIS server-side rendering support.
+*   **Performance:** Lightweight map payloads; bounded server viewport querying follows decided J2/J6; no mandatory PostGIS. Do not treat PostGIS as a decided prerequisite.
+
+
+17 October checkpoint: ordered dispatch [WORK_PLAN](docs/WORK_PLAN.md), bounded [EXECUTION_PACKETS](docs/EXECUTION_PACKETS.md). Nonresident posters browse safe people and send apartment-bound invitations; recipient acceptance precedes chat/address. Saver identities remain private. Technical/moderation defaults adopted; runtime evidence remains separate. DECISIONS.md wins.

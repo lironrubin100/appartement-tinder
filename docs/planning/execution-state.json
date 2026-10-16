@@ -1,0 +1,92 @@
+{
+  "updated_at": "2026-10-17",
+  "meaning": "Progress only, not product authority. Initially pending means not reconciled by this plan, not missing implementation.",
+  "priority": [
+    "SL00.1",
+    "SL01.1",
+    "SL08.1",
+    "SL00.2",
+    "SL01.2",
+    "SL02.1",
+    "SL03.1",
+    "SL04.1",
+    "SL05.1",
+    "SL08.2",
+    "SL06.1",
+    "SL06.2",
+    "SL09.1",
+    "SL10.1",
+    "SL11.1",
+    "SL12.1",
+    "SL13.1",
+    "SL14.1",
+    "SL15.1",
+    "SL07.1",
+    "SL16.1"
+  ],
+  "packets": {
+    "SL00.1": {
+      "status": "pending"
+    },
+    "SL01.1": {
+      "status": "pending"
+    },
+    "SL08.1": {
+      "status": "pending"
+    },
+    "SL00.2": {
+      "status": "pending"
+    },
+    "SL01.2": {
+      "status": "pending"
+    },
+    "SL02.1": {
+      "status": "pending"
+    },
+    "SL03.1": {
+      "status": "pending"
+    },
+    "SL04.1": {
+      "status": "pending"
+    },
+    "SL05.1": {
+      "status": "pending"
+    },
+    "SL08.2": {
+      "status": "pending"
+    },
+    "SL06.1": {
+      "status": "pending"
+    },
+    "SL06.2": {
+      "status": "pending"
+    },
+    "SL09.1": {
+      "status": "pending"
+    },
+    "SL10.1": {
+      "status": "pending"
+    },
+    "SL11.1": {
+      "status": "pending"
+    },
+    "SL12.1": {
+      "status": "pending"
+    },
+    "SL13.1": {
+      "status": "pending"
+    },
+    "SL14.1": {
+      "status": "pending"
+    },
+    "SL15.1": {
+      "status": "pending"
+    },
+    "SL07.1": {
+      "status": "pending"
+    },
+    "SL16.1": {
+      "status": "pending"
+    }
+  }
+}

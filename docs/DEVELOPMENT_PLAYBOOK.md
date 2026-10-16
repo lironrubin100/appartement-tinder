@@ -1,5 +1,7 @@
 # Shutaf Development Playbook
 
+Planning update, 15 October 2026: the sequence and deferrals below describe an earlier first-journey plan. For the current owner-approved pilot target and proposed complete slice catalog, start with [BUILD_BLUEPRINT.md](BUILD_BLUEPRINT.md). Existing groups and 31-category v1 commitments must not be removed because an older sequence deferred them. The broader planning task deliberately resolves cross-journey questions now; its user instruction supersedes this older "only decide the next slice" sequencing advice. DECISIONS.md remains authoritative.
+
 This guide turns product decisions into a build direction. It is for choosing what to build next, working with Codex, and reviewing progress without managing Git or a terminal directly.
 
 `DECISIONS.md` remains the product source of truth. This document decides sequence, not product rules. If a slice depends on an `OPEN` decision, settle that decision before implementation begins.

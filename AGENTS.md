@@ -25,3 +25,19 @@ You are acting as a Staff-Level Solutions Architect and Lead Developer. We are b
 3.  **Implement:** Build in vertical slices.
 4.  **Verify:** Check syntax and logic.
 5.  **Leave a handoff:** Update the shared status row and `docs/workstreams/<work-id>.md` at meaningful checkpoints and before ending a task. Include outcome, branch or detached HEAD, worktree, changed files, decision IDs, verification evidence/date, uncommitted work, live migrations, PR/preview/deployment state, blockers and the next concrete step. Refresh `docs/WORKTREE_INVENTORY.md` with `node scripts/project-status.mjs --write --shared`. Mark missing or stale evidence explicitly; implementation, verification, merge and deployment are separate states. Documentation updates do not authorize commits, pushes, merges or deployments.
+
+## 5. Planning and slice dispatch
+
+Read `docs/BUILD_BLUEPRINT.md` for the planning package and `docs/EXECUTION_PROTOCOL.md` for execution. `docs/SLICES.md` defines proposed new slices; the old 114-task plan maps through `docs/LEGACY_SLICE_MAP.md`. Proposals and `needs-decision`/`needs-research` entries are not implementation-ready or authorization to change a DECIDED rule.
+
+Owner dispatch: `Work on slice <ID> from docs/SLICES.md following AGENTS.md and docs/EXECUTION_PROTOCOL.md.` Read the named domain contract and relevant decisions, reconcile existing implementation/evidence, and complete only the missing approved work. Use `node scripts/check-planning.mjs` for structural planning validation; passing it does not prove policy completeness or runtime behavior.
+
+**Automatic continuation:** When the owner says “work on the next feature”, “continue the project”, or equivalent (including Hebrew), follow `docs/START_NEXT_WORK.md`. Run `node scripts/next-work.mjs --json`, resume incomplete eligible work or select the next eligible packet, verify actual prerequisite artifacts and perform approved local implementation without asking the owner to choose an ID. Maintain `docs/planning/execution-state.json`, the owning handoff and shared status; continue while meaningful authorized work remains. Planning-ready never means completed. Commit/push/hosted changes still require their own authorization.
+
+Owner interview preference: batch currently known questions with recommendations, preserve direct answers, and do not re-ask settled decisions. Continue independent authorized planning work while a question is pending. Business hypotheses live in `docs/BUSINESS_MODEL.md`; approved product behavior still lives in `DECISIONS.md`.
+
+New post-MVP ideas are captured/updated by stable IDEA ID in `ROADMAP.md`, preserving owner intent and revisit trigger without silently expanding the active slice. Defects go to `docs/KNOWN_ISSUES.md` with reported/reproduced/fixed/verified state. Follow the intake workflow in `docs/EXECUTION_PROTOCOL.md`.
+
+The ordered plan is `docs/WORK_PLAN.md`; bounded dispatch packets are `docs/EXECUTION_PACKETS.md` with readiness in `docs/planning/packets.json`. Ready packets may cover a settled subset of an unresolved parent slice; context research is not a local policy blocker. Do not promote the whole parent to ready or skip packet-specific runtime/release gates. Technical defaults are in `docs/specs/TECHNICAL_DEFAULTS.md`; apartment-bound poster outreach is in `docs/specs/POSTER_OUTREACH.md`.
+
+Required MVP SL00–SL16 are now packetized into 21 local packets (initial three plus `docs/REMAINING_MVP_PACKETS.md`). Owner priority: working product and university-funding demonstration; do not reopen settled decisions or delay independent implementation for cosmetic polish/general public-launch or legal discussion. Preserve concrete authorization/privacy correctness and record real activation blockers only when relevant.
