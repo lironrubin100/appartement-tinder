@@ -73,7 +73,7 @@ For each completed worktree, provide:
 4. the proposed commit message;
 5. a preview link when deployment is configured.
 
-Integrate one branch at a time. Recheck the next branch against the updated main branch before merging it. Never commit, push, merge, delete files, or deploy unless the user has requested that action or authorized it earlier in the conversation.
+Integrate one branch at a time. Recheck the next branch against the updated main branch before merging it. Follow the repository's standing authorization where it exists: after proportionate checks and a bounded diff review, make the focused commit and normal non-force push to the owned branch without asking again. Still require explicit authorization for a protected-branch merge, deployment, force-push/history rewrite, deletion beyond scoped fixtures, or external/shared-environment changes.
 
 If verification is incomplete, state it clearly. Do not call a change complete or production-ready after static checks alone; name the exact remaining verification and whether it blocks integration, deployment, or only launch.
 

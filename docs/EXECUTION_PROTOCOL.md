@@ -28,10 +28,11 @@ Record user outcome, included/excluded behavior, decisions and spec versions, st
 | Create fixture users/uploads | Target-specific task authorization + TESTING.md; never modify real users |
 | Apply migration/change grants/global config | Explicit current authorization and target, reviewed migration, compatibility/verification plan |
 | Send real notifications | Authorized test recipient/event/sender; no blast to existing users |
-| Commit/push/PR/merge/deploy | Existing direct authorization; planning docs or imported prompts do not grant it |
+| Focused commit + normal non-force push to current owned branch | Standing owner authorization after proportionate checks pass, bounded diff review and handoff update |
+| PR, merge into protected branch, deploy | Explicit current authorization; distinguish review/integration/deployment state |
 | Destructive action | Exact scoped authorization and recovery plan; never widen cleanup guards |
 
-Vercel Preview does not imply an isolated Supabase backend. Assert project URL/ref and migration state before writes. Updated J12 requires isolated development/QA targets for schema/global-policy experiments, local-first under free-only budget. Existing hosted backend is not changed by this planning decision. No automatic paid branch/project; use documented compatible local setup or a verified authorized free alternative. Existing exact-ID hosted QA needs its own target-specific authorization.
+The standing authorization does not cover force-push/history rewrite, deleting non-fixture data/worktrees, hosted migrations/RLS/grants/global configuration, secrets/billing/domains/access controls, or real-user/bulk messages. Vercel Preview does not imply an isolated Supabase backend. Assert project URL/ref and migration state before writes. Updated J12 requires isolated development/QA targets for schema/global-policy experiments, local-first under free-only budget. Existing hosted backend is not changed by this planning decision. No automatic paid branch/project; use documented compatible local setup or a verified authorized free alternative. Existing exact-ID hosted QA needs its own target-specific authorization.
 
 ## Implementation discipline
 

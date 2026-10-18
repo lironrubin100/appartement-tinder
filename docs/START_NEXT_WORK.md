@@ -4,7 +4,7 @@ Owner authorization: select and execute the next approved local MVP work autonom
 
 ## One reusable instruction
 
-> Continue the Shutaf MVP autonomously following AGENTS.md and docs/START_NEXT_WORK.md. Select the next eligible packet, implement the missing approved work, verify it and update the execution ledger and shared handoff. Continue to the next eligible packet while you can make meaningful progress. Preserve settled decisions and unrelated work; do not commit, push, apply hosted migrations or deploy without separate authorization.
+> Continue the Shutaf MVP autonomously following AGENTS.md and docs/START_NEXT_WORK.md. Select the next eligible packet, implement the missing approved work, verify it and update the execution ledger and shared handoff. Continue to the next eligible packet while you can make meaningful progress. Preserve settled decisions and unrelated work. After proportionate checks pass, commit the bounded result and push normally (never force-push) to the owned branch; do not apply hosted migrations, merge protected branches or deploy without explicit authorization.
 
 ## Bootstrap and location
 
@@ -49,6 +49,6 @@ For uncommitted implementation, save its relevant tracked diff and untracked-fil
 
 ## Genuine stopping conditions
 
-Ask only for a concrete new contradiction/missing product choice that changes approved behavior, unavailable credential/target access needed for remaining work, an approval-dependent external action, or competing active ownership. Batch known questions and continue independent authorized work. Do not treat cosmetic polish, future business hypotheses or generic public-launch preparations as a reason to interrupt local MVP work.
+Ask only for a concrete new contradiction/missing product choice that changes approved behavior, unavailable credential/target access needed for remaining work, an approval-dependent external action, or competing active ownership. Batch known questions and continue independent authorized work. Do not ask for confirmation to implement, test, make a focused commit or normally push verified owned-branch work. Do not treat cosmetic polish, future business hypotheses or generic public-launch preparations as a reason to interrupt local MVP work.
 
-Never infer authorization for commit/push/merge/hosted migration/deployment or real-user bulk notifications from this workflow. Prepare reviewable local work and name the exact remaining external action. If all local packets are verified, reconcile SL16 evidence and report the working demonstration plus actual remaining external gates; do not invent another roadmap or claim a public release/funding outcome.
+Never infer authorization for force-push/history rewrite, merge into a protected branch, hosted migration/deployment, deleting non-fixture data, or real-user bulk notifications from this workflow. The standing authorization covers a focused commit and normal push only after checks and handoff evidence; prepare reviewable work and name every remaining external action. If all local packets are verified, reconcile SL16 evidence and report the working demonstration plus actual remaining external gates; do not invent another roadmap or claim a public release/funding outcome.
