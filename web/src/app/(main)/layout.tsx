@@ -38,12 +38,20 @@ export default async function MainLayout({
       <main className="flex-1 pb-24 md:pb-0">
         {isLister && (
           <div className="border-b border-card-border bg-white px-4 py-3">
-            <Link
-              href={en ? '/en/my-listings' : '/my-listings'}
-              className="font-medium text-orange"
-            >
-              {en ? 'My listings' : 'המודעות שלי'}
-            </Link>
+            <nav className="mx-auto flex max-w-5xl flex-wrap gap-x-5 gap-y-2" aria-label={en ? 'Lister navigation' : 'ניווט מפרסם'}>
+              <Link href={en ? '/en/my-listings' : '/my-listings'} className="font-medium text-orange">
+                {en ? 'My listings' : 'המודעות שלי'}
+              </Link>
+              <Link href={en ? '/en/discover' : '/discover'} className="font-medium text-teal">
+                {en ? 'Browse people' : 'עיון באנשים'}
+              </Link>
+              <Link href={en ? '/en/map' : '/map'} className="font-medium text-teal">
+                {en ? 'Map' : 'מפה'}
+              </Link>
+              <Link href={en ? '/en/chats' : '/chats'} className="font-medium text-teal">
+                {en ? 'Chats' : "צ'אטים"}
+              </Link>
+            </nav>
           </div>
         )}
         {children}

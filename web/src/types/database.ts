@@ -1438,6 +1438,10 @@ export type Database = {
         Args: { p_group: string | null; p_policy: string };
         Returns: undefined;
       };
+      convert_to_lister: {
+        Args: { p_agency?: string | null; p_phone: string };
+        Returns: undefined;
+      };
       create_group_from_chats: {
         Args: { p_contacts: string[]; p_name: string; p_policy?: string };
         Returns: string;
@@ -1523,6 +1527,16 @@ export type Database = {
           other_user_id: string;
           photo_url: string;
           unread_count: number;
+        }[];
+      };
+      list_accessible_groups: {
+        Args: never;
+        Returns: {
+          admission_policy: string;
+          admin_id: string;
+          id: string;
+          membership_version: number;
+          name: string;
         }[];
       };
       list_group_contacts: {

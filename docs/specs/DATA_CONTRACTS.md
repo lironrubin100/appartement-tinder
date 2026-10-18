@@ -21,7 +21,7 @@ State: 17 October technical delegation adopted; J1-J7/J10-J14/K5 closed. Exact m
 | Notification | Event→recipient/channel delivery; optional device subscription | None | Preferences, endpoint credentials, sender/outbox state |
 | Pilot event | Stable event ID, cohort and approved object refs | Aggregated authorized report only | Pseudonymous actor, timestamps; no content/contact/exact location |
 
-Do not duplicate auth identity across resident/lister personas or make social group membership the owner of someone's profile. A group is not an apartment; group maximum four (E2) is not maximum apartment tenants. A room is not a standalone listing. A subscription is not a permission to bypass privacy.
+Do not duplicate auth identity across resident/lister personas or make social group membership the owner of someone's profile. Resident/lister is one account's server-authorized capability state: B10 permits only the explicit resident-to-lister Settings transition, with private data retained and active-group membership a refusal condition. A group is not an apartment; group maximum four (E2) is not maximum apartment tenants. A room is not a standalone listing. A subscription is not a permission to bypass privacy.
 
 ## API compatibility and proposed read contracts (J2/J3/J7)
 

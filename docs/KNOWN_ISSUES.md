@@ -13,11 +13,11 @@ This is a defect register, not a feature roadmap. Keep owner-reported, reproduce
 - Acceptance: A sends while A's thread open → A zero new unread, B one; B reads → B zero; reload/reconnect/second tab do not restore a phantom count; group newcomer cannot count pre-join history; leave suppresses according to F5.
 - Do not fix by hiding the badge or marking every message read globally. No fix or runtime test claimed yet.
 
-## ONBOARD-INTAKE-001 — Non-resident poster reportedly receives full resident onboarding
+## ONBOARD-INTAKE-001 — Existing resident cannot enter the non-resident poster intake
 
 - Reported: owner Q8, 16 October 2026.
-- State: reported, not reproduced in exact browser/origin.
+- State: fixed locally on 17 October; awaiting the new reviewed migration, real browser acceptance and separate code-publication authorization.
 - Expected: D1/B10/I9 account-only name/private phone/optional agency for a nonresident property poster; no lifestyle preferences/photo/bio requirement. Resident cohabitants still complete required social profile.
-- Local source observation: ResidentOnboarding already has resident/lister branch state and branch-specific name/date/phone validation. This does not prove the user's deployed/origin/account state selects it correctly.
-- Owner slice: SL01. Capture fresh-account path, returning account mode, actual origin/deployment and selected intent before diagnosis. Do not create a second account model or persistent Solo/Group switch.
-- Acceptance: fresh nonresident follows short intake→My Listings→compose; resident follows profile path; later capability expansion completes missing fields on same account under approved rules. UI copy should explain the distinction without internal jargon.
+- Finding: a fresh account reaches the residency/capability choice and can select “No, I’m posting for others”. But `web/src/app/onboarding/page.tsx` redirects every already-onboarded account away before it renders the selector, so the owner's completed resident account cannot enter the poster path. The short form and `save_onboarding` RPC already exist.
+- Local implementation: Settings now offers an explicit resident-to-lister conversion with private phone and optional agency, informed confirmation, profile removal from Discover and My Listings redirect. It retains private resident fields and existing direct-chat history, but blocks conversion while the resident belongs to a group so group lifecycle is never silently corrupted. Do not create a second account model or persistent Solo/Group switch.
+- Remaining acceptance: fresh nonresident follows short intake→My Listings→compose; an eligible existing account makes the approved conversion and reaches My Listings; a group member gets a clear blocked state; lister direct reads never expose the retained private data. Verify HE/EN phone/desktop with a disposable fixture and clean it exactly.

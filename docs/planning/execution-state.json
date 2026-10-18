@@ -26,10 +26,25 @@
   ],
   "packets": {
     "SL00.1": {
-      "status": "pending"
+      "status": "verified",
+      "handoff": "docs/workstreams/2026-10-17-sl00-baseline.md",
+      "worktree": "C:/Users/User/.codex/worktrees/b6f7/appartement tinder",
+      "source_sha": "6926eb4090b9fea42f48dd97d42346f7eea0b0cf",
+      "diff_sha256": "7b56b31220a68a0ce296708635fe754b3b7d37a601710584d9b67b81a4fcc530",
+      "verified_at": "2026-10-17T08:22:00Z",
+      "outcome": "Named source and local-only test boundary established; PGlite and TypeScript baselines passed, with no local Supabase runtime or hosted mutation.",
+      "checks": [
+        {"command_or_scenario": "npm run test:db; disposable PGlite migrations and RLS assertions", "result": "passed"},
+        {"command_or_scenario": "npx tsc --noEmit", "result": "passed"},
+        {"command_or_scenario": "git diff --check", "result": "passed"}
+      ]
     },
     "SL01.1": {
-      "status": "pending"
+      "status": "verification-incomplete",
+      "handoff": "docs/workstreams/2026-10-17-sl01-intake-and-safe-browsing.md",
+      "worktree": "C:/Users/User/.codex/worktrees/b6f7/appartement tinder",
+      "reason": "Local implementation, PGlite checks and the owner-authorized shared migration `20261017095908_lister_safe_browsing` pass structural verification. The Settings resident-to-lister conversion and migration `20261017101500_convert_resident_to_lister` also pass local PGlite/type/lint checks but are not applied to a hosted target. Required ordinary-user HE/EN browser acceptance remains incomplete; there are no live lister profiles for a non-invasive runtime assertion, and Docker CLI access is not yet authorized for this Windows session.",
+      "revisit_when": "The owner explicitly authorizes `20261017101500_convert_resident_to_lister` for a named target and a disposable resident/lister/group fixture is available for exact browser/cleanup validation, or Docker access is enabled for the local stack."
     },
     "SL08.1": {
       "status": "pending"

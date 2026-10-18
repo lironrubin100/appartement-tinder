@@ -1,6 +1,6 @@
 # Lifecycle and privacy contracts
 
-State: owner Q16/Q17/Q21/Q22/Q23/Q30 confirmed product rules on 16 October 2026; exact technical transitions remain to verify. No schema/live behavior changed.
+State: owner Q16/Q17/Q21/Q22/Q23/Q30 confirmed product rules on 16 October 2026. On 17 October, the owner also approved the B10 resident-to-lister Settings conversion; its local migration and source are recorded separately from live/deployment state.
 
 16 October answers: ordinary history rights restored after unblock; lister/resident phone optionality and 30-day deletion grace accepted. Updated DECISIONS.md is authoritative; see MVP_DECISION_ANSWERS.md for still-unanswered questions.
 
@@ -35,6 +35,7 @@ Expiry D6: 45 days then hide/explicit renewal. D7: 3 distinct taken-reports hide
 | Reopen | Valid published/nonrestricted apartment; owner chooses rooms/date/intake | New availability, no retroactive acceptance/notification spam |
 | Send inquiry | Authenticated eligible requester, active room, intake open, unblocked, not self | Persist once using existing duplicate rules; outsider cannot impersonate requester |
 | Accept inquiry | Owner, still available/intake compatible, both accounts eligible/unblocked | Lock/recheck; one conversation/membership/grant; retry idempotent; failure no partial grant |
+| Convert resident to lister | Completed resident confirms consequence copy, supplies private phone and has no active group membership | Atomically set lister capability and private poster contact/optional agency; profile disappears from public resident projection and future resident introductions/passes are denied. Preserve private profile data and existing direct-chat history; refuse without mutating anything when group membership exists. |
 | Share listing | Current conversation membership and post-join history | Reference only public listing ID; no exact address/owner/private fields in payload |
 | Hide/moderate | Authorized reviewer with reason | Public visibility changes, durable audit; no user-controlled admin role |
 
@@ -86,6 +87,8 @@ Technical job contract: idempotent deactivation and resource cleanup/progress; r
 ## Identity and trust recommendation
 
 18+ self-declaration/server enforcement and first-name/last-initial display accepted Q6; DOB private. Student email verification is real MVP requirement Q5, not ID/property/background proof. B10 nonresident poster requires no lifestyle profile; listers may browse safe authenticated social projections; guests sign in for people. Apartment-bound invitation requires recipient consent (POSTER_OUTREACH).
+
+B10 transition clarification (17 October): a resident may intentionally become a lister through Settings, not by a client-side direct mode update. The account keeps one identity; retained resident fields remain owner-private and the profile is removed from public resident projection. Existing direct chats retain their normal history rules. The product must block the conversion while the account has active group membership; resolving/leaving that group follows E3 rather than being silently performed. There is no lister-to-resident return flow yet.
 
 ## Acceptance scenarios
 

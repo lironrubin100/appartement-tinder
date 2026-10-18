@@ -17,7 +17,6 @@ export default async function DiscoverPage() {
     .select('mode')
     .eq('id', user.id)
     .maybeSingle();
-  if (profile?.mode === 'lister') redirect(localePath('/my-listings', locale));
   const [people, groups] = await Promise.all([
     client.rpc('discover_individuals', {}),
     client.rpc('discover_groups', {}),
@@ -28,6 +27,7 @@ export default async function DiscoverPage() {
       people={people.data ?? []}
       groups={groups.data ?? []}
       locale={locale}
+      canParticipate={profile?.mode !== 'lister'}
     />
   );
 }

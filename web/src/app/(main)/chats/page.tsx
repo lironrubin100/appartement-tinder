@@ -45,9 +45,7 @@ export default async function ChatsPage() {
   const [contacts, invites, groups] = await Promise.all([
     supabase.rpc('list_group_contacts'),
     supabase.rpc('list_group_invites'),
-    supabase
-      .from('groups')
-      .select('id,name,admin_id,admission_policy,membership_version'),
+    supabase.rpc('list_accessible_groups'),
   ]);
   if (contacts.error || invites.error || groups.error)
     throw new Error('Could not load groups');

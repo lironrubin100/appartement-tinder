@@ -2,6 +2,10 @@
 
 Confirmed direction: J12 isolation, free-only budget K3; exact tooling and rollout not yet installed/authorized by this document. Date: 16 October 2026.
 
+## Standing owner preference — 18 October 2026
+
+Docker-backed local Supabase is preferred for schema, RLS, Auth, Storage and Realtime work, but it is not a prerequisite while the shared project has no real-user data. If Docker is unavailable/inaccessible or the repository cannot reproduce the local baseline, apply reviewed migrations and run ordinary-client QA against the shared target only if the current `PROJECT_STATUS.md` explicitly confirms zero real-user data and no competing owner. Record the local skip reason, recheck target ref/migration history, and use exact-ID QA fixtures. Retain those demo fixtures when the owner asks; otherwise verify their cleanup. This does not authorize paid branches/projects, deployment, commits or changes once real-user data exists; in those cases obtain fresh target-specific owner approval.
+
 ## Simple owner explanation
 
 1. **Local development:** own app checkout + a local test backend with fake users/properties. It is safe to test migrations, report thresholds and config changes here.

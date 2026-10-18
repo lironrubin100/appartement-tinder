@@ -12,10 +12,12 @@ export default function DiscoverClient({
   people: initialPeople,
   groups: initialGroups,
   locale,
+  canParticipate,
 }: {
   people: Person[];
   groups: Group[];
   locale: Locale;
+  canParticipate: boolean;
 }) {
   const en = locale === 'en',
     t = (he: string, eng: string) => (en ? eng : he);
@@ -188,23 +190,32 @@ export default function DiscoverClient({
                 </details>
               </section>
             ))}
-            <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                disabled={busy}
-                className="flex-1"
-                onClick={() => void act(true)}
-              >
-                {t('דילוג', 'Pass')}
-              </Button>
-              <Button
-                disabled={busy}
-                className="flex-1"
-                onClick={() => setIntro(true)}
-              >
-                {t('שליחת היכרות', 'Introduce yourself')}
-              </Button>
-            </div>
+            {canParticipate ? (
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  className="flex-1"
+                  onClick={() => void act(true)}
+                >
+                  {t('דילוג', 'Pass')}
+                </Button>
+                <Button
+                  disabled={busy}
+                  className="flex-1"
+                  onClick={() => setIntro(true)}
+                >
+                  {t('שליחת היכרות', 'Introduce yourself')}
+                </Button>
+              </div>
+            ) : (
+              <p className="rounded-xl bg-orange-soft p-3 text-sm text-ink">
+                {t(
+                  'אפשר לעיין בפרופילים ובקבוצות. כדי ליצור היכרות או להצטרף לקבוצה, יש להשלים פרופיל דייר.',
+                  'You can browse people and groups. Complete a resident profile to introduce yourself or join a group.'
+                )}
+              </p>
+            )}
           </article>
         ) : (
           <div className="rounded-3xl bg-white p-8 text-center space-y-4">

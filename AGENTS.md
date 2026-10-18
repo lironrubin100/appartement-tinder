@@ -26,6 +26,12 @@ You are acting as a Staff-Level Solutions Architect and Lead Developer. We are b
 4.  **Verify:** Check syntax and logic.
 5.  **Leave a handoff:** Update the shared status row and `docs/workstreams/<work-id>.md` at meaningful checkpoints and before ending a task. Include outcome, branch or detached HEAD, worktree, changed files, decision IDs, verification evidence/date, uncommitted work, live migrations, PR/preview/deployment state, blockers and the next concrete step. Refresh `docs/WORKTREE_INVENTORY.md` with `node scripts/project-status.mjs --write --shared`. Mark missing or stale evidence explicitly; implementation, verification, merge and deployment are separate states. Documentation updates do not authorize commits, pushes, merges or deployments.
 
+### Local-first database workflow — standing owner preference (18 October 2026)
+
+Prefer Docker-backed local Supabase first for schema, RLS, Auth, Storage and Realtime changes. Create isolated synthetic fixtures, run the affected browser/ordinary-client checks, and record the target plus results in the workstream. Docker is an acceleration path, not a release blocker: if it is unavailable, inaccessible, or the repository cannot reproduce its baseline locally, proceed against the shared project only when the current register explicitly confirms no real-user data and no competing executor owns the migration. Record why local runtime was skipped and use only exact-ID QA fixtures. Retain demo fixtures when the owner asks; otherwise clean them after QA. PGlite/static checks remain useful but do not replace ordinary-client acceptance.
+
+An agent may apply a reviewed migration to the shared Shutaf project **only while `PROJECT_STATUS.md` confirms there are no real-user data and no competing executor owns the migration**. Recheck the project ref and live migration history immediately before applying, then verify the named change and record it. The moment the project contains real users, or target/data state is ambiguous, hosted mutation again requires a fresh owner authorization. This standing preference never authorizes paid Supabase resources, deployment, commit, push or merge.
+
 ## 5. Planning and slice dispatch
 
 Read `docs/BUILD_BLUEPRINT.md` for the planning package and `docs/EXECUTION_PROTOCOL.md` for execution. `docs/SLICES.md` defines proposed new slices; the old 114-task plan maps through `docs/LEGACY_SLICE_MAP.md`. Proposals and `needs-decision`/`needs-research` entries are not implementation-ready or authorization to change a DECIDED rule.

@@ -26,16 +26,24 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261013213103_profile_passes_and_like_validation.sql'),
   await read('supabase/migrations/20261015084833_resident_journeys.sql'),
   await read('supabase/migrations/20261015084841_group_conversations.sql'),
-  await read('supabase/migrations/20261015084850_inquiry_acceptance_guards.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261015084850_inquiry_acceptance_guards.sql'),
+  await read('supabase/migrations/20261017082317_lister_safe_browsing.sql'),
+  await read('supabase/migrations/20261017101500_convert_resident_to_lister.sql')]) await db.exec(sql);
 
 const ids = Array.from({ length: 25 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
 for (const id of ids) await db.query('insert into auth.users(id) values($1)', [id]);
 async function as(i) { await db.exec('reset role'); await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids[i]]); await db.exec('set role authenticated'); }
 async function rpc(sql, params = []) { return (await db.query(sql, params)).rows[0]; }
 async function rejected(sql, params = []) { await assert.rejects(() => db.query(sql, params)); }
+const listerIndex = 23;
 for (let i = 0; i < ids.length; i++) {
   await as(i);
-  await rpc("select public.save_onboarding($1,true,'2000-01-01','private-phone','','hello','{\"cleanliness\":\"clean\"}',true)", [`Resident ${i}`]);
+  await rpc(
+    i === listerIndex
+      ? "select public.save_onboarding($1,false,null,'private-phone','QA agency','', '{}',true)"
+      : "select public.save_onboarding($1,true,'2000-01-01','private-phone','','hello','{\"cleanliness\":\"clean\"}',true)",
+    [i === listerIndex ? `Lister ${i}` : `Resident ${i}`]
+  );
 }
 await as(0);
 const publicProfile = await rpc('select * from public.profiles_public where id=$1', [ids[1]]);
@@ -112,9 +120,32 @@ await rpc("select public.save_onboarding('Draft',true,null,'','','draft bio','{}
 await rejected("select public.save_onboarding('Invalid replacement',true,null,'','','','{}',true)");
 assert.equal((await rpc('select name,onboarded from public.profiles where id=$1', [draftId])).name, 'Draft');
 await as(0); assert.equal((await db.query('select * from public.profiles_public where id=$1', [draftId])).rows.length, 0);
+// A completed property poster can read only the safe person/group projections.
+await as(listerIndex);
+assert.ok((await db.query('select * from public.discover_individuals()')).rows.length > 0);
+assert.ok((await db.query('select * from public.discover_groups()')).rows.length > 0);
+await rejected('select public.pass_discovery($1,$2)', [ids[0], 'individual']);
+await rejected("select public.send_introduction($1,null,'','bio')", [ids[0]]);
+await db.exec('reset role');
+await db.query('insert into public.blocks(blocker_id,blocked_id) values($1,$2)', [ids[listerIndex], ids[0]]);
+await as(listerIndex);
+assert.equal((await db.query('select * from public.discover_individuals() where id=$1', [ids[0]])).rows.length, 0);
+await db.exec('reset role');
+await db.query('delete from public.blocks where blocker_id=$1 and blocked_id=$2', [ids[listerIndex], ids[0]]);
+// A resident can explicitly become a lister; the public profile is hidden and social actions are denied.
+await as(10);
+await rpc("select public.convert_to_lister('converted-private-phone','Converted agency')");
+assert.equal((await rpc('select mode from public.profiles where id=$1', [ids[10]])).mode, 'lister');
+assert.equal((await db.query('select * from public.profiles_public where id=$1', [ids[10]])).rows.length, 0);
+assert.equal((await rpc('select phone,agency_name from public.profile_private where profile_id=$1', [ids[10]])).phone, 'converted-private-phone');
+await rejected('select public.pass_discovery($1,$2)', [ids[0], 'individual']);
+await rejected("select public.send_introduction($1,null,'','bio')", [ids[0]]);
+// Group membership must be resolved before changing account capability.
+await as(1);
+await rejected("select public.convert_to_lister('private-phone','')");
 await as(4);
-for (const id of ids.filter(id => id !== ids[4]).slice(0, 20)) await rpc("select public.send_introduction($1,null,'','bio')", [id]);
+for (const id of ids.filter(id => id !== ids[4] && id !== ids[10]).slice(0, 20)) await rpc("select public.send_introduction($1,null,'','bio')", [id]);
 await rejected("select public.send_introduction($1,null,'','bio')", [ids[24]]);
 await rejected("insert into public.likes(from_user,to_user,message) values($1,$2,'bypass')", [ids[4], ids[24]]);
-console.log('PASS: migrations, private drafts/atomic completion, trait validation, optional introductions, idempotent acceptance, invitation consent, admin/any-member/majority, four-member cap/removal, history/preview boundaries, outsider isolation, pass expiry, symmetric blocking, daily quota, inquiry owner/availability/address checks and direct-write denial.');
+console.log('PASS: migrations, private drafts/atomic completion, resident-to-lister conversion, trait validation, poster safe-browse/action denial/block isolation, optional introductions, idempotent acceptance, invitation consent, admin/any-member/majority, four-member cap/removal, history/preview boundaries, outsider isolation, pass expiry, symmetric blocking, daily quota, inquiry owner/availability/address checks and direct-write denial.');
 await db.close();

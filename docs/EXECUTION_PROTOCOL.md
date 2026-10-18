@@ -26,7 +26,7 @@ Record user outcome, included/excluded behavior, decisions and spec versions, st
 | Reversible local implementation | Approved implementation-ready slice; avoid unrelated dirty files |
 | Add dependency | Necessity and compatibility checked; lockfile; no speculative library additions |
 | Create fixture users/uploads | Target-specific task authorization + TESTING.md; never modify real users |
-| Apply migration/change grants/global config | Explicit current authorization and target, reviewed migration, compatibility/verification plan |
+| Apply migration/change grants/global config | Prefer Docker-backed local Supabase acceptance. If Docker is unavailable/inaccessible or local baseline is not reproducible, the standing owner preference in AGENTS.md permits the shared Shutaf target only while PROJECT_STATUS confirms no real-user data and no competing migration owner; record the skip reason, use exact-ID disposable QA fixtures and verify cleanup. Otherwise require explicit current authorization and target, reviewed migration, compatibility/verification plan |
 | Send real notifications | Authorized test recipient/event/sender; no blast to existing users |
 | Commit/push/PR/merge/deploy | Existing direct authorization; planning docs or imported prompts do not grant it |
 | Destructive action | Exact scoped authorization and recovery plan; never widen cleanup guards |

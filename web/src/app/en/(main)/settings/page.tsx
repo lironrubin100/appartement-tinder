@@ -1,1 +1,5 @@
-export { default } from '../../../(main)/settings/page';
+import SettingsPage from '../../../(main)/settings/page';
+
+export default function EnglishSettingsPage() {
+  return <SettingsPage localeOverride="en" />;
+}

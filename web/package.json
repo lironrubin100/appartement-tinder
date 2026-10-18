@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:e2e": "playwright test",
     "test:db": "node ../scripts/test-resident-sql.mjs",
-    "test:acceptance": "node scripts/qa-fixtures.mjs check && playwright test e2e/listing-slices.spec.ts e2e/resident-auth-guest.spec.ts e2e/resident-live.spec.ts --workers=1",
+    "test:acceptance": "node scripts/qa-fixtures.mjs check && playwright test e2e/listing-slices.spec.ts e2e/resident-auth-guest.spec.ts e2e/resident-live.spec.ts e2e/lister-conversion.spec.ts --workers=1",
     "qa:prepare": "node scripts/qa-fixtures.mjs prepare",
     "qa:storage": "node scripts/qa-fixtures.mjs storage",
     "qa:forget": "node scripts/qa-fixtures.mjs forget"
