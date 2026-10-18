@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -78,32 +80,63 @@ interface LeafletMapProps {
 }
 
 export default function LeafletMap({ apartments, selectedId, onSelect }: LeafletMapProps) {
+  const [tileError, setTileError] = useState(false);
+  const [tileLayerKey, setTileLayerKey] = useState(0);
+  const en = usePathname().startsWith('/en/');
+
+  const retryTiles = () => {
+    setTileError(false);
+    setTileLayerKey((current) => current + 1);
+  };
+
   return (
-    <MapContainer
-      center={BEER_SHEVA_CENTER}
-      zoom={13}
-      scrollWheelZoom
-      className="w-full h-full rounded-shutaf-lg"
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-      />
-      <MarkerClusterGroup
-        iconCreateFunction={clusterIcon}
-        disableClusteringAtZoom={CLUSTER_MAX_ZOOM}
-        spiderfyOnMaxZoom={false}
-        showCoverageOnHover={false}
+    <div className="relative h-full">
+      <MapContainer
+        center={BEER_SHEVA_CENTER}
+        zoom={13}
+        scrollWheelZoom
+        className="w-full h-full rounded-shutaf-lg"
       >
-        {apartments.map((apt) => (
-          <Marker
-            key={apt.id}
-            position={[apt.lat, apt.lng]}
-            icon={priceIcon(apt, apt.id === selectedId)}
-            eventHandlers={{ click: () => onSelect(apt.id) }}
-          />
-        ))}
-      </MarkerClusterGroup>
-    </MapContainer>
+        <TileLayer
+          key={tileLayerKey}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          eventHandlers={{
+            tileerror: () => setTileError(true),
+          }}
+        />
+        <MarkerClusterGroup
+          iconCreateFunction={clusterIcon}
+          disableClusteringAtZoom={CLUSTER_MAX_ZOOM}
+          spiderfyOnMaxZoom={false}
+          showCoverageOnHover={false}
+        >
+          {apartments.map((apt) => (
+            <Marker
+              key={apt.id}
+              position={[apt.lat, apt.lng]}
+              icon={priceIcon(apt, apt.id === selectedId)}
+              eventHandlers={{ click: () => onSelect(apt.id) }}
+            />
+          ))}
+        </MarkerClusterGroup>
+      </MapContainer>
+      {tileError && (
+        <div
+          className="absolute inset-0 z-[1000] flex flex-col items-center justify-center gap-3 rounded-shutaf-lg bg-page-bg/90 p-6 text-center"
+          role="alert"
+        >
+          <p className="font-semibold text-ink">{en ? 'Could not load the map' : 'לא הצלחנו לטעון את המפה'}</p>
+          <p className="text-sm text-muted-text">{en ? 'Check your connection and try again.' : 'בדקו את החיבור ונסו שוב.'}</p>
+          <button
+            type="button"
+            onClick={retryTiles}
+            className="min-h-11 rounded-shutaf-md bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark"
+          >
+            {en ? 'Retry' : 'ניסיון חוזר'}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

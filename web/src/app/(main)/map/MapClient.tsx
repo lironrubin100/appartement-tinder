@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Heart, MapPin, MessageCircle } from 'lucide-react';
 import { ListingCard } from '@/components/discovery';
 import { Badge, Button, Modal } from '@/components/ui';
+import JourneyError from '@/components/ui/JourneyError';
 import { FilterBar } from '@/components/map/FilterBar';
 import { APARTMENT_FILTERS } from '@/components/map/filters';
 import { createClient } from '@/utils/supabase/client';
@@ -34,6 +35,8 @@ function isNewListing(createdAt: string) {
 export default function MapPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadCount, setReloadCount] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { isSaved, isPending, toggle } = useFavorites();
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -41,15 +44,33 @@ export default function MapPage() {
   const { values, setValue, filtered } = useApartmentFilters(apartments);
 
   useEffect(() => {
+    let cancelled = false;
     const supabase = createClient();
-    supabase
+
+    void supabase
       .from('apartments_public')
       .select('*')
-      .then(({ data }) => {
-        setApartments(data ?? []);
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) setLoadError(true);
+        else setApartments(data ?? []);
+        setLoading(false);
+      }, () => {
+        if (cancelled) return;
+        setLoadError(true);
         setLoading(false);
       });
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadCount]);
+
+  const retryLoadApartments = () => {
+    setLoading(true);
+    setLoadError(false);
+    setReloadCount((current) => current + 1);
+  };
 
   const selected = apartments.find((a) => a.id === selectedId) ?? null;
   const handleSave = useCallback(async (apartmentId: string) => {
@@ -89,51 +110,55 @@ export default function MapPage() {
       )}
       {contactMessage && <p role="status" className="mb-4 text-sm text-muted-text" aria-live="polite">{contactMessage}</p>}
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Map */}
-        <div className="flex-1 min-h-96 md:min-h-[calc(100vh-220px)]" data-testid="map-container">
-          {loading ? (
-            <div className="w-full h-full rounded-shutaf-lg bg-neutral-bg-soft flex items-center justify-center">
-              <p className="text-muted-text">טוען מפה…</p>
-            </div>
-          ) : (
-            <LeafletMap apartments={filtered} selectedId={selectedId} onSelect={setSelectedId} />
-          )}
-        </div>
+      {loadError ? (
+        <JourneyError retry={retryLoadApartments} />
+      ) : (
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Map */}
+          <div className="flex-1 min-h-96 md:min-h-[calc(100vh-220px)]" data-testid="map-container">
+            {loading ? (
+              <div className="w-full h-full rounded-shutaf-lg bg-neutral-bg-soft flex items-center justify-center">
+                <p className="text-muted-text">טוען מפה…</p>
+              </div>
+            ) : (
+              <LeafletMap apartments={filtered} selectedId={selectedId} onSelect={setSelectedId} />
+            )}
+          </div>
 
-        {/* Listing Cards */}
-        <div className="w-full md:w-[36rem]">
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[calc(100vh-220px)] overflow-y-auto content-start"
-            data-testid="listing-grid"
-          >
-            {filtered.map((apt) => (
-              <ListingCard
-                key={apt.id}
-                id={apt.id}
-                title={apt.title}
-                price={apt.price}
-                minRoomPrice={apt.min_room_price}
-                maxRoomPrice={apt.max_room_price}
-                availableRoomCount={apt.available_room_count}
-                billsIncluded={apt.bills_included}
-                interestedCount={apt.interest_count}
-                image={apt.photos[0]}
-                location={publicAreaLabel()}
-                bedrooms={apt.bedrooms}
-                availableFrom={apt.available_from ?? ''}
-                tags={apt.is_sublet ? ['סאבלט'] : []}
-                isNew={isNewListing(apt.created_at)}
-                saved={isSaved(apt.id)}
-                savePending={isPending(apt.id)}
-                onSave={handleSave}
-                onMessage={handleContact}
-                onClick={() => setSelectedId(apt.id)}
-              />
-            ))}
+          {/* Listing Cards */}
+          <div className="w-full md:w-[36rem]">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[calc(100vh-220px)] overflow-y-auto content-start"
+              data-testid="listing-grid"
+            >
+              {filtered.map((apt) => (
+                <ListingCard
+                  key={apt.id}
+                  id={apt.id}
+                  title={apt.title}
+                  price={apt.price}
+                  minRoomPrice={apt.min_room_price}
+                  maxRoomPrice={apt.max_room_price}
+                  availableRoomCount={apt.available_room_count}
+                  billsIncluded={apt.bills_included}
+                  interestedCount={apt.interest_count}
+                  image={apt.photos[0]}
+                  location={publicAreaLabel()}
+                  bedrooms={apt.bedrooms}
+                  availableFrom={apt.available_from ?? ''}
+                  tags={apt.is_sublet ? ['סאבלט'] : []}
+                  isNew={isNewListing(apt.created_at)}
+                  saved={isSaved(apt.id)}
+                  savePending={isPending(apt.id)}
+                  onSave={handleSave}
+                  onMessage={handleContact}
+                  onClick={() => setSelectedId(apt.id)}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Apartment detail */}
       <Modal isOpen={!!selected} onClose={() => setSelectedId(null)} size="md">
