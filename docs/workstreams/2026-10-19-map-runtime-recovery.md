@@ -1,6 +1,6 @@
 # Map runtime recovery — CARTO tiles and listing data
 
-Updated 19 October 2026 (Asia/Jerusalem). Status: in progress in `C:/Users/User/.codex/worktrees/92e7/appartement tinder` at detached `f4d1d4a`.
+Updated 19 October 2026 (Asia/Jerusalem). Status: implementation published to Production; authenticated visual acceptance remains incomplete.
 
 ## Outcome and scope
 
@@ -18,7 +18,9 @@ Updated 19 October 2026 (Asia/Jerusalem). Status: in progress in `C:/Users/User/
 
 ## External state
 
-- No hosted Supabase mutation, deployment, commit, push or merge has occurred.
+- No hosted Supabase mutation occurred.
+- Commit `c1da7ee92c2b3603c0ef51184d3087c75b15d3dd` (`Show recoverable errors on the map`) was pushed to GitHub `master` on 19 October 2026 after the user explicitly authorized publication.
+- Vercel Production deployment `dpl_9jeMmE3XJ2nePBhusDCJMVm2AqHd` for that exact SHA reached `READY`; it is assigned to `https://appartement-tinder.vercel.app`.
 - `web/.env.local` and `web/.qa/run.json` are absent in this checkout. Creating external QA identities is deferred until local implementation is ready and the target/fixture authorization is rechecked.
 
 ## Verification — 19 October 2026
