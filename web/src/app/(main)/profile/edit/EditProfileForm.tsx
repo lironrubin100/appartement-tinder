@@ -1,297 +1,77 @@
 'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { createClient } from '@/utils/supabase/client';
-import { Button, Input, Badge } from '@/components/ui';
-import { TAG_CATEGORIES, type TagKey } from '@/utils/profileTags';
-import { uploadProfilePhoto } from '@/utils/photos';
+import { useRef, useState } from 'react';
+import { ResidentProfileForm } from '@/components/profile/ResidentProfileForm';
+import { Button, Input } from '@/components/ui';
+import { localePath, type Locale } from '@/utils/navigation';
 import type { Database } from '@/types/database';
-
+import type { Lifestyle, PrivateLifestyle } from '@/lib/resident-profile';
+import { createClient } from '@/utils/supabase/client';
+import { isRecord } from '@/lib/contracts/taxonomy';
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type PrivateProfile = Database['public']['Tables']['profile_private']['Row'];
 type ProfilePhoto = Database['public']['Tables']['profile_photos']['Row'];
-
-const MAX_PHOTOS = 6;
-
-export function EditProfileForm({
-  profile,
-  privateProfile,
-  initialPhotos,
-}: {
-  profile: Profile;
-  privateProfile: PrivateProfile | null;
-  initialPhotos: ProfilePhoto[];
+export function EditProfileForm({ profile, privateProfile, initialPhotos, lifestyle, privateLifestyle, locale }: {
+  profile: Profile; privateProfile: PrivateProfile | null; initialPhotos: ProfilePhoto[];
+  lifestyle: Lifestyle; privateLifestyle: PrivateLifestyle; locale: Locale;
 }) {
-  const router = useRouter();
-  const supabase = createClient();
-
-  const [name, setName] = useState(profile.name);
-  const [bio, setBio] = useState(profile.bio ?? '');
-  const [tags, setTags] = useState<Record<TagKey, string | null>>(
-    Object.fromEntries(
-      TAG_CATEGORIES.map((c) => [c.key, profile[c.key] as string | null])
-    ) as Record<TagKey, string | null>
-  );
-  const [photos, setPhotos] = useState(initialPhotos);
-  const [phone, setPhone] = useState(privateProfile?.phone ?? '');
-  const [publicBadges, setPublicBadges] = useState(profile.public_badges);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+  const t = (he: string, en: string) => locale === 'en' ? en : he;
   const [studentEmail, setStudentEmail] = useState(privateProfile?.student_email ?? '');
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [verified, setVerified] = useState(Boolean(privateProfile?.student_email_verified_at));
-  const [verifyError, setVerifyError] = useState<string | null>(null);
-  const [verifyBusy, setVerifyBusy] = useState(false);
-
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file || photos.length >= MAX_PHOTOS) return;
-
-    const url = await uploadProfilePhoto(supabase, profile.id, file);
-    const { data, error: insertError } = await supabase
-      .from('profile_photos')
-      .insert({ profile_id: profile.id, url, display_order: photos.length })
-      .select()
-      .single();
-    if (insertError || !data) {
-      setError(insertError?.message ?? 'העלאת התמונה נכשלה');
-      return;
-    }
-    setPhotos([...photos, data]);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [phone, setPhone] = useState(privateProfile?.phone ?? '');
+  const [agency, setAgency] = useState(privateProfile?.agency_name ?? '');
+  const [saved, setSaved] = useState(false);
+  const [name, setName] = useState(privateProfile?.full_name ?? profile.name);
+  const [revision, setRevision] = useState(lifestyle?.revision ?? 0);
+  const [conflict, setConflict] = useState(false);
+  const request = useRef<{ payload: string; key: string } | null>(null);
+  async function savePosterContact() {
+    if (busy || conflict) return;
+    setError(''); setSaved(false);
+    if (!name.trim() || !phone.trim()) { setError(t('נדרשים שם מלא וטלפון פרטי לחשבון מפרסם.', 'A property-poster account requires a full name and private phone.')); return; }
+    const args = { p_name: name, p_phone: phone, p_agency: agency, p_expected_revision: revision };
+    const payload = JSON.stringify(args);
+    if (request.current?.payload !== payload) request.current = { payload, key: crypto.randomUUID() };
+    setBusy(true);
+    const result = await createClient().rpc('save_lister_profile', { ...args, p_request_key: request.current!.key });
+    if (result.error) {
+      if (/revision|conflict|stale/i.test(result.error.message)) { setConflict(true); setError(t('החשבון השתנה בחלון אחר. טענו מחדש לפני שמירה.', 'Your account changed in another window. Reload before saving.')); }
+      else setError(t('לא הצלחנו לשמור. אפשר לנסות שוב.', 'Could not save. Please retry.'));
+    } else if (isRecord(result.data) && typeof result.data.revision === 'number') {
+      setRevision(result.data.revision); request.current = null; setSaved(true);
+    } else setError(t('לא הצלחנו לאשר את השמירה. אפשר לנסות שוב.', 'Could not confirm the save. Please retry.'));
+    setBusy(false);
   }
-
-  async function handlePhotoRemove(photo: ProfilePhoto) {
-    await supabase.from('profile_photos').delete().eq('id', photo.id);
-    setPhotos(photos.filter((p) => p.id !== photo.id));
+  async function verify(confirm: boolean) {
+    setBusy(true); setError('');
+    try {
+      const response = await fetch(`/api/verify-student-email/${confirm ? 'confirm' : 'start'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: studentEmail, ...(confirm ? { code: otpCode } : {}) }) });
+      if (!response.ok) throw new Error('verification failed');
+      if (confirm) { setVerified(true); setOtpSent(false); } else setOtpSent(true);
+    } catch { setError(t('האימות לא הושלם. אפשר לנסות שוב.', 'Verification could not finish. Please retry.')); }
+    finally { setBusy(false); }
   }
-
-  function movePhoto(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= photos.length) return;
-    const next = [...photos];
-    [next[index], next[target]] = [next[target], next[index]];
-    setPhotos(next);
-    next.forEach((p, i) => {
-      if (p.display_order !== i) {
-        supabase.from('profile_photos').update({ display_order: i }).eq('id', p.id).then();
-      }
-    });
-  }
-
-  async function handleSave() {
-    setSaving(true);
-    setError(null);
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ name, bio, public_badges: publicBadges, ...tags })
-      .eq('id', profile.id);
-    const { error: privateUpdateError } = await supabase
-      .from('profile_private')
-      .update({ phone: phone.trim() || null })
-      .eq('profile_id', profile.id);
-    setSaving(false);
-    if (updateError || privateUpdateError) {
-      setError(updateError?.message ?? privateUpdateError?.message ?? 'שמירת הפרופיל נכשלה');
-      return;
-    }
-    router.push('/profile');
-    router.refresh();
-  }
-
-  async function handleSendCode() {
-    setVerifyBusy(true);
-    setVerifyError(null);
-    const res = await fetch('/api/verify-student-email/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: studentEmail }),
-    });
-    const body = await res.json();
-    setVerifyBusy(false);
-    if (!res.ok) {
-      setVerifyError(body.error ?? 'שליחת הקוד נכשלה');
-      return;
-    }
-    setOtpSent(true);
-  }
-
-  async function handleConfirmCode() {
-    setVerifyBusy(true);
-    setVerifyError(null);
-    const res = await fetch('/api/verify-student-email/confirm', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: studentEmail, code: otpCode }),
-    });
-    const body = await res.json();
-    setVerifyBusy(false);
-    if (!res.ok) {
-      setVerifyError(body.error ?? 'האימות נכשל');
-      return;
-    }
-    setVerified(true);
-    setOtpSent(false);
-  }
-
-  return (
-    <div className="w-full bg-page-bg min-h-[calc(100vh-80px)]">
-      <div className="max-w-2xl mx-auto bg-white">
-        <div className="border-b border-card-border px-6 py-8">
-          <h1 className="text-3xl font-bold text-ink">עריכת פרופיל</h1>
-        </div>
-
-        <div className="p-6 md:p-8 space-y-8">
-          {/* Photos */}
-          <div>
-            <h3 className="font-semibold text-ink mb-3">תמונות</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {photos.map((photo, i) => (
-                <div
-                  key={photo.id}
-                  className="relative aspect-[4/5] rounded-shutaf-md overflow-hidden bg-neutral-bg-soft"
-                >
-                  <Image src={photo.url} alt="" fill unoptimized sizes="(max-width: 768px) 50vw, 33vw" className="object-cover" />
-                  <div className="absolute inset-x-0 bottom-0 flex justify-between p-1 bg-black/40">
-                    <button type="button" onClick={() => movePhoto(i, -1)} className="text-white text-xs px-2">
-                      ◀
-                    </button>
-                    <button type="button" onClick={() => handlePhotoRemove(photo)} className="text-white text-xs px-2">
-                      ✕
-                    </button>
-                    <button type="button" onClick={() => movePhoto(i, 1)} className="text-white text-xs px-2">
-                      ▶
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {photos.length < MAX_PHOTOS && (
-                <label className="aspect-[4/5] rounded-shutaf-md border-2 border-dashed border-card-border flex items-center justify-center cursor-pointer text-muted-text">
-                  +
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-                </label>
-              )}
-            </div>
-          </div>
-
-          {/* Name / Bio */}
-          <div className="space-y-4">
-            <Input label="שם" value={name} onChange={(e) => setName(e.target.value)} />
-            <Input
-              label="טלפון פרטי לחשבון (אופציונלי)"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              helperText="הטלפון לא מוצג בפרופיל או במודעה. פניות נשארות בתוך Shutaf."
-            />
-            <div>
-              <label className="block text-sm font-medium text-ink mb-2">ביו</label>
-              <textarea
-                value={bio}
-                maxLength={300}
-                onChange={(e) => setBio(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-shutaf-md border border-card-border focus:outline-none focus:ring-2 focus:ring-orange"
-                rows={4}
-              />
-            </div>
-          </div>
-
-          {/* Student email verification */}
-          <div className="border-t border-card-border pt-6">
-            <h3 className="font-semibold text-ink mb-3">אימות דוא״ל סטודנטיאלי</h3>
-            {verified ? (
-              <div className="space-y-3">
-                <Badge variant="success">מאומת כסטודנט ({privateProfile?.student_email})</Badge>
-                <label className="flex items-center gap-2 text-sm text-body-text">
-                  <input
-                    type="checkbox"
-                    checked={publicBadges.includes('student_verified')}
-                    onChange={(event) => setPublicBadges((current) =>
-                      event.target.checked
-                        ? Array.from(new Set([...current, 'student_verified']))
-                        : current.filter((badge) => badge !== 'student_verified')
-                    )}
-                  />
-                  הצג את תג אימות הסטודנט בפרופיל הציבורי
-                </label>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <Input
-                  label="דוא״ל אוניברסיטאי"
-                  placeholder="name@post.bgu.ac.il"
-                  value={studentEmail}
-                  onChange={(e) => setStudentEmail(e.target.value)}
-                  disabled={otpSent}
-                />
-                {!otpSent ? (
-                  <Button variant="secondary" onClick={handleSendCode} disabled={verifyBusy || !studentEmail}>
-                    שלח קוד אימות
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="קוד בן 6 ספרות"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                    />
-                    <Button variant="primary" onClick={handleConfirmCode} disabled={verifyBusy || otpCode.length === 0}>
-                      אמת
-                    </Button>
-                  </div>
-                )}
-                {verifyError && <p className="text-sm text-error">{verifyError}</p>}
-              </div>
-            )}
-          </div>
-
-          {/* Tags */}
-          <div className="border-t border-card-border pt-6">
-            <h3 className="font-semibold text-ink mb-4">התגים שלי</h3>
-            <div className="space-y-5">
-              {TAG_CATEGORIES.map((category) => (
-                <div key={category.key}>
-                  <p className="text-sm font-medium text-ink mb-2">{category.label}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {category.options.map((option) => {
-                      const active = tags[category.key] === option.value;
-                      return (
-                        <button
-                          type="button"
-                          key={option.value}
-                          onClick={() =>
-                            setTags((prev) => ({
-                              ...prev,
-                              [category.key]: active ? null : option.value,
-                            }))
-                          }
-                        >
-                          <Badge variant={active ? 'success' : 'default'}>{option.label}</Badge>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {error && <p className="text-sm text-error">{error}</p>}
-
-          <div className="flex gap-3">
-            <Button variant="primary" className="flex-1" onClick={handleSave} disabled={saving}>
-              {saving ? 'שומר...' : 'שמור'}
-            </Button>
-            <Button variant="ghost" onClick={() => router.push('/profile')}>
-              ביטול
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <main className="min-h-screen bg-page-bg p-5"><section className="mx-auto max-w-2xl rounded-3xl bg-white p-6 space-y-8">
+    <h1 className="text-3xl font-bold">{t('עריכת פרופיל', 'Edit profile')}</h1>
+    {profile.mode === 'lister' ? <form className="space-y-4" onSubmit={e => { e.preventDefault(); void savePosterContact(); }}>
+      <p>{t('זהו חשבון מפרסם, ללא שאלון אורח חיים. פרטי הקשר נשארים פרטיים.', 'This is a property-poster account without a lifestyle questionnaire. Contact details stay private.')}</p>
+      <Input label={t('שם מלא (פרטי)', 'Full name (private)')} value={name} maxLength={80} onChange={e => setName(e.target.value)} helperText={t('יוצגו השם הפרטי והאות הראשונה של שם המשפחה.', 'Only your first name and last initial are displayed.')} />
+      <Input label={t('טלפון פרטי לחשבון', 'Private account phone')} type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
+      <Input label={t('שם סוכנות (לא חובה)', 'Agency (optional)')} value={agency} maxLength={120} onChange={e => setAgency(e.target.value)} />
+      {error && <p role="alert" className="text-error">{error}</p>}{saved && <p role="status" className="text-success">{t('הפרטים נשמרו', 'Details saved')}</p>}
+      {conflict && <Button type="button" variant="secondary" onClick={() => window.location.reload()}>{t('טעינה מחדש', 'Reload profile')}</Button>}
+      <Button type="submit" disabled={busy || conflict}>{t('שמירת הפרופיל', 'Save profile')}</Button>
+    </form>
+      : <ResidentProfileForm profile={profile} privateProfile={privateProfile} lifestyle={lifestyle} privateLifestyle={privateLifestyle} initialPhotos={initialPhotos} locale={locale} returnTo={localePath('/profile', locale)} editing />}
+    {profile.mode !== 'lister' && <section className="border-t border-card-border pt-6 space-y-3"><h2 className="font-semibold">{t('אימות דוא״ל סטודנטיאלי (לא חובה)', 'Student email verification (optional)')}</h2>
+      {verified ? <p className="text-success">{t('האימות נשמר. הצגת התג נשארת לבחירתך.', 'Verification saved. Badge visibility remains your choice.')}</p>
+        : <><Input label={t('דוא״ל אוניברסיטאי', 'University email')} value={studentEmail} onChange={e => setStudentEmail(e.target.value)} disabled={otpSent || busy} />
+          {otpSent && <Input label={t('קוד אימות', 'Verification code')} value={otpCode} onChange={e => setOtpCode(e.target.value)} />}
+          <Button type="button" variant="secondary" disabled={busy || !studentEmail || (otpSent && !otpCode)} onClick={() => void verify(otpSent)}>{otpSent ? t('אמת', 'Verify') : t('שלח קוד אימות', 'Send verification code')}</Button></>}
+      {error && <p role="alert" className="text-error">{error}</p>}
+    </section>}
+  </section></main>;
 }

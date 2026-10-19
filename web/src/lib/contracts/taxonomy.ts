@@ -247,3 +247,31 @@ export function adaptLegacyTags(input: unknown): { facts: ResidentFacts; needsRe
   }
   return { facts: parseResidentFacts(facts), needsReview };
 }
+
+/** Render an already public projection; never infer disclosure from own facts. */
+export function localizedResidentFacts(input: unknown, locale: 'he' | 'en') {
+  let facts: ResidentFacts;
+  try { facts = parseResidentFacts(input); } catch { return []; }
+  const output: { field: ResidentField; label: string; referenceValue: string | null }[] = [];
+  for (const [field, definition] of Object.entries(residentFields)) {
+    const key = field as ResidentField;
+    const value = facts[key];
+    if (value == null) continue;
+    const category = Object.entries(taxonomy).find(([id, c]) => id.startsWith('R') && (c.fields as readonly string[]).includes(key))?.[1];
+    if (!category) continue;
+    const prefix = category.label[locale];
+    if (definition.kind === 'enum' && typeof value === 'string') {
+      const option = (definition.options as Options)[value];
+      if (option) output.push({ field: key, label: `${prefix}: ${option[locale]}`, referenceValue: value });
+    } else if (definition.kind === 'set' && typeof value === 'object') {
+      if (!value.values.length) output.push({ field: key, label: `${prefix}: ${locale === 'en' ? 'None' : 'אין'}`, referenceValue: null });
+      for (const item of value.values) {
+        const option = (definition.options as Options)[item];
+        if (option) output.push({ field: key, label: `${prefix}: ${option[locale]}`, referenceValue: item });
+      }
+    } else if (definition.kind === 'text' && typeof value === 'string' && value.trim()) {
+      output.push({ field: key, label: `${prefix}: ${value}`, referenceValue: null });
+    }
+  }
+  return output;
+}

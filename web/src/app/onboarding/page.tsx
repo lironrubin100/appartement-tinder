@@ -35,10 +35,18 @@ export default async function OnboardingPage({
     .select('*')
     .eq('profile_id', user.id)
     .maybeSingle();
+  const [{ data: lifestyle }, { data: privateLifestyle }, { data: photos }] = await Promise.all([
+    supabase.from('profile_lifestyle').select('*').eq('profile_id', user.id).maybeSingle(),
+    supabase.from('profile_lifestyle_private').select('*').eq('profile_id', user.id).maybeSingle(),
+    supabase.from('profile_photos').select('*').eq('profile_id', user.id).order('display_order').order('id'),
+  ]);
   return (
     <ResidentOnboarding
       profile={profile}
       privateProfile={privateProfile}
+      lifestyle={lifestyle}
+      privateLifestyle={privateLifestyle}
+      initialPhotos={photos ?? []}
       returnTo={returnTo}
       locale={locale}
     />

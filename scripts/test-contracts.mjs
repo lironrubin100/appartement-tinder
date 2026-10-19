@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { taxonomy, residentFields, apartmentFields, requiredResidentFields, scoringContract,
   parseResidentFacts, parseApartmentFacts, parseResidentPreferences, publicResidentFacts,
-  applianceViews, parseBills, billsIncluded, adaptLegacyTags } from '../web/src/lib/contracts/taxonomy.ts';
+  applianceViews, parseBills, billsIncluded, adaptLegacyTags, localizedResidentFacts } from '../web/src/lib/contracts/taxonomy.ts';
 import { resolveConfig, publicConfig, structuralLimits } from '../web/src/lib/contracts/config.ts';
 
 test('all 31 approved headings map once and scoring weights stay 12/15', () => {
@@ -129,4 +129,14 @@ test('reference pet mismatch remains explicit and other animals are unknown',()=
   assert.equal(scorePair(noPets,dog).score,86);
   const other=person({pets:{answered:true,values:['other']}},{pet_preference_answered:true,accepted_pet_types:['other']});
   assert.equal(scorePair(noPets,other).factors.R11,null);
+});
+
+test('public fact formatting uses canonical labels and never legacy identity/private inputs',()=>{
+  assert.deepEqual(localizedResidentFacts({phone:'private'},'en'),[]);
+  assert.deepEqual(localizedResidentFacts({gender_dynamic:'coed_anyone'},'he'),[]);
+  const result=localizedResidentFacts({cleanliness:'very_tidy',pets:{answered:true,values:[]},music_habits:{answered:true,values:['headphones']}},'en');
+  assert.equal(result.find(t=>t.field==='cleanliness').referenceValue,'very_tidy');
+  assert.match(result.find(t=>t.field==='pets').label,/None/);
+  assert.equal(result.find(t=>t.field==='pets').referenceValue,null);
+  assert.match(result.find(t=>t.field==='music_habits').label,/Headphones/);
 });

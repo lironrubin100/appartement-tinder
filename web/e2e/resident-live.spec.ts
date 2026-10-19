@@ -2,6 +2,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync, existsSync } from 'node:fs';
 import type { Database } from '../src/types/database';
+import { completeCanonicalResident } from './canonical-fixture';
 
 // Real accounts, browser sessions, Storage, RPCs and Realtime; no route mocks.
 const env = Object.fromEntries(
@@ -78,23 +79,14 @@ test('new resident, accepted introduction, configurable group and private viewin
       [cc, 'QA C applicant'],
       [cd, 'QA D outsider'],
     ] as const) {
-      const existing = await api.from('profiles').select('onboarded').single();
-      if (!existing.data?.onboarded)
-        expect(
-          (
-            await api.rpc('save_onboarding', {
-              p_name: name,
-              p_resident: true,
-              p_birth_date: '2000-02-20',
-              p_phone: '0500000000',
-              p_agency: '',
-              p_bio: 'QA resident bio',
-              p_tags: { cleanliness: 'clean' },
-              p_complete: true,
-            })
-          ).error
-        ).toBeNull();
+      const user = await api.auth.getUser();
+      expect(user.error).toBeNull();
+      await completeCanonicalResident(api, user.data.user!.id, name);
     }
+
+    const connectedProfile = await ca.from('profiles_public').select('*').eq('id', fixtures[5].id).single();
+    expect(connectedProfile.error).toBeNull();
+    const connectedName = connectedProfile.data!.name!;
 
     console.info('Resident QA: initial login and draft');
     // A first-time resident fills a private draft, resumes and completes it.
@@ -106,23 +98,25 @@ test('new resident, accepted introduction, configurable group and private viewin
       await a
         .getByRole('button', { name: 'Yes, I’m looking for roommates' })
         .click();
-      await a.getByLabel('Your display name').fill('QA A resident');
+      await a.getByLabel('Full name (private)').fill('QA A resident');
       await a.getByPlaceholder('DD/MM/YYYY').fill('15032000');
       await expect(a.getByPlaceholder('DD/MM/YYYY')).toHaveValue('15/03/2000');
       await a
-        .getByLabel('A little about you (optional)')
+        .getByLabel('A little about you (required)')
         .fill('QA A public bio');
-      await a.getByText('Your lifestyle (optional)', { exact: true }).click();
-      await a.getByLabel('Cleanliness', { exact: true }).selectOption('clean');
+      await a.getByLabel('Shared-space cleanliness', { exact: true }).selectOption('tidy_shared');
+      await a.getByLabel('Sleep schedule', { exact: true }).selectOption('regular');
+      await a.getByLabel('Social life and guests', { exact: true }).selectOption('occasional');
+      await a.getByLabel('Smoking habits', { exact: true }).selectOption('none');
       console.info('Resident QA: upload profile photo');
       await a
-        .getByLabel('Profile photo (optional)')
+        .getByLabel('Upload photo')
         .setInputFiles({
           name: 'profile.png',
           mimeType: 'image/png',
           buffer: png,
         });
-      await expect(a.getByText('Photo saved', { exact: true })).toBeVisible();
+      await expect(a.getByRole('img', { name: 'Primary photo', exact: true })).toBeVisible();
       await a.getByRole('button', { name: 'Save and finish later' }).click();
       await expect(a.getByRole('status')).toHaveText('Details saved');
       expect(
@@ -130,7 +124,7 @@ test('new resident, accepted introduction, configurable group and private viewin
           .data
       ).toEqual([]);
       await a.reload();
-      await expect(a.getByLabel('Your display name')).toHaveValue(
+      await expect(a.getByLabel('Full name (private)')).toHaveValue(
         'QA A resident'
       );
       await expect(a.getByPlaceholder('DD/MM/YYYY')).toHaveValue('15/03/2000');
@@ -176,7 +170,7 @@ test('new resident, accepted introduction, configurable group and private viewin
       for (
         let n = 0;
         n < 15 &&
-        !(await a.getByRole('heading', { name: /QA B connected/ }).isVisible());
+        !(await a.getByRole('heading', { name: connectedName, exact: true }).isVisible());
         n++
       ) {
         await a.getByRole('button', { name: 'Pass', exact: true }).click();
@@ -185,12 +179,12 @@ test('new resident, accepted introduction, configurable group and private viewin
         ).toBeEnabled();
       }
       await expect(
-        a.getByRole('heading', { name: /QA B connected/ })
+        a.getByRole('heading', { name: connectedName, exact: true })
       ).toBeVisible();
       await a.getByRole('button', { name: 'Introduce yourself' }).click();
       await a
         .getByLabel('What caught your attention?')
-        .selectOption(`${fixtures[5].id}:cleanliness:clean`);
+        .selectOption(`${fixtures[5].id}:canonical.cleanliness:tidy_shared`);
       await a
         .getByRole('button', { name: 'Send introduction', exact: true })
         .click();
@@ -245,7 +239,7 @@ test('new resident, accepted introduction, configurable group and private viewin
       .getByRole('button', { name: 'Create a group', exact: true })
       .click();
     await a.getByLabel('Group name', { exact: true }).fill('QA group journey');
-    await a.getByLabel('QA B connected', { exact: true }).check();
+    await a.getByLabel(connectedName, { exact: true }).check();
     await a
       .getByRole('button', { name: 'Create and send invitations' })
       .click();
@@ -402,6 +396,7 @@ test('new resident, accepted introduction, configurable group and private viewin
       .click();
     await owner.getByLabel('Full name', { exact: true }).fill('QA owner');
     await owner.getByLabel('Contact phone', { exact: true }).fill('0500000000');
+    await owner.getByLabel('I confirm I am at least 18 years old', { exact: true }).check();
     await owner.getByRole('button', { name: 'Continue', exact: true }).click();
     await expect(owner).toHaveURL('/en/my-listings');
     await owner.goto('/en/compose');

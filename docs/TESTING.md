@@ -30,7 +30,7 @@ git diff --check
 ```powershell
 # From web; creates local ignored files only, with no remote writes or outbound email.
 npm run qa:prepare
-git check-ignore .env.qa.local .qa/provision.sql .qa/cleanup.sql .qa/verify.sql .qa/run.json
+git check-ignore .env.qa.local .qa/provision.sql .qa/prepare-cleanup.sql .qa/cleanup.sql .qa/verify.sql .qa/run.json
 ```
 
 This generates exactly nine fresh UUIDs, `qa-resident-<uuid>@example.invalid` emails and random passwords. It refuses to overwrite an unfinished fixture manifest. The ignored `.qa/run.json` records target URL and IDs; `.env.qa.local` holds credentials. Never commit or show them. Do not use real email signup to work around missing fixtures.
@@ -69,15 +69,26 @@ If Chromium is absent, use installed Chrome/Edge through `PLAYWRIGHT_CHANNEL` or
 
 Realtime lessons: authenticate the channel with the current session before subscribing; use a unique channel per mounted effect; wait for both subscription and replication readiness; catch up and deduplicate by server message sequence. Tests must observe recipient delivery without reload and then verify reload persistence. Do not label a joined socket as a passing chat test.
 
-## 5. Clean up even after a failed test
+## 5. Explicitly dispose of temporary fixtures, or retain owner demos
 
-Keep the fixture manifest until all cleanup is verified. Tests attempt upload cleanup, but the coordinator must complete and confirm it:
+The owner currently wants useful synthetic demos retained. **Do not run disposal for retained demos.** Keep their ignored fixture manifests, uploads and evidence for inspection. A failed test does not authorize deleting a retained demo or reusing it as a pristine fixture.
+
+When this exact run is explicitly being discarded, retain its manifest until all cleanup is verified. Completed canonical residents protect their last gallery/Storage photo. First review `.qa/prepare-cleanup.sql` against the current target and exact IDs, then apply it through the authorized database connector. New runs generate this ignored SQL automatically. For a run created before that file existed, generate it locally (no remote action):
+
+```powershell
+# From web; requires explicit disposal intent, generates SQL only.
+node scripts/qa-fixtures.mjs prepare-cleanup --discard-fixtures
+```
+
+Use the same `QA_FIXTURE_COUNT`, `QA_FIXTURE_PREFIX`, `QA_FIXTURE_MANIFEST` and `QA_FIXTURE_DIRECTORY` environment overrides used to prepare a custom run; never point the default helper at unrelated manifests. The generated disposal-preparation transaction verifies exact expected QA emails, rejects conversations/groups with outside participants or administrators, locks only these fixture profiles, and sets only their `onboarded=false`. It preserves fixture identities and owner sign-in so Storage removal can use ordinary owner permissions. This is scoped fixture disposal SQL, not an application RPC, schema migration or permission bypass available to users. Do not apply it to retained demos or real users, and do not broaden a failed external-peer guard.
+
+After that transaction succeeds on the confirmed target:
 
 ```powershell
 npm run qa:storage
 ```
 
-This signs in each recorded owner, removes only its UUID-prefix objects in `apartment-photos` and `profile-photos` through the ordinary Storage API, and signs out. It refuses a target mismatch or unexpected nested folders. It never deletes Storage metadata using SQL.
+The Storage helper signs in and preflights **every** exact fixture before deleting any object's bytes. If any profile is still completed, or any identity/target check fails, it stops before deleting either bucket and explains the preparation step. Once all fixtures are explicitly de-onboarded, it removes only their UUID-prefix objects in `apartment-photos` and `profile-photos` through ordinary owner Storage APIs and signs out. It refuses unexpected nested folders. Never delete Storage metadata using SQL. Avoid concurrent fixture editing or onboarding during this disposal window; recover from an unexpected failure using the exact ignored run manifest rather than widening scope.
 
 Apply `.qa/cleanup.sql` with the same authorized database connector/project. It guards exact IDs and expected QA emails, refuses mixed conversations/groups or leftover Storage objects, deletes only fixture conversations/groups/listings/sessions/users in one transaction and relies on existing foreign-key cascades. Do not broaden a failed guard; inspect the specific dependency. Then execute `.qa/verify.sql`. All five results (users, profiles, listings, groups, Storage objects) must be zero.
 
@@ -87,7 +98,7 @@ Only after observing those zero counts:
 npm run qa:forget -- --verified-clean
 ```
 
-This removes the temporary credentials and SQL files. If cleanup fails, keep ignored files for recovery and record the IDs and failed step in the owning handoff without passwords. Stop only the server started for this run. For the next run, use fresh fixtures rather than silently reusing onboarded accounts.
+This removes the temporary credentials and SQL files, including `prepare-cleanup.sql`. If cleanup fails, keep ignored files for recovery and record the IDs and failed step in the owning handoff without passwords. Stop only the server started for this run. For the next run, use fresh fixtures rather than silently reusing onboarded accounts.
 
 ## 6. Record the outcome
 

@@ -6,10 +6,13 @@ import { createClient } from '@/utils/supabase/client';
 export function DefaultHomeSelect({
   userId,
   initialHome,
+  locale = 'he',
 }: {
   userId: string;
   initialHome: 'discover' | 'map';
+  locale?: 'he' | 'en';
 }) {
+  const t = (he: string, en: string) => locale === 'en' ? en : he;
   const [home, setHome] = useState(initialHome);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -27,14 +30,14 @@ export function DefaultHomeSelect({
       .eq('id', userId);
 
     setSaving(false);
-    setMessage(error ? 'לא הצלחנו לשמור את הבחירה.' : 'הבחירה נשמרה.');
+    setMessage(error ? t('לא הצלחנו לשמור את הבחירה.', 'Could not save your preference.') : t('הבחירה נשמרה.', 'Preference saved.'));
     if (error) setHome(previousHome);
   }
 
   return (
     <fieldset className="px-4 py-4">
-      <legend className="font-medium text-ink">מסך פתיחה</legend>
-      <p className="mt-1 text-sm text-muted-text">המסך שיוצג בכל פתיחה של האפליקציה</p>
+      <legend className="font-medium text-ink">{t('מסך פתיחה', 'Startup screen')}</legend>
+      <p className="mt-1 text-sm text-muted-text">{t('המסך שיוצג בכל פתיחה של האפליקציה', 'The screen shown when you open the app')}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {(['discover', 'map'] as const).map((value) => (
           <label
@@ -50,7 +53,7 @@ export function DefaultHomeSelect({
               onChange={() => updateHome(value)}
               className="h-4 w-4 accent-orange"
             />
-            {value === 'discover' ? 'חיפוש שותפים' : 'מפה'}
+            {value === 'discover' ? t('חיפוש שותפים', 'Discover') : t('מפה', 'Map')}
           </label>
         ))}
       </div>

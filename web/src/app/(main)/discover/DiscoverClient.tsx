@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button, Modal, Avatar } from '@/components/ui';
 import { createClient } from '@/utils/supabase/client';
-import { localizedTags } from '@/utils/profileTags';
+import { localizedResidentFacts } from '@/lib/contracts/taxonomy';
 import type { Locale } from '@/utils/navigation';
 import type { Database } from '@/types/database';
 type Person = Database['public']['Views']['profiles_public']['Row'];
@@ -42,6 +42,7 @@ export default function DiscoverClient({
         ? [people[0]]
         : []
       : ((groups[0]?.members ?? []) as Person[]);
+  const visibleTraits = (person: Person) => localizedResidentFacts('lifestyle_facts' in person ? person.lifestyle_facts : undefined, locale);
   function dismiss() {
     if (view === 'individual') setPeople((x) => x.slice(1));
     else setGroups((x) => x.slice(1));
@@ -171,21 +172,11 @@ export default function DiscoverClient({
                   </summary>
                   <p className="mt-2 whitespace-pre-wrap">{p.bio}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {localizedTags(locale).flatMap((c) => {
-                      const label = c.options.find(
-                        (o) => o.value === p[c.key]
-                      )?.label;
-                      return label
-                        ? [
-                            <span
-                              key={c.key}
-                              className="rounded-full bg-orange-soft px-3 py-1 text-sm"
-                            >
-                              {label}
-                            </span>,
-                          ]
-                        : [];
-                    })}
+                    {visibleTraits(p).map((trait, index) => (
+                      <span key={`${trait.field}:${index}`} className="rounded-full bg-orange-soft px-3 py-1 text-sm">
+                        {trait.label}
+                      </span>
+                    ))}
                   </div>
                 </details>
               </section>
@@ -264,21 +255,14 @@ export default function DiscoverClient({
                 className="w-full rounded-xl border border-card-border p-3"
               >
                 <option value="bio">{t('הפרופיל', 'The profile')}</option>
-                {members.flatMap((p) =>
-                  localizedTags(locale).flatMap((c) => {
-                    const o = c.options.find((o) => o.value === p[c.key]);
-                    return o
-                      ? [
-                          <option
-                            key={`${p.id}:${c.key}`}
-                            value={`${p.id}:${c.key}:${o.value}`}
-                          >
-                            {p.name} · {o.label}
-                          </option>,
-                        ]
-                      : [];
-                  })
-                )}
+                {members.flatMap((p) => visibleTraits(p).flatMap((trait) =>
+                  trait.referenceValue === null ? [] : [
+                    <option key={`${p.id}:${trait.field}:${trait.referenceValue}`}
+                      value={`${p.id}:canonical.${trait.field}:${trait.referenceValue}`}>
+                      {p.name} · {trait.label}
+                    </option>
+                  ]
+                ))}
               </select>
             </label>
             <label className="block space-y-2">

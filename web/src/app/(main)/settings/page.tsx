@@ -9,29 +9,31 @@ import { ConvertToLister } from './ConvertToLister';
 import { signOut } from '../profile/actions';
 import { Bell, LogOut, Settings2 } from 'lucide-react';
 import { headers } from 'next/headers';
+import { localePath } from '@/utils/navigation';
 
 export default async function SettingsPage({
   localeOverride,
 }: {
   localeOverride?: 'he' | 'en';
 } = {}) {
+  const locale = localeOverride ?? ((await headers()).get('x-shutaf-locale') === 'en' ? 'en' : 'he');
+  const t = (he: string, en: string) => locale === 'en' ? en : he;
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect(localePath('/login', locale));
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('notifications_enabled, default_home, mode')
     .eq('id', user.id)
     .single();
-  if (!profile) redirect('/login');
+  if (!profile) redirect(localePath('/login', locale));
 
   const { data: privateProfile } = await supabase
     .from('profile_private')
     .select('phone, agency_name')
     .eq('profile_id', user.id)
     .maybeSingle();
-  const locale = localeOverride ?? ((await headers()).get('x-shutaf-locale') === 'en' ? 'en' : 'he');
 
   return (
     <main className="min-h-[calc(100vh-80px)] bg-page-bg px-4 py-6 sm:px-6 sm:py-8">
@@ -53,26 +55,26 @@ export default async function SettingsPage({
                 <Bell className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
-                <h2 id="preferences-heading" className="font-semibold text-ink">העדפות</h2>
-                <p className="text-sm text-muted-text">כך Shutaf עובדת בשבילך</p>
+                <h2 id="preferences-heading" className="font-semibold text-ink">{t('העדפות', 'Preferences')}</h2>
+                <p className="text-sm text-muted-text">{t('כך Shutaf עובדת בשבילך', 'Make Shutaf work for you')}</p>
               </div>
             </div>
             <div className="divide-y divide-card-border border-t border-card-border">
               <div className="flex items-center justify-between gap-4 px-4 py-4">
                 <div>
-                  <p className="font-medium text-ink">התראות באימייל</p>
-                  <p className="mt-1 text-sm text-muted-text">עדכונים על התאמות והודעות חדשות</p>
+                  <p className="font-medium text-ink">{t('התראות באימייל', 'Email notifications')}</p>
+                  <p className="mt-1 text-sm text-muted-text">{t('עדכונים על התאמות והודעות חדשות', 'Updates about introductions and new messages')}</p>
                 </div>
-                <NotificationsToggle userId={user.id} initialEnabled={profile.notifications_enabled} />
+                <NotificationsToggle locale={locale} userId={user.id} initialEnabled={profile.notifications_enabled} />
               </div>
               {profile.mode !== 'lister' && (
-                <DefaultHomeSelect userId={user.id} initialHome={profile.default_home === 'map' ? 'map' : 'discover'} />
+                <DefaultHomeSelect locale={locale} userId={user.id} initialHome={profile.default_home === 'map' ? 'map' : 'discover'} />
               )}
             </div>
           </section>
 
           <section aria-labelledby="privacy-heading" className="overflow-hidden rounded-shutaf-lg border border-card-border bg-white">
-            <h2 id="privacy-heading" className="sr-only">פרטיות</h2>
+            <h2 id="privacy-heading" className="sr-only">{t('פרטיות', 'Privacy')}</h2>
             <PrivacySummary />
           </section>
 
@@ -86,8 +88,8 @@ export default async function SettingsPage({
 
           <section aria-labelledby="account-heading" className="overflow-hidden rounded-shutaf-lg border border-card-border bg-white">
             <div className="px-4 py-4">
-              <h2 id="account-heading" className="font-semibold text-ink">חשבון</h2>
-              <p className="mt-1 text-sm text-muted-text">פעולות חשבון ואבטחה</p>
+              <h2 id="account-heading" className="font-semibold text-ink">{t('חשבון', 'Account')}</h2>
+              <p className="mt-1 text-sm text-muted-text">{t('פעולות חשבון ואבטחה', 'Account and security')}</p>
             </div>
             <div className="divide-y divide-card-border border-t border-card-border">
               <form action={signOut}>
@@ -95,8 +97,8 @@ export default async function SettingsPage({
                   <span className="flex items-center gap-3">
                     <LogOut className="h-5 w-5 text-muted-text" aria-hidden="true" />
                     <span>
-                      <span className="block font-medium text-ink">התנתקות</span>
-                      <span className="mt-1 block text-sm text-muted-text">התנתקות מהמכשיר הזה</span>
+                      <span className="block font-medium text-ink">{t('התנתקות', 'Sign out')}</span>
+                      <span className="mt-1 block text-sm text-muted-text">{t('התנתקות מהמכשיר הזה', 'Sign out from this device')}</span>
                     </span>
                   </span>
                   <span className="text-muted-text" aria-hidden="true">‹</span>

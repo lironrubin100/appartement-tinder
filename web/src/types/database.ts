@@ -15,6 +15,18 @@ export type Database = {
   };
   public: {
     Tables: {
+      profile_lifestyle: {
+        Row: { profile_id: string; taxonomy_version: number; facts: Json; disclosed_fields: string[]; revision: number; updated_at: string };
+        Insert: { profile_id: string; taxonomy_version?: number; facts?: Json; disclosed_fields?: string[]; revision?: number; updated_at?: string };
+        Update: { facts?: Json; disclosed_fields?: string[]; revision?: number; updated_at?: string };
+        Relationships: [];
+      };
+      profile_lifestyle_private: {
+        Row: { profile_id: string; preferences: Json; updated_at: string };
+        Insert: { profile_id: string; preferences?: Json; updated_at?: string };
+        Update: { preferences?: Json; updated_at?: string };
+        Relationships: [];
+      };
       apartment_interests: {
         Row: {
           apartment_id: string;
@@ -989,6 +1001,8 @@ export type Database = {
       };
       profile_private: {
         Row: {
+          full_name: string | null;
+          adult_confirmed_at: string | null;
           agency_name: string | null;
           birth_date: string | null;
           budget_max: number | null;
@@ -1002,6 +1016,8 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          full_name?: string | null;
+          adult_confirmed_at?: string | null;
           agency_name?: string | null;
           birth_date?: string | null;
           budget_max?: number | null;
@@ -1015,6 +1031,8 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          full_name?: string | null;
+          adult_confirmed_at?: string | null;
           agency_name?: string | null;
           birth_date?: string | null;
           budget_max?: number | null;
@@ -1399,6 +1417,7 @@ export type Database = {
       };
       profiles_public: {
         Row: {
+          lifestyle_facts: Json;
           age: number | null;
           bio: string | null;
           cleanliness: string | null;
@@ -1427,6 +1446,16 @@ export type Database = {
       };
     };
     Functions: {
+      save_lister_profile: {
+        Args: { p_name: string; p_phone: string; p_agency: string; p_expected_revision: number; p_request_key: string };
+        Returns: Json;
+      };
+
+      save_resident_profile: {
+        Args: { p_name: string; p_birth_date: string | null; p_phone: string; p_bio: string; p_facts: Json; p_preferences: Json; p_disclosed_fields: string[]; p_complete: boolean; p_expected_revision: number; p_request_key: string };
+        Returns: Json;
+      };
+
       send_chat_message: {
         Args: { p_conversation_id: string; p_body: string; p_request_key: string };
         Returns: { id: string; conversation_id: string; sender_id: string | null; kind: string; body: string; created_at: string; message_seq: number; request_key: string | null }[];
@@ -1478,31 +1507,7 @@ export type Database = {
       };
       discover_individuals: {
         Args: { p_after?: string | null };
-        Returns: {
-          age: number | null;
-          bio: string | null;
-          cleanliness: string | null;
-          climate: string | null;
-          cooking_dynamics: string | null;
-          financial_splitting: string | null;
-          gender: string | null;
-          gender_dynamic: string | null;
-          id: string | null;
-          kitchen_dietary: string | null;
-          miluim_reserve_duty: string | null;
-          music_vibe: string | null;
-          name: string | null;
-          noise_tolerance: string | null;
-          pets: string | null;
-          photo_url: string | null;
-          public_badges: string[] | null;
-          relationship_status: string | null;
-          sleep_schedule: string | null;
-          smoking: string | null;
-          social_guests: string | null;
-          study_habits: string | null;
-          weekend_routine: string | null;
-        }[];
+        Returns: Database['public']['Views']['profiles_public']['Row'][];
         SetofOptions: {
           from: '*';
           to: 'profiles_public';

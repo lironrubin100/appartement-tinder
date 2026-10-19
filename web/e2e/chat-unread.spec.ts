@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import type { Database } from '../src/types/database';
+import { completeCanonicalResident } from './canonical-fixture';
 
 // Real ordinary accounts and Realtime, never route mocks. Missing fixtures fail.
 const settings = () => Object.fromEntries(readFileSync('.env.local', 'utf8')
@@ -34,13 +35,7 @@ for (const [locale, offset, viewport] of [
     try {
       for (let i = 0; i < 2; i++) {
         expect((await apis[i].auth.signInWithPassword(accounts[i])).error).toBeNull();
-        const existing = await apis[i].from('profiles').select('onboarded').eq('id', accounts[i].id).single();
-        expect(existing.error).toBeNull();
-        if (!existing.data?.onboarded) expect((await apis[i].rpc('save_onboarding', {
-          p_name: `Unread ${locale} ${i}`, p_resident: true, p_birth_date: '2000-01-01',
-          p_phone: '0500000000', p_agency: '', p_bio: 'Synthetic unread QA',
-          p_tags: { cleanliness: 'clean' }, p_complete: true,
-        })).error).toBeNull();
+        await completeCanonicalResident(apis[i], accounts[i].id, `Unread ${locale} ${i}`);
       }
       const intro = await apis[0].rpc('send_introduction', {
         p_user: accounts[1].id, p_group: null, p_message: '', p_ref_tag: 'bio',

@@ -115,10 +115,9 @@
     },
     "SL01.2": {
       "status": "verification-incomplete",
-      "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md",
+      "handoff": "docs/workstreams/2026-10-19-sl01-canonical-profile.md",
       "worktree": "/workspace/appartement-tinder",
-      "reason": "Bounded18+ completion/direct DOB guard implemented and live-verified with11 ordinary-client checks. Remaining full packet work includes required photo/bio/four core traits with canonical contract adoption and auth/provider acceptance; age fix alone is not packet completion.",
-      "revisit_when": "Continue remaining SL01.2 approved profile requirements using completed SL00.2 manifest and retained demo fixtures; create separate exact-ID fresh fixtures for pristine completion tests."
+      "outcome": "Canonical resident/lister profiles, private names/preferences, required owned photo/core facts, draft/reload/edit/startup/signout and authorization verified with real clients/HE-EN browsers. Full Google account-provider roundtrip remains unexecuted; configured provider start alone is not that acceptance. Independent following local work may consume named verified intake/capability artifacts per protocol."
     },
     "SL02.1": {
       "status": "pending"

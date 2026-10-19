@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { existsSync, readFileSync } from 'node:fs';
 import type { Database } from '../src/types/database';
+import { completeCanonicalResident } from './canonical-fixture';
 
 // This covers the explicit Settings transition against a real authenticated
 // client. It deliberately uses fresh disposable QA identities only.
@@ -37,19 +38,7 @@ async function signIn(page: Page, fixture: number, locale: 'en' | 'he') {
 async function makeResident(fixture: number, name: string) {
   const api = client();
   expect((await api.auth.signInWithPassword(fixtures[fixture])).error).toBeNull();
-  const profile = await api.from('profiles').select('onboarded,mode').eq('id', fixtures[fixture].id).single();
-  if (!profile.data?.onboarded) {
-    expect((await api.rpc('save_onboarding', {
-      p_name: name,
-      p_resident: true,
-      p_birth_date: '2000-02-20',
-      p_phone: '0500000000',
-      p_agency: '',
-      p_bio: 'Conversion QA resident',
-      p_tags: { cleanliness: 'clean' },
-      p_complete: true,
-    })).error).toBeNull();
-  }
+  await completeCanonicalResident(api, fixtures[fixture].id, name);
   await api.auth.signOut();
 }
 

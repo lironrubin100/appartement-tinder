@@ -6,9 +6,11 @@ import { createClient } from '@/utils/supabase/client';
 export function NotificationsToggle({
   userId,
   initialEnabled,
+  locale = 'he',
 }: {
   userId: string;
   initialEnabled: boolean;
+  locale?: 'he' | 'en';
 }) {
   const [enabled, setEnabled] = useState(initialEnabled);
   const [busy, setBusy] = useState(false);
@@ -25,7 +27,7 @@ export function NotificationsToggle({
       .update({ notifications_enabled: next })
       .eq('id', userId);
     if (error) {
-      setMessage('לא הצלחנו לשמור את ההעדפה. נסו שוב.');
+      setMessage(locale === 'en' ? 'Could not save your preference. Please retry.' : 'לא הצלחנו לשמור את ההעדפה. נסו שוב.');
     } else {
       setEnabled(next);
     }
@@ -40,7 +42,7 @@ export function NotificationsToggle({
         disabled={busy}
         role="switch"
         aria-checked={enabled}
-        aria-label="התראות באימייל"
+        aria-label={locale === 'en' ? 'Email notifications' : 'התראות באימייל'}
         className={`flex h-7 w-12 items-center rounded-full p-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 ${enabled ? 'justify-start bg-orange' : 'justify-end bg-neutral-bg'}`}
         dir="ltr"
       >

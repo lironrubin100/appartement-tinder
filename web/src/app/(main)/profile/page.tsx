@@ -3,28 +3,10 @@ import Link from 'next/link';
 import { createServerClient } from '@/utils/supabase/server';
 import { Avatar, Button, Badge } from '@/components/ui';
 import { signOut } from './actions';
-import { localizedTagLabel } from '@/utils/profileTags';
+import { factLabel, residentLabel, initialFacts, ageAt } from '@/lib/resident-profile';
+import { residentFields, type ResidentField } from '@/lib/contracts/taxonomy';
 import { headers } from 'next/headers';
 import { localePath } from '@/utils/navigation';
-
-const TAG_COLUMNS = [
-  'gender_dynamic',
-  'cleanliness',
-  'sleep_schedule',
-  'social_guests',
-  'noise_tolerance',
-  'music_vibe',
-  'climate',
-  'smoking',
-  'kitchen_dietary',
-  'cooking_dynamics',
-  'pets',
-  'weekend_routine',
-  'relationship_status',
-  'study_habits',
-  'financial_splitting',
-  'miluim_reserve_duty',
-] as const;
 
 export default async function ProfilePage() {
   const locale =
@@ -36,7 +18,7 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect(localePath('/login', locale));
   }
 
   const { data: profile } = await supabase
@@ -46,7 +28,7 @@ export default async function ProfilePage() {
     .single();
 
   if (!profile) {
-    redirect('/login');
+    redirect(localePath('/login', locale));
   }
 
   const { data: privateProfile } = await supabase
@@ -55,22 +37,10 @@ export default async function ProfilePage() {
     .eq('profile_id', user.id)
     .maybeSingle();
 
-  const today = new Date();
-  const age = privateProfile?.birth_date
-    ? Math.max(
-        0,
-        today.getUTCFullYear() -
-          new Date(privateProfile.birth_date).getUTCFullYear() -
-          (today <
-          new Date(
-            `${today.getUTCFullYear()}-${new Date(privateProfile.birth_date).getUTCMonth() + 1}-${new Date(privateProfile.birth_date).getUTCDate()}`
-          )
-            ? 1
-            : 0)
-      )
-    : null;
-
-  const setTags = TAG_COLUMNS.filter((key) => profile[key]);
+  const { data: lifestyle } = await supabase.from('profile_lifestyle').select('facts,disclosed_fields').eq('profile_id', user.id).maybeSingle();
+  const facts = initialFacts(lifestyle?.facts);
+  const age = privateProfile?.birth_date ? ageAt(privateProfile.birth_date) : null;
+  const setTags = (Object.keys(facts) as ResidentField[]).filter(key => key in residentFields && facts[key] != null);
 
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)]">
@@ -146,7 +116,7 @@ export default async function ProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {setTags.map((key) => (
                   <Badge key={key}>
-                    {localizedTagLabel(key, profile[key], locale)}
+                    {residentLabel(key, locale)}: {factLabel(key, facts[key], locale)}{' '}{lifestyle?.disclosed_fields.includes(key) ? (en ? '(public)' : '(ציבורי)') : (en ? '(private)' : '(פרטי)')}
                   </Badge>
                 ))}
               </div>

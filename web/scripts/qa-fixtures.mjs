@@ -24,6 +24,31 @@ async function fixtures() {
   if (new Set(rows.map(r => r.id)).size !== fixtureCount) throw new Error('Duplicate fixture identity.');
   return rows;
 }
+function cleanupGuard(rows) {
+  const ids = rows.map(r => quote(r.id)).join(',');
+  const scope = `(${ids})`;
+  return `do $$ begin
+ if exists(select 1 from auth.users where id in ${scope} and email <> '${fixturePrefix}-' || id::text || '@example.invalid') then raise exception 'QA identity mismatch'; end if;
+ if exists(select 1 from public.conversation_members a join public.conversation_members b using(conversation_id) where a.user_id in ${scope} and b.user_id not in ${scope}) then raise exception 'Non-QA conversation participant: inspect before cleanup'; end if;
+ if exists(select 1 from public.groups g join public.group_members m on m.group_id=g.id where g.admin_id in ${scope} and m.user_id not in ${scope}) then raise exception 'Non-QA group member: inspect before cleanup'; end if;
+ if exists(select 1 from public.group_members a join public.groups g on g.id=a.group_id where a.user_id in ${scope} and g.admin_id not in ${scope}) then raise exception 'Non-QA group administrator: inspect before cleanup'; end if;
+end $$;`;
+}
+function prepareCleanupSql(rows, url) {
+  const scope = `(${rows.map(r => quote(r.id)).join(',')})`;
+  return `-- Explicit disposal stage ONLY; never apply to retained owner demos. Target: ${url}.
+-- Review this run's exact IDs and existing external-peer guard before execution.
+-- Does not remove Storage metadata or objects; ordinary owner API cleanup follows.
+begin;
+${cleanupGuard(rows)}
+-- Serialize with ordinary profile completion/edit/conversion before changing capability.
+select id from public.profiles where id in ${scope} order by id for update;
+update public.profiles p set onboarded=false
+where p.id in ${scope}
+and exists(select 1 from auth.users u where u.id=p.id and u.email='${fixturePrefix}-' || u.id::text || '@example.invalid');
+commit;
+`;
+}
 async function settings() {
   const text = await readFile(at('.env.local'), 'utf8');
   const env = Object.fromEntries(text.split(/\r?\n/).filter(l => /^[A-Z_]+=/.test(l)).map(l => {
@@ -43,11 +68,7 @@ if (command === 'prepare') {
   await mkdir(at(fixtureDirectory), { recursive: true });
   const ids = rows.map(r => quote(r.id)).join(',');
   const scope = `(${ids})`;
-  const guard = `do $$ begin
- if exists(select 1 from auth.users where id in ${scope} and email <> '${fixturePrefix}-' || id::text || '@example.invalid') then raise exception 'QA identity mismatch'; end if;
- if exists(select 1 from public.conversation_members a join public.conversation_members b using(conversation_id) where a.user_id in ${scope} and b.user_id not in ${scope}) then raise exception 'Non-QA conversation participant: inspect before cleanup'; end if;
- if exists(select 1 from public.groups g join public.group_members m on m.group_id=g.id where g.admin_id in ${scope} and m.user_id not in ${scope}) then raise exception 'Non-QA group member: inspect before cleanup'; end if;
-end $$;`;
+  const guard = cleanupGuard(rows);
   const provision = `-- Target: ${url}; verify project and authorization before applying. Contains temporary secrets.\nbegin;\n` + rows.map(r => `insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,confirmation_token,recovery_token,email_change_token_new,email_change,email_change_token_current,phone_change,phone_change_token,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
 values(${quote(r.id)},'00000000-0000-0000-0000-000000000000','authenticated','authenticated',${quote(r.email)},extensions.crypt(${quote(r.password)},extensions.gen_salt('bf')),now(),'','','','','','','','{"provider":"email","providers":["email"]}','{"full_name":"QA resident journey"}',now(),now());
 insert into auth.identities(id,provider_id,user_id,identity_data,provider,created_at,updated_at) values(gen_random_uuid(),${quote(r.id)},${quote(r.id)},jsonb_build_object('sub',${quote(r.id)},'email',${quote(r.email)},'email_verified',true),'email',now(),now());`).join('\n') + '\ncommit;\n';
@@ -66,9 +87,17 @@ commit;\n`;
  (select count(*) from public.groups where admin_id in ${scope}) as groups_remaining,
  (select count(*) from storage.objects where split_part(name,'/',1) in ${scope}) as storage_objects_remaining;\n`;
   await writeFile(at(fixtureManifest), JSON.stringify(rows, null, 2), { mode: 0o600, flag: 'wx' });
-  for (const [name, body] of Object.entries({ 'provision.sql': provision, 'cleanup.sql': cleanup, 'verify.sql': verify, 'run.json': JSON.stringify({ created: new Date().toISOString(), target: url, ids: rows.map(r => r.id) }, null, 2) }))
+  for (const [name, body] of Object.entries({ 'provision.sql': provision, 'prepare-cleanup.sql': prepareCleanupSql(rows, url), 'cleanup.sql': cleanup, 'verify.sql': verify, 'run.json': JSON.stringify({ created: new Date().toISOString(), target: url, ids: rows.map(r => r.id) }, null, 2) }))
     await writeFile(at(artifact(name)), body, { mode: 0o600 });
   console.log(`Prepared ${fixtureCount} isolated identities for ${url}. SQL is in ${fileURLToPath(at(`${fixtureDirectory}/`))}. No database changes performed.`);
+} else if (command === 'prepare-cleanup') {
+  if (!process.argv.includes('--discard-fixtures')) throw new Error('Retained demos must remain intact. To generate disposal SQL for an explicitly discarded run, use prepare-cleanup --discard-fixtures. No remote action is automatic.');
+  const rows = await fixtures();
+  const { url } = await settings();
+  const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
+  if (run.target !== url || JSON.stringify(run.ids) !== JSON.stringify(rows.map(row => row.id))) throw new Error('Fixture target/IDs differ from the current run; refusing cleanup preparation.');
+  await writeFile(at(artifact('prepare-cleanup.sql')), prepareCleanupSql(rows, url), { mode: 0o600 });
+  console.log(`Generated only ${artifact('prepare-cleanup.sql')}. Review and explicitly apply it to the confirmed target only when discarding these exact synthetic fixtures. No remote mutation performed.`);
 } else if (command === 'check') {
   const rows = await fixtures();
   const { url, key } = await settings();
@@ -81,18 +110,26 @@ commit;\n`;
     await client.auth.signOut();
   }
   console.log(`All ${fixtureCount} isolated QA accounts can sign in. Acceptance will not silently skip.`);
-} else if (command === 'storage') {
+ } else if (command === 'storage') {
   const rows = await fixtures();
   const { url, key } = await settings();
   const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
-  if (run.target !== url) throw new Error('Fixture project differs from current environment.');
-  for (const row of rows) {
-    const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-    const result = await client.auth.signInWithPassword(row);
-    if (result.error || result.data.user?.id !== row.id) throw new Error('Cannot sign in to clean this QA owner. Keep manifest for recovery.');
-    try {
+  if (run.target !== url || JSON.stringify(run.ids) !== JSON.stringify(rows.map(row => row.id))) throw new Error('Fixture project/IDs differ from current run.');
+  const sessions = [];
+  try {
+    // Check every owner before removing ANY bucket's objects. In particular,
+    // never partially remove listing photos before discovering a later profile guard.
+    for (const row of rows) {
+      const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+      sessions.push({ row, client });
+      const result = await client.auth.signInWithPassword({ email: row.email, password: row.password });
+      if (result.error || result.data.user?.id !== row.id) throw new Error('Cannot sign in to preflight this QA owner. Keep manifest for recovery.');
+      const profile = await client.from('profiles').select('id,onboarded').eq('id', row.id).single();
+      if (profile.error || profile.data?.id !== row.id) throw new Error('Cannot verify exact own profile before cleanup. No Storage removal started.');
+      if (profile.data.onboarded) throw new Error(`Completed fixture retained: no Storage removal started. If this run is explicitly being discarded, generate prepare-cleanup --discard-fixtures, review/apply ${artifact('prepare-cleanup.sql')} through the authorized connector, then retry storage. Never apply that SQL to retained demos.`);
+    }
+    for (const { row, client } of sessions) {
       for (const bucket of ['apartment-photos', 'profile-photos']) {
-        // Current upload contract is <owner UUID>/<filename>; repeatedly take first page after removal.
         for (let page = 0; page < 100; page++) {
           const list = await client.storage.from(bucket).list(row.id, { limit: 100 });
           if (list.error) throw list.error;
@@ -103,14 +140,14 @@ commit;\n`;
           if (page === 99) throw new Error('Storage cleanup exceeded its bound; keep manifest.');
         }
       }
-    } finally { await client.auth.signOut(); }
-  }
+    }
+  } finally { for (const { client } of sessions) await client.auth.signOut().catch(() => {}); }
   console.log('Removed only fixture-owned uploads through ordinary owner Storage permissions. Now apply cleanup.sql, then verify.sql.');
 } else if (command === 'forget') {
   // The agent must have checked zero counts through the connector before supplying this flag.
   if (!process.argv.includes('--verified-clean')) throw new Error('First verify all five database counts are zero; then use --verified-clean.');
   await fixtures();
-  for (const name of [fixtureManifest, artifact('provision.sql'), artifact('cleanup.sql'), artifact('verify.sql'), artifact('run.json')])
+  for (const name of [fixtureManifest, artifact('provision.sql'), artifact('prepare-cleanup.sql'), artifact('cleanup.sql'), artifact('verify.sql'), artifact('run.json')])
     if (await exists(name)) await unlink(at(name));
   console.log('Removed temporary credentials and this run\'s SQL files.');
-} else throw new Error('Usage: node scripts/qa-fixtures.mjs prepare|check|storage|forget --verified-clean');
+} else throw new Error('Usage: node scripts/qa-fixtures.mjs prepare|check|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
