@@ -77,6 +77,17 @@ export function ResidentOnboarding({
       );
       return;
     }
+    if (complete && branch === 'resident' && date) {
+      const today = new Date();
+      const birth = new Date(date + 'T12:00:00Z');
+      const age = today.getUTCFullYear() - birth.getUTCFullYear()
+        - (today.getUTCMonth() < birth.getUTCMonth()
+          || (today.getUTCMonth() === birth.getUTCMonth() && today.getUTCDate() < birth.getUTCDate()) ? 1 : 0);
+      if (age < 18) {
+        setError(t('ההרשמה לדיירים מגיל 18 ומעלה.', 'Residents must be at least 18 years old.'));
+        return;
+      }
+    }
     setBusy(true);
     setError('');
     setSaved(false);
@@ -220,8 +231,8 @@ export function ResidentOnboarding({
                   />
                   <span className="text-xs text-muted-text">
                     {t(
-                      'רק הגיל יוצג בפרופיל.',
-                      'Only your age appears on your profile.'
+                      'ההרשמה מגיל 18 ומעלה. רק הגיל יוצג בפרופיל.',
+                      'You must be at least 18. Only your age appears on your profile.'
                     )}
                   </span>
                 </label>

@@ -6,6 +6,7 @@ import { localePath } from '@/utils/navigation';
 import { Avatar } from '@/components/ui';
 import { createServerClient } from '@/utils/supabase/server';
 import PendingLikes from './PendingLikes';
+import InboxSync from './InboxSync';
 
 function initials(name: string) {
   return name
@@ -101,6 +102,7 @@ export default async function ChatsPage() {
 
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)]">
+      {user && <InboxSync userId={user.id} />}
       <div className="max-w-2xl mx-auto bg-white">
         <div className="border-b border-card-border px-6 py-8 sticky top-0 bg-white z-10">
           <h1 className="text-3xl font-bold text-ink">
@@ -158,7 +160,7 @@ export default async function ChatsPage() {
                   </p>
                 </div>
                 {conversation.unread_count > 0 && (
-                  <div className="w-6 h-6 rounded-full bg-orange text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  <div aria-label={en ? 'Unread messages' : 'הודעות שלא נקראו'} className="w-6 h-6 rounded-full bg-orange text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
                     {conversation.unread_count > 9
                       ? '9+'
                       : conversation.unread_count}

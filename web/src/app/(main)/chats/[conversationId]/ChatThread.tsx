@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Send } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { localePath, type Locale } from '@/utils/navigation';
@@ -45,41 +45,76 @@ export default function ChatThread({
   const [connection, setConnection] = useState('connecting');
   const [connectionAttempt, setConnectionAttempt] = useState(0);
 
+  const catchUpCursor = useRef(initialMessages.at(-1)?.message_seq ?? 0);
+  const pendingSend = useRef<{ body: string; key: string } | null>(null);
+  const acknowledgedSeq = useRef(0);
+  useEffect(() => { acknowledgedSeq.current = 0; }, [conversationId]);
+  const newestRenderedSeq = messages.at(-1)?.message_seq ?? 0;
+
   useEffect(() => {
     const supabase = createClient();
-    void supabase
-      .from('conversation_members')
-      .update({ last_read_at: new Date().toISOString() })
-      .eq('conversation_id', conversationId)
-      .eq('user_id', currentUserId);
-  }, [conversationId, currentUserId]);
+    let active = true;
+    let inFlight = false;
+    const markRenderedRead = async () => {
+      if (document.visibilityState !== 'visible' || !document.hasFocus() ||
+          newestRenderedSeq <= acknowledgedSeq.current || inFlight) return;
+      inFlight = true;
+      const { data, error: readError } = await supabase.rpc('mark_conversation_read', {
+        p_conversation_id: conversationId,
+        p_through_seq: newestRenderedSeq,
+      });
+      inFlight = false;
+      if (active && !readError && data !== null) {
+        acknowledgedSeq.current = Math.max(acknowledgedSeq.current, data);
+      }
+    };
+    // The effect runs after React commits the displayed message list.
+    void markRenderedRead();
+    const onFocus = () => { void markRenderedRead(); };
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('online', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      active = false;
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('online', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [conversationId, newestRenderedSeq, connection]);
 
   useEffect(() => {
     const supabase = createClient();
     let active = true;
     let joined = false;
     let replicationReady = false;
+    let catchingUp = false;
     const catchUp = async () => {
-      if (!joined || !replicationReady) return;
-      const { data, error: loadError } = await supabase
-        .from('messages')
-        .select('id,sender_id,kind,body,created_at,message_seq')
-        .eq('conversation_id', conversationId)
-        .order('message_seq', { ascending: false })
-        .limit(100);
-      if (!active || !joined || !replicationReady) return;
-      if (loadError) {
-        setConnection('offline');
-        return;
-      }
-      setMessages((current) => {
-        const merged = new Map(current.map((m) => [m.id, m]));
-        for (const m of data ?? []) merged.set(m.id, m);
-        return [...merged.values()].sort(
-          (a, b) => a.message_seq - b.message_seq
-        );
-      });
-      setConnection('live');
+      if (!joined || !replicationReady || catchingUp) return;
+      catchingUp = true;
+      try {
+        // Fetch forward from the last persisted page, so a long disconnect
+        // cannot silently leave a hole between old state and the latest 100.
+        while (active && joined && replicationReady) {
+          const { data, error: loadError } = await supabase
+            .from('messages')
+            .select('id,sender_id,kind,body,created_at,message_seq')
+            .eq('conversation_id', conversationId)
+            .gt('message_seq', catchUpCursor.current)
+            .order('message_seq', { ascending: true })
+            .limit(100);
+          if (!active || !joined || !replicationReady) return;
+          if (loadError) { setConnection('offline'); return; }
+          const batch = data ?? [];
+          setMessages((current) => {
+            const merged = new Map(current.map((m) => [m.id, m]));
+            for (const m of batch) merged.set(m.id, m);
+            return [...merged.values()].sort((a, b) => a.message_seq - b.message_seq);
+          });
+          if (batch.length) catchUpCursor.current = batch.at(-1)!.message_seq;
+          if (batch.length < 100) break;
+        }
+        if (active && joined && replicationReady) setConnection('live');
+      } finally { catchingUp = false; }
     };
     const channel = supabase
       .channel(`conversation:${conversationId}:${crypto.randomUUID()}`, {
@@ -103,13 +138,6 @@ export default function ChatThread({
                   (a, b) => a.message_seq - b.message_seq
                 )
           );
-          if (message.sender_id !== currentUserId) {
-            void supabase
-              .from('conversation_members')
-              .update({ last_read_at: new Date().toISOString() })
-              .eq('conversation_id', conversationId)
-              .eq('user_id', currentUserId);
-          }
         }
       )
       .on('system', {}, (payload) => {
@@ -168,15 +196,15 @@ export default function ChatThread({
     setSending(true);
     setError(null);
     const supabase = createClient();
+    if (pendingSend.current?.body !== trimmedBody) {
+      pendingSend.current = { body: trimmedBody, key: crypto.randomUUID() };
+    }
     const { data, error: insertError } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        sender_id: currentUserId,
-        body: trimmedBody,
-      })
-      .select('id, sender_id, kind, body, created_at, message_seq')
-      .single();
+      .rpc('send_chat_message', {
+        p_conversation_id: conversationId,
+        p_body: trimmedBody,
+        p_request_key: pendingSend.current.key,
+      }).single();
     if (insertError)
       setError(
         en
@@ -189,6 +217,7 @@ export default function ChatThread({
           ? current
           : [...current, data].sort((a, b) => a.message_seq - b.message_seq)
       );
+      pendingSend.current = null;
       setBody('');
     }
     setSending(false);

@@ -1,0 +1,59 @@
+# Cloud MVP continuation — 19 October 2026
+
+Owner: current autonomous cloud goal; checkout `/workspace/appartement-tinder`, branch `work`, starting SHA `c2df1494251be183f1e723dd8fb046a2a2d7fc50` (clean).
+
+## Plan and boundaries
+
+- Repair cross-platform dispatch validation without rewriting historical paths/evidence; reconcile SL01.1 from its published owning handoff.
+- Execute SL08.1: server-authoritative monotonic sequence read markers, exclude sender/system events from unread counts, acknowledge rendered messages only while visible/focused. Preserve existing membership/history/block guards and RPC return shape.
+- Decisions F1/F2/F5/F8/H1 and TECHNICAL_DEFAULTS. Typing, leave UI and broad inbox changes remain SL08.2.
+- Run PGlite authorization/state checks, type/lint/build and ordinary-client/browser acceptance when an identified disposable local backend is reproducible. Do not count static checks as browser acceptance.
+- Prefer available local Docker; no hosted mutation before target/data/ownership gates. No fixtures yet. Standing bounded publication authorization applies, but do not publish application callers before compatible backend migration.
+- Update ledger/shared register/inventory, then continue independently eligible work.
+
+## Findings
+
+- Dispatcher rejected historical Windows absolute evidence paths on Linux; fixed using both path dialects. Eight selector tests pass, including Windows/UNC/POSIX evidence and relative-path rejection.
+- SL01.1 ledger was stale; reconciled from owning handoff's 18 October checks and 19 October exact published SHA. No fresh cloud/browser acceptance implied.
+- SL08.1 defect confirmed in source: client wall-clock writes on mount and insert, even hidden tabs; inbox compares timestamps instead of sequence. Sequence and group visibility cutoff already exist.
+- Initial dependency installation failed because default npm cache `/home/agent/.npm` is outside writable roots; retry uses `/tmp/shutaf-npm-cache`, preserving lockfile integrity.
+
+## Current state
+
+SL08.1 implementation in progress. No migration applied to hosted project, no accounts/uploads created, no deployment performed. This checkout is the calling task's sole registered checkout; preserve it until integration or recoverable handoff.
+
+## Verification checkpoint
+
+- 19 October: dependency installation succeeded using writable npm cache, lockfile unchanged. Existing PGlite baseline passed before implementation.
+- Selector tests: 8 passed; planning checker: 26 slices/21 packets valid.
+- Read-marker SQL checks passed in disposable PGlite, including own vs recipient unread, stale-tab GREATEST, high-sequence clamp followed by a genuinely new unread message, legacy future-clock immunity, system event exclusion, protected marker column, anon/outsider/blocked/removed-member denial and group history cutoff.
+- Added retry-safe send RPC and client request-key retention; PGlite verifies same-key/same-body returns one message, changed payload conflicts and outsider send is denied. This is not a new rate-limit/typing implementation; those remain broader SL08 work.
+- TypeScript and targeted ESLint passed for the initial marker/inbox changes. One production build exited 0 before the final retry-safe RPC/client edits; final build must follow final changes.
+- Actual HE desktop/EN 390px two-context browser test added (`web/e2e/chat-unread.spec.ts`), with hidden-tab unread, focus read, stale marker, offline persisted-message catch-up/reload and outsider assertion. Not yet executed; no mock/browser acceptance claimed.
+- Local Docker daemon is available, no preexisting containers. Latest CLI cannot create `/home/agent/.supabase` on read-only home; pinned official CLI 2.83.0 runs from `/tmp`. Repository config contains newer unsupported keys, so an isolated generated CLI config is used under `/tmp/shutaf-local-runtime`, project ID `shutaf-local-runtime`; no repository config rewrite.
+- Local runtime images are downloading/extracting. `scripts/local-chat-baseline.mjs` emits the exact synthetic chat baseline chain without applying it. It deliberately omits unrelated listing migrations and is not a live schema clone. No hosted mutation or fixtures yet.
+
+## Runtime block and independent continuation
+
+- Local Supabase start failed while registering the Postgres 17.6.1.095 image layer: `no space left on device` with the managed `vfs` driver. The CLI's automatic retry was interrupted. Six other runtime images were downloaded; no containers/users/volumes were created. Driver/data-root were not changed.
+- The shared register does not explicitly confirm zero real users and no competing migration owner, so hosted mutation remains gated. Asked the owner for that factual state asynchronously; no approval inferred from elapsed time.
+- SL08.1 is blocked specifically on ordinary-user/browser/Realtime verification and compatible release; implemented SQL/type checks are not packet completion. No server running, no hosted mutation.
+- Continue independent SL00.2 (depends only on SL00.1 baseline): typed TAXONOMY manifest, HE/EN labels, private/public validation boundaries, fail-safe config registry and compatibility adapters. Existing onboarding/UI and production scoring remain unchanged in this contract-generation packet. Source C2/J1–J7/J10–J14, DATA_CONTRACTS and TECHNICAL_DEFAULTS read. Do not collect gender/marital/military identity or duplicate appliances.
+
+## Completed verification and hosted continuation — 19 October
+
+Owner clarified: no real app users until explicitly announced otherwise; current cloud executor owns the project/database exclusively; retain useful exact-ID demo accounts and stop repeatedly requesting fixture permission. AGENTS and shared register now preserve that instruction. This satisfied the existing local-first hosted fallback after Docker's vfs/space failure.
+
+- Confirmed `npbduvjnqnbydolmdpsc` = active healthy `roomie-beersheva`, Postgres17. Read migration history and actual chat columns/function bodies before applying; no preexisting sequence-marker/send RPC. Existing live `app_config` and two18October config migrations are absent from source; no recreation or global config edits performed.
+- Applied/rechecked `monotonic_chat_read_markers`, live version `20261019211840` (local reviewed file `20261019210659_monotonic_chat_read_markers.sql`). Added monotonic/clamped marker, compatible inbox return shape, authenticated-only retry-safe send and account membership invalidation publication. Both new RPCs deny anonymous execute. Existing membership/history/symmetric-block checks retained.
+- Applied/rechecked `resident_adult_validation`, live version `20261019212312` (local `20261019212059_resident_adult_validation.sql`). Server18+ completion check and direct-private-DOB guard; draft/lister behavior unchanged. This is a bounded SL01.2 fix, **not full SL01.2 completion** (photo/bio/core-trait completion and Google acceptance remain).
+- SL00.2: all31 category IDs, HE/EN enum labels, typed facts/private preferences, missing-vs-none, exact appliance references, bill unknowns, safe public/config allowlists, legacy meanings requiring review and test-only scoring oracle. Existing UI/SQL storage/scoring consumers unchanged. Protected config persistence/actual canonical questionnaire adoption remain successor work. Eleven contracts tests pass;8 selector tests pass.
+- Final PGlite resident/chat tests passed, including monotonic markers, own/system unread exclusion, clamping/future-clock immunity, group cutoff, anonymous/outsider/block/removal denial, concurrent-key-compatible idempotent RPC behavior and body conflict. Focused adult-resident PGlite tests passed. Full TypeScript, targeted ESLint and final production build exited0; planning checker validates26 slices/21 packets. Root-directory ESLint invocation failed configuration lookup; rerun from web is the applicable check.
+- Real browser acceptance: `e2e/chat-unread.spec.ts`, EN390x844 and HE1280x900, **2 passed in48.5s**, owned local Next server + shared Supabase, no route/data mocks. Covers 10/11/12 sender counts, actual visible/focused rendered read, stale marker, concurrent retry ID/body conflict, live message through recipient browser, hidden tab retaining unread, offline persisted catch-up, reload dedupe, inbox refresh and outsider marker denial. Playwright native-focus override was disabled for the background thread; Xvfb/full Chromium were required to model real focus. Earlier environment/test-harness attempts failed on proxy trust, repeated fixture text and default focus emulation; those are not counted as passes.
+- Cloud browser TLS: automatic review initially denied persistent NSS trust modification; owner explicitly approved enabling all needed tests in response to that concrete question. Authorized CA import + browser launch in the same permission context preserved TLS verification. No verification bypass used.
+- Ordinary-client hosted age acceptance: **11 checks passed**, exact fixture index4; draft17 allowed, completion17 rejects atomically, exact18 succeeds, own direct17/null rejected and19 correction allowed. Evidence `web/.qa/age-acceptance.json` (ignored; server target/fixture IDs/outcomes, no credentials).
+- Ordinary-client hosted chat authorization: **4 scenario groups passed**, exact indices5/6/4; outsider history/read/send denial, direct sequence-write denial, concurrent retry returns same ID/different body conflicts, symmetric block hides inbox/history and rejects read/send for both parties. Temporary exact-ID block removed; demos retained. Evidence `web/.qa/chat-authorization.json`.
+- Retained fixture policy:9 new synthetic identities in ignored `.env.qa.local` + `.qa/run.json`; original existing demos untouched. No uploads in these checks. No accounts deleted by owner request; do not call zero-user cleanup a result. Fixture passwords never tracked; failure artifacts are ignored/private.
+- Security advisors compared before/after: existing view/RLS/auth advisories unchanged; authenticated-only function advisory count26→28 corresponds to the two intentional guarded new RPC endpoints. No new anonymous callable endpoint. Existing advisories are not claimed resolved (reference: https://supabase.com/docs/guides/database/database-linter).
+
+Publication: pending final integration at this checkpoint. Sole checkout remains `/workspace/appartement-tinder`, branch `work`; no additional worktree created. Next packet is remaining SL01.2 profile completion; broad packet must not be marked complete from the age fix alone.

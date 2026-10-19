@@ -12,7 +12,10 @@
     "test:acceptance": "node scripts/qa-fixtures.mjs check && playwright test e2e/listing-slices.spec.ts e2e/resident-auth-guest.spec.ts e2e/resident-live.spec.ts e2e/lister-conversion.spec.ts --workers=1",
     "qa:prepare": "node scripts/qa-fixtures.mjs prepare",
     "qa:storage": "node scripts/qa-fixtures.mjs storage",
-    "qa:forget": "node scripts/qa-fixtures.mjs forget"
+    "qa:forget": "node scripts/qa-fixtures.mjs forget",
+    "test:contracts": "node --test ../scripts/test-contracts.mjs ../scripts/test-next-work.mjs",
+    "test:age": "node ../scripts/test-resident-age.mjs",
+    "test:unread": "node scripts/qa-fixtures.mjs check && playwright test e2e/chat-unread.spec.ts --workers=1 --headed"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

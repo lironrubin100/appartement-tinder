@@ -331,18 +331,21 @@ export type Database = {
         Row: {
           conversation_id: string;
           last_read_at: string;
+          last_read_seq: number;
           user_id: string;
           visible_after_seq: number;
         };
         Insert: {
           conversation_id: string;
           last_read_at?: string;
+          last_read_seq?: number;
           user_id: string;
           visible_after_seq?: number;
         };
         Update: {
           conversation_id?: string;
           last_read_at?: string;
+          last_read_seq?: number;
           user_id?: string;
           visible_after_seq?: number;
         };
@@ -833,6 +836,7 @@ export type Database = {
           id: string;
           kind: string;
           message_seq: number;
+          request_key: string | null;
           sender_id: string | null;
         };
         Insert: {
@@ -842,6 +846,7 @@ export type Database = {
           id?: string;
           kind?: string;
           message_seq?: never;
+          request_key?: never;
           sender_id?: string | null;
         };
         Update: {
@@ -851,6 +856,7 @@ export type Database = {
           id?: string;
           kind?: string;
           message_seq?: number;
+          request_key?: never;
           sender_id?: string | null;
         };
         Relationships: [
@@ -1421,6 +1427,14 @@ export type Database = {
       };
     };
     Functions: {
+      send_chat_message: {
+        Args: { p_conversation_id: string; p_body: string; p_request_key: string };
+        Returns: { id: string; conversation_id: string; sender_id: string | null; kind: string; body: string; created_at: string; message_seq: number; request_key: string | null }[];
+      };
+      mark_conversation_read: {
+        Args: { p_conversation_id: string; p_through_seq: number };
+        Returns: number;
+      };
       reserve_geocoding_request: { Args: { p_actor: string }; Returns: boolean };
       pause_geocoding_provider: { Args: Record<PropertyKey, never>; Returns: undefined };
       accept_like: { Args: { p_like_id: string }; Returns: string };

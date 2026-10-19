@@ -1,6 +1,6 @@
 // Read-only packet dispatch. Planning readiness is never completion evidence.
 import { readFile, access } from 'node:fs/promises';
-import { resolve, dirname, isAbsolute } from 'node:path';
+import { resolve, dirname, posix, win32 } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export function validateExecution(manifest, ledger) {
@@ -16,7 +16,9 @@ export function validateExecution(manifest, ledger) {
     if (['in-progress', 'verification-incomplete'].includes(row.status) && (!row.handoff || !row.worktree)) errors.push(`${id}: active work requires handoff and worktree`);
     if (row.status === 'verified') {
       if (!row.handoff || !/^\d{4}-\d{2}-\d{2}T/.test(row.verified_at ?? '') || !row.outcome || !row.checks?.length || row.checks.some((c) => !c.command_or_scenario || c.result !== 'passed')) errors.push(`${id}: verified requires dated handoff, outcome and passed checks`);
-      if (!/^[a-f0-9]{40}$/.test(row.source_sha ?? '') || !row.worktree || !isAbsolute(row.worktree) || !/^(clean|[a-f0-9]{64})$/.test(row.diff_sha256 ?? '')) errors.push(`${id}: verified requires exact source SHA, absolute worktree and clean/diff SHA256`);
+      // Evidence may come from another OS; preserve its original absolute path.
+      const absoluteWorktree = typeof row.worktree === 'string' && (posix.isAbsolute(row.worktree) || win32.isAbsolute(row.worktree));
+      if (!/^[a-f0-9]{40}$/.test(row.source_sha ?? '') || !absoluteWorktree || !/^(clean|[a-f0-9]{64})$/.test(row.diff_sha256 ?? '')) errors.push(`${id}: verified requires exact source SHA, absolute worktree and clean/diff SHA256`);
       for (const dep of manifest.packets.find((p) => p.id === id).depends_on) if (ledger.packets?.[dep]?.status !== 'verified') errors.push(`${id}: verified with unverified prerequisite ${dep}`);
     }
     if (row.handoff && (!/^docs\/workstreams\/[A-Za-z0-9_.-]+\.md$/.test(row.handoff))) errors.push(`${id}: handoff must be a local workstream Markdown path`);
