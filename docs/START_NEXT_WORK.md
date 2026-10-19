@@ -4,7 +4,7 @@ Owner authorization: select and execute the next approved local MVP work autonom
 
 ## One reusable instruction
 
-> Continue the Shutaf MVP autonomously following AGENTS.md and docs/START_NEXT_WORK.md. Select the next eligible packet, implement the missing approved work, verify it and update the execution ledger and shared handoff. Continue to the next eligible packet while you can make meaningful progress. Preserve settled decisions and unrelated work; do not commit, push, apply hosted migrations or deploy without separate authorization.
+> Continue the Shutaf MVP autonomously following AGENTS.md and docs/START_NEXT_WORK.md. Select the next eligible packet, implement the missing approved work, verify it and update the execution ledger and shared handoff. Continue to the next eligible packet while you can make meaningful progress. Preserve settled decisions and unrelated work. Under the standing owner authorization of 19 October 2026, commit, non-force push, integrate and publish routine verified changes without another confirmation; ask only for critical actions. Hosted migrations retain AGENTS.md target/data/ownership gates.
 
 ## Bootstrap and location
 
@@ -51,4 +51,4 @@ For uncommitted implementation, save its relevant tracked diff and untracked-fil
 
 Ask only for a concrete new contradiction/missing product choice that changes approved behavior, unavailable credential/target access needed for remaining work, an approval-dependent external action, or competing active ownership. Batch known questions and continue independent authorized work. Do not treat cosmetic polish, future business hypotheses or generic public-launch preparations as a reason to interrupt local MVP work.
 
-Never infer authorization for commit/push/merge/hosted migration/deployment or real-user bulk notifications from this workflow. Prepare reviewable local work and name the exact remaining external action. If all local packets are verified, reconcile SL16 evidence and report the working demonstration plus actual remaining external gates; do not invent another roadmap or claim a public release/funding outcome.
+Apply the direct standing owner publication authorization in AGENTS.md; do not re-ask for routine verified commits, non-force pushes, integration or deployment. Hosted migrations and real-user bulk notifications retain their specific gates; critical actions require approval. If all local packets are verified, reconcile SL16 evidence and report the working demonstration plus actual remaining external gates; do not invent another roadmap or claim a public release/funding outcome.

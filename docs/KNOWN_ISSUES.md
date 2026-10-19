@@ -2,6 +2,13 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, reproduced, fixed and verified states distinct. A report does not authorize unrelated implementation during planning.
 
+## MAP-CARTO-KEY-001 — Basemap shows API KEY REQUIRED instead of streets
+
+- Reported and reproduced: 19 October 2026, authenticated production Chrome at `appartement-tinder-appartinder.vercel.app/map`; owner confirmed. Listings and markers load.
+- State: reproduced; required key integration in progress. See `workstreams/2026-10-19-carto-api-key.md`.
+- Cause: CARTO raster tile URL lacks its required Basemaps API key; HTTP 200 serves watermark imagery. Existing network-error recovery cannot detect this successful placeholder response.
+- Acceptance: valid key configured before build; real streets and OSM/CARTO attribution visible on Hebrew/English desktop and 390px; missing configuration shows an explicit state rather than requesting keyless tiles. No claim of live repair until configured and visually verified.
+
 ## CHAT-UNREAD-001 — Unread badge sticks at one, including own sent message
 
 - Reported: owner, 16 October 2026, questionnaire Q25.

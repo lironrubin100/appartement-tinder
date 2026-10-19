@@ -19,6 +19,13 @@ const BEER_SHEVA_CENTER: [number, number] = [31.2530, 34.7915];
 // DECISIONS.md D14: cluster below zoom 14. Individual pins from zoom 14 up.
 const CLUSTER_MAX_ZOOM = 14;
 
+// CARTO Basemaps browser key, restricted to the app's origins in CARTO.
+// NEXT_PUBLIC values are embedded by Next.js at build time.
+const CARTO_BASEMAPS_KEY = process.env.NEXT_PUBLIC_CARTO_BASEMAPS_KEY?.trim();
+const CARTO_TILE_URL = CARTO_BASEMAPS_KEY
+  ? `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(CARTO_BASEMAPS_KEY)}`
+  : null;
+
 // Fixed-size box (not content-sized) so the div's own bounding rect — what
 // Leaflet uses for click hit-testing — actually covers the visible pill.
 // A CSS-transform-positioned auto-width tag leaves a 0x0 hit target.
@@ -97,14 +104,14 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
         scrollWheelZoom
         className="w-full h-full rounded-shutaf-lg"
       >
-        <TileLayer
+        {CARTO_TILE_URL && <TileLayer
           key={tileLayerKey}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url={CARTO_TILE_URL}
           eventHandlers={{
             tileerror: () => setTileError(true),
           }}
-        />
+        />}
         <MarkerClusterGroup
           iconCreateFunction={clusterIcon}
           disableClusteringAtZoom={CLUSTER_MAX_ZOOM}
@@ -121,20 +128,22 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
           ))}
         </MarkerClusterGroup>
       </MapContainer>
-      {tileError && (
+      {(!CARTO_TILE_URL || tileError) && (
         <div
           className="absolute inset-0 z-[1000] flex flex-col items-center justify-center gap-3 rounded-shutaf-lg bg-page-bg/90 p-6 text-center"
           role="alert"
         >
           <p className="font-semibold text-ink">{en ? 'Could not load the map' : 'לא הצלחנו לטעון את המפה'}</p>
-          <p className="text-sm text-muted-text">{en ? 'Check your connection and try again.' : 'בדקו את החיבור ונסו שוב.'}</p>
-          <button
+          <p className="text-sm text-muted-text">{!CARTO_TILE_URL
+            ? (en ? 'You can still browse the listings beside the map.' : 'אפשר להמשיך לעיין בדירות שברשימה לצד המפה.')
+            : (en ? 'Check your connection and try again.' : 'בדקו את החיבור ונסו שוב.')}</p>
+          {CARTO_TILE_URL && <button
             type="button"
             onClick={retryTiles}
             className="min-h-11 rounded-shutaf-md bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark"
           >
             {en ? 'Retry' : 'ניסיון חוזר'}
-          </button>
+          </button>}
         </div>
       )}
     </div>
