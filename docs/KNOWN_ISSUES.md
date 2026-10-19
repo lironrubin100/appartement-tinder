@@ -5,7 +5,7 @@ This is a defect register, not a feature roadmap. Keep owner-reported, reproduce
 ## MAP-CARTO-KEY-001 — Basemap shows API KEY REQUIRED instead of streets
 
 - Reported and reproduced: 19 October 2026, authenticated production Chrome at `appartement-tinder-appartinder.vercel.app/map`; owner confirmed. Listings and markers load.
-- State: reproduced; required key integration in progress. See `workstreams/2026-10-19-carto-api-key.md`.
+- State: key repair published in `085a5f9`; authenticated desktop production shows actual streets and 15/15 loaded keyed tile images. Follow-up 390px check reproduced a pre-existing zero-height Leaflet container; focused height fix in progress. See `workstreams/2026-10-19-carto-api-key.md`.
 - Cause: CARTO raster tile URL lacks its required Basemaps API key; HTTP 200 serves watermark imagery. Existing network-error recovery cannot detect this successful placeholder response.
 - Acceptance: valid key configured before build; real streets and OSM/CARTO attribution visible on Hebrew/English desktop and 390px; missing configuration shows an explicit state rather than requesting keyless tiles. No claim of live repair until configured and visually verified.
 

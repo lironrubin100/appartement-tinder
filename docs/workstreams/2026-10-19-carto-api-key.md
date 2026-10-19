@@ -35,3 +35,12 @@ Updated: 19 October 2026 (Asia/Jerusalem).
 - Previous fresh local checks: TypeScript, focused ESLint and production build all passed; `git diff --check` and planning validation passed after the policy-only edits. No application code changed since the successful build.
 - Intended target: GitHub `lironrubin100/appartement-tinder`, non-force fast-forward `master`; Vercel project `prj_XAJx2MhiQegnszuLPjR0GiRG0Isk`, team `team_MFJ5mOsQxL74JqEmQDMA03Up`, Production. Remote master fetched and equals starting HEAD `87e7f11fbc3b9da1863014653ab3f0088da9b0f9` before commit. No unrelated commits to integrate.
 - Production acceptance after publication must verify real loaded streets with keyed requests, attribution and markers at HE/EN desktop/390px. Do not print the browser key or store it in tracked files.
+
+## First publication and phone regression
+
+- `085a5f92f66d62272758853258297561b529b8e1` pushed by normal fast-forward to master; remote SHA independently confirmed. Vercel Production `dpl_6edgE3AGkKVru7amXCdGawMn5xEY` reached READY and all production aliases were assigned.
+- Authenticated HE desktop Chrome: 13 listings, pins/clusters, actual streets and OSM/CARTO attribution visible; 15/15 rendered tiles had nonempty key and loaded. No watermark. Key value omitted from records.
+- Required 390x844 check found pre-existing layout defect: `.leaflet-container` measured width 343.2px and height 0px. Parent had only min-height, while nested Leaflet used percentage height; desktop flex stretching masked it.
+- Focused follow-up: give map parent explicit responsive height (`h-96`, desktop viewport height with 384px minimum), retain existing responsive layout and listing controls. Rebuild/focused lint before publication; verify HE/EN phone and desktop after release.
+- Primary checkout has unrelated dirty BUILD_PLAN.md/new plan work. It was not reset/merged. New standing policy copies and scoped shared records were synchronized; primary remains on historical local master and must not be treated as the live source.
+- Phone height fix: fresh production build (including TypeScript) and focused ESLint for both MapClient/LeafletMap passed; no schema/auth/query changes. Publishing this bounded follow-up under the owner's standing authorization.

@@ -115,7 +115,7 @@ export default function MapPage() {
       ) : (
         <div className="flex flex-col md:flex-row gap-6">
           {/* Map */}
-          <div className="flex-1 min-h-96 md:min-h-[calc(100vh-220px)]" data-testid="map-container">
+          <div className="h-96 md:h-[calc(100vh-220px)] md:min-h-96 md:flex-1" data-testid="map-container">
             {loading ? (
               <div className="w-full h-full rounded-shutaf-lg bg-neutral-bg-soft flex items-center justify-center">
                 <p className="text-muted-text">טוען מפה…</p>
