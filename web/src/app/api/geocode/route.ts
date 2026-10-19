@@ -26,18 +26,21 @@ export async function POST(request: Request) {
   }
   const key = process.env.GEOAPIFY_API_KEY?.trim();
   if (!key) { console.warn('geocode:missing_key'); return reply({ error: 'unavailable' }, 503); }
+  let stage = 'budget_client';
   try {
     const admin = createAdminClient();
+    stage = 'budget_request';
     const { data: allowed, error } = await admin.rpc('reserve_geocoding_request', { p_actor: user.id });
     // Missing/unavailable budget fails closed; manual entry stays available.
     if (error) { console.error('geocode:budget_unavailable', error.code); return reply({ error: 'budget_unavailable' }, 503); }
     if (!allowed) return reply({ error: 'rate_limited' }, 429);
+    stage = 'provider_request';
     const result = await lookupAddresses(query, body.language, key, user.id);
     if (result.status !== 200) console.warn('geocode:provider_unavailable', result.status);
     if (result.status === 429) await admin.rpc('pause_geocoding_provider');
     return reply(result.status === 200 ? { suggestions: result.suggestions } : { error: 'unavailable' }, result.status);
   } catch {
-    console.error('geocode:request_unavailable');
+    console.error('geocode:request_unavailable', stage);
     // Never log provider URLs/errors, address queries or raw results.
     return reply({ error: 'unavailable' }, 503);
   }
