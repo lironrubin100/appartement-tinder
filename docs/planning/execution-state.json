@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-17",
+  "updated_at": "2026-10-19",
   "meaning": "Progress only, not product authority. Initially pending means not reconciled by this plan, not missing implementation.",
   "priority": [
     "SL00.1",
@@ -34,26 +34,87 @@
       "verified_at": "2026-10-17T08:22:00Z",
       "outcome": "Named source and local-only test boundary established; PGlite and TypeScript baselines passed, with no local Supabase runtime or hosted mutation.",
       "checks": [
-        {"command_or_scenario": "npm run test:db; disposable PGlite migrations and RLS assertions", "result": "passed"},
-        {"command_or_scenario": "npx tsc --noEmit", "result": "passed"},
-        {"command_or_scenario": "git diff --check", "result": "passed"}
+        {
+          "command_or_scenario": "npm run test:db; disposable PGlite migrations and RLS assertions",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "npx tsc --noEmit",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "git diff --check",
+          "result": "passed"
+        }
       ]
     },
     "SL01.1": {
-      "status": "verification-incomplete",
+      "status": "verified",
       "handoff": "docs/workstreams/2026-10-17-sl01-intake-and-safe-browsing.md",
       "worktree": "C:/Users/User/.codex/worktrees/b6f7/appartement tinder",
-      "reason": "Local implementation, PGlite checks and the owner-authorized shared migration `20261017095908_lister_safe_browsing` pass structural verification. The Settings resident-to-lister conversion and migration `20261017101500_convert_resident_to_lister` also pass local PGlite/type/lint checks but are not applied to a hosted target. Required ordinary-user HE/EN browser acceptance remains incomplete; there are no live lister profiles for a non-invasive runtime assertion, and Docker CLI access is not yet authorized for this Windows session.",
-      "revisit_when": "The owner explicitly authorizes `20261017101500_convert_resident_to_lister` for a named target and a disposable resident/lister/group fixture is available for exact browser/cleanup validation, or Docker access is enabled for the local stack."
+      "source_sha": "ed601e38350fdbb097ce8d006883f007c7493a73",
+      "diff_sha256": "clean",
+      "verified_at": "2026-10-19T21:13:33.114Z",
+      "outcome": "Historical completion reconciled 19 October from owning handoff: actual 18 October EN phone and HE desktop conversion and focused Chats regression passed; exact published source ed601e3. No fresh cloud browser acceptance claimed.",
+      "checks": [
+        {
+          "command_or_scenario": "18 October PGlite, TypeScript and targeted ESLint, documented in owning handoff",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "18 October EN phone and HE desktop resident-to-lister browser conversion; focused Chats regression, documented in owning handoff",
+          "result": "passed"
+        }
+      ]
     },
     "SL08.1": {
-      "status": "pending"
+      "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md",
+      "worktree": "/workspace/appartement-tinder",
+      "source_sha": "95f333bb5d7587122e9e72a9296b48bd14e3f3e0",
+      "diff_sha256": "clean",
+      "verified_at": "2026-10-19T21:32:26.080Z",
+      "status": "verified",
+      "outcome": "Server-authorized monotonic/clamped sequence read markers, sender/system exclusion, retry-safe messages, forward reconnect catch-up and account inbox invalidation. Shared migration verified; HE desktop/EN390px real two-browser journeys passed plus ordinary-client authorization.",
+      "checks": [
+        {
+          "command_or_scenario": "PGlite chat/read/idempotency/history/outsider/block tests passed",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "e2e/chat-unread.spec.ts against owned local Next + npbduvjnqnbydolmdpsc:2 passed in48.5s; headed Chromium/native background focus",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "qa-chat-authorization.mjs:4 ordinary-client scenario groups passed; exact synthetic demo IDs retained and temporary block removed",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "Full TypeScript, targeted ESLint, final production build exit0",
+          "result": "passed"
+        }
+      ]
     },
     "SL00.2": {
-      "status": "pending"
+      "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md",
+      "worktree": "/workspace/appartement-tinder",
+      "source_sha": "95f333bb5d7587122e9e72a9296b48bd14e3f3e0",
+      "diff_sha256": "clean",
+      "verified_at": "2026-10-19T21:32:26.080Z",
+      "status": "verified",
+      "outcome": "Approved31-category typed facts/private preferences/HE-EN options/config contract and compatible legacy adapter generated;11 contracts tests including test-only C2/C13 scoring oracle pass. No canonical UI/SQL rollout claimed.",
+      "checks": [
+        {
+          "command_or_scenario": "node --test scripts/test-contracts.mjs:11 passed; typecheck, targeted ESLint and final production build exit0",
+          "result": "passed"
+        }
+      ]
     },
     "SL01.2": {
-      "status": "pending"
+      "status": "verification-incomplete",
+      "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md",
+      "worktree": "/workspace/appartement-tinder",
+      "reason": "Bounded18+ completion/direct DOB guard implemented and live-verified with11 ordinary-client checks. Remaining full packet work includes required photo/bio/four core traits with canonical contract adoption and auth/provider acceptance; age fix alone is not packet completion.",
+      "revisit_when": "Continue remaining SL01.2 approved profile requirements using completed SL00.2 manifest and retained demo fixtures; create separate exact-ID fresh fixtures for pristine completion tests."
     },
     "SL02.1": {
       "status": "pending"
