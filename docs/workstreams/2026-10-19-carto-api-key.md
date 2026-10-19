@@ -44,3 +44,11 @@ Updated: 19 October 2026 (Asia/Jerusalem).
 - Focused follow-up: give map parent explicit responsive height (`h-96`, desktop viewport height with 384px minimum), retain existing responsive layout and listing controls. Rebuild/focused lint before publication; verify HE/EN phone and desktop after release.
 - Primary checkout has unrelated dirty BUILD_PLAN.md/new plan work. It was not reset/merged. New standing policy copies and scoped shared records were synchronized; primary remains on historical local master and must not be treated as the live source.
 - Phone height fix: fresh production build (including TypeScript) and focused ESLint for both MapClient/LeafletMap passed; no schema/auth/query changes. Publishing this bounded follow-up under the owner's standing authorization.
+
+## Verified production outcome, 19 October 2026
+
+- Phone height commit `57d458c3fc90c68f3e7f1d76c092135c13c4cf75` pushed normally to master; Vercel Production `dpl_HSGqyZBPtzLDwJ36cPJ728X84RDk` reached READY and all 3 aliases were assigned.
+- Authenticated real Chrome at `appartement-tinder-appartinder.vercel.app`: HE and EN routes both visibly show actual street imagery, listing pins/clusters and OSM/CARTO attribution at desktop and 390x844. Phone Leaflet dimensions are 343.2x384, previously height zero. EN desktop dimensions 872x475.2. Existing Hebrew filter/listing copy on EN is pre-existing, outside this repair; this is locale-route map-render evidence, not full translation acceptance.
+- No backend writes, QA accounts, migrations, uploads, messages or paid resources. Existing owner session used for read-only checks. Temporary responsive viewport override reset; dedicated QA tab is ephemeral. No key values in tracked files.
+- Owner's follow-up clarified address autocomplete is the intended listing outcome; it is separate missing implementation, recorded under `2026-10-19-address-autocomplete`. Do not mark that feature fixed based on this map release.
+- a6de cleanup remains owner/next executor after this chat is inactive and committed history is preserved; do not remove the calling checkout. Primary dirty planning work remains intact.
