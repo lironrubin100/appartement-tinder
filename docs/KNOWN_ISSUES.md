@@ -12,7 +12,7 @@ This is a defect register, not a feature roadmap. Keep owner-reported, reproduce
 ## LISTING-ADDRESS-001 — Address autocomplete absent from live composer
 
 - Reported/reconciled: 19 October 2026. Owner clarified autocomplete was the reason for the provider change. Current ComposeForm has plain address plus manual latitude/longitude fields; no geocode API is present. Historical M01 was an unintegrated archived draft.
-- State: fixed and verified for bounded autocomplete, 19 October 2026. Application e485e92 published; real HE/EN lookup, clean duplicate-free sample labels and selection/edit invalidation checked. Signed selection/manual fallback, private quotas and six focused tests passed. Full listing lifecycle not rerun. See `workstreams/2026-10-19-address-autocomplete.md`.
+- State: fixed and verified for bounded autocomplete, 19 October 2026. Application 9d75218 published; real HE/EN lookup, parsed city/street/house fields, grouped city refinement and clean sample labels verified. Signed selection/manual fallback, private quotas, seven logic/SQL tests and HE/EN 390px mocked UI contracts passed. Full listing lifecycle not rerun. See `workstreams/2026-10-19-address-autocomplete.md`.
 
 ## CHAT-UNREAD-001 — Unread badge sticks at one, including own sent message
 
