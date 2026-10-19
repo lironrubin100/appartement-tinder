@@ -28,3 +28,17 @@
 - Mocked UI contract rerun passed for HE and EN at 390x844: keyboard selection fills coordinates/receipt, text edit invalidates both and confirmation, 429/retry, empty/network-error recovery and manual location confirmation; no browser page errors or horizontal overflow. These are synthetic provider responses, not real Geoapify quality proof. Temporary test routes removed and owned local server stopped. Final production rebuild underway.
 - Existing listing/resident integration specs updated to follow explicit manual-city/pin confirmation; their full multi-user listing-publish suites have not been rerun in this task (no fresh fixture setup or business-data mutation). Current acceptance scope is autocomplete selection/manual UI plus receipt/quota enforcement, not a new full listing lifecycle certification.
 - Final rebuild passed after removing only generated `.next/dev` types referencing the deleted temporary harness; production route list contains `/api/geocode` and no harness route. Final focused lint/diff checks passed. Source prepared for normal master push; real-provider acceptance follows deployment.
+
+## Initial publication / live verification in progress
+
+- `da18b429b9ef3696cfc13460360a27248fa9fe2c` pushed to master; Production deployment `dpl_4Rxw6TkfzX4y38RAkKMcNMvrjqeC` reached READY for that SHA.
+- Authenticated production form loaded, but live lookups show the recoverable unavailable state before any quota reservation. Both public canonical host and protected alias were checked. Alias direct unauthenticated API request is blocked by Vercel Authentication; canonical `appartement-tinder.vercel.app` correctly reaches app auth and returns sign_in 401. No protection settings changed.
+- Shared reserve RPC was independently exercised as service_role with exact synthetic actor `00000000-0000-4000-8000-000000000099` inside an explicit rolled-back transaction: true, with no retained test rows.
+- `35ece6d` adds only sanitized operational stage codes (no queries, raw errors, keys or user identifiers); TypeScript and focused ESLint passed. It was pushed to diagnose the live boundary. Completion remains verification-incomplete until actual suggestions work.
+
+## Real lookup works; owner-requested formatting follow-up
+
+- `6a84d5bcab9e27f2cb970fa2452699d7cd3b8574`, Production `dpl_9wpo9y9sD9sdwwgkm4D8NDN6fjKT`, reached READY. Added compatibility with the existing integration's `SUPABASE_SECRET_KEY` (server-only, legacy fallback retained). After this change, authenticated canonical production lookup returned HTTP 200 and real Hebrew Beer Sheva suggestions; selection populated coordinates and a signed receipt. Shared budget recorded real reservations. No listing was submitted.
+- Owner confirmed basic search works and reported noisy provider formatting/duplicate matches, with screenshot: same street/house/city repeated with different postcodes and city hyphenation.
+- Follow-up scope: display structured street + house number + city, omit postcode/country, normalize city hyphenation, collapse matching street/house/city variants even if provider coordinates differ, choose strongest provider building/confidence match, retain different house numbers/cities, label street-only accuracy honestly and isolate RTL label text. Still require owner pin confirmation; ranking is not proof of rooftop accuracy.
+- Added regression tests for the exact Hebrew duplication/formatting pattern and English labels. Type/lint/build and real-provider clean-label acceptance in progress; no further schema changes.

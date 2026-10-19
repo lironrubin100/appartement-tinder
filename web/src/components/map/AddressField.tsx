@@ -89,7 +89,10 @@ export default function AddressField({ locale }: { locale: Locale }) {
             <li key={suggestion.token} role="option" id={`${id}-option-${index}`} aria-selected={index === active}
               className={index === active ? 'bg-neutral-bg-soft' : ''}>
               <button type="button" tabIndex={-1} onMouseDown={(event) => event.preventDefault()}
-                onClick={() => select(suggestion)} className="min-h-11 w-full px-3 py-3 text-start text-sm hover:bg-neutral-bg-soft">{suggestion.label}</button>
+                onClick={() => select(suggestion)} className="min-h-11 w-full px-3 py-3 text-start text-sm hover:bg-neutral-bg-soft">
+                <bdi className="block" dir={locale === 'he' ? 'rtl' : 'ltr'}>{suggestion.label}</bdi>
+                {suggestion.accuracy === 'street' && <span className="mt-1 block text-xs text-muted-text">{t('התאמה לרחוב — בדקו את מספר הבית במפה', 'Street-level match — check the house number on the map')}</span>}
+              </button>
             </li>
           ))}
         </ul>

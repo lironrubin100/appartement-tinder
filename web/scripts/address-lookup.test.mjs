@@ -54,6 +54,29 @@ test('lookup sends correct locale/bias/filter and handles 429 without forwarding
   } finally { globalThis.fetch = original; }
 });
 
+test('Hebrew postcode/city variants collapse to one clean address, using the strongest building match', () => {
+  const row = { formatted: 'שדרות יצחק רגר 22, 8452566 באר שבע, ישראל', street: 'שדרות יצחק רגר', housenumber: '22',
+    city: 'באר שבע', country_code: 'il', lat: 31.25, lon: 34.79, result_type: 'building', rank: { confidence: 0.7 } };
+  const result = normalizeAddresses({ results: [row, { ...row, city: 'באר-שבע', formatted: 'שדרות יצחק רגר 22, 8434009 באר-שבע, ישראל',
+    lat: 31.251, rank: { confidence: 1, confidence_building_level: 1, match_type: 'full_match' } },
+    { ...row, housenumber: '24', formatted: 'another building' },
+    { ...row, city: 'עיר אחרת', formatted: 'another city' }] });
+  assert.equal(result.length, 3);
+  assert.equal(result[0].label, 'שדרות יצחק רגר 22, באר שבע');
+  assert.equal(result[0].latitude, 31.251);
+  assert.ok(!result[0].label.includes('8434009'));
+  assert.equal(result.some((row) => row.label.includes('24')), true);
+});
+
+test('English labels use structured address components and retain street-only accuracy', () => {
+  const result = normalizeAddresses({ results: [{ formatted: 'Rager 22, 8452566 Beer Sheva, Israel',
+    street: 'Rager', housenumber: '22', city: 'Beer Sheva', country_code: 'il', result_type: 'building', lat: 31.25, lon: 34.79 },
+    { formatted: 'Rager, Beer Sheva, Israel', street: 'Rager', city: 'Beer Sheva',
+      country_code: 'il', result_type: 'street', lat: 31.25, lon: 34.79 }] });
+  assert.equal(result[0].label, 'Rager 22, Beer Sheva');
+  assert.equal(result[1].accuracy, 'street');
+});
+
 test('private shared budget enforces actor/day/rate/circuit and denies ordinary clients', async () => {
   const db = new PGlite();
   try {
