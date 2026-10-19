@@ -91,6 +91,10 @@
         {
           "command_or_scenario": "Full TypeScript, targeted ESLint, final production build exit0",
           "result": "passed"
+        },
+        {
+          "command_or_scenario": "Production https://appartement-tinder.vercel.app at bf8fe9d / deployment dpl_DRuE82VP1VYuJw7Atc9RcHG84fXe: HE1280px + EN390px two-browser journeys2/2 passed in51.9s",
+          "result": "passed"
         }
       ]
     },
