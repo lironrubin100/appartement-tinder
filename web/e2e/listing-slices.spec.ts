@@ -63,8 +63,11 @@ test.describe('Three listing slices, real database', () => {
       await page.locator('[name=bedrooms]').fill('3');
       await page.locator('[name=availableFrom]').fill('2026-11-01');
       await page.locator('[name=address]').fill('PRIVATE TEST ADDRESS 123');
+      await page.getByRole('button', { name: locale === 'he' ? 'הכתובת לא נמצאה? הזנה ותיקון מיקום ידניים' : 'Address not found? Enter and adjust location manually', exact: true }).click();
+      await page.locator('[name=locationCity]').fill('Beer Sheva');
       await page.locator('[name=latitude]').fill('31.252');
       await page.locator('[name=longitude]').fill('34.791');
+      await page.locator('[name=locationConfirmed]').check();
       await page.locator('[name=roomPrice]').fill('1700');
       await page.getByRole('button', { name: locale === 'he' ? '+ הוספת חדר פנוי' : '+ Add an available room', exact: true }).click();
       await page.locator('[name=roomPrice]').nth(1).fill('2200');

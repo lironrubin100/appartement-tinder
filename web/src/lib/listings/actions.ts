@@ -3,6 +3,8 @@
 import { createServerClient } from '@/utils/supabase/server';
 import { validateListingDraft } from './validation';
 import { revalidatePath } from 'next/cache';
+import { verifyAddress } from './geocoding';
+import { isIsraeliLocation } from './address-types';
 
 export type PublishListingResult = { error: string } | { error: null; listingId: string };
 
@@ -34,6 +36,17 @@ export async function publishListing(formData: FormData): Promise<PublishListing
   };
   const validationError = validateListingDraft(draft);
   if (validationError) return { error: validationError };
+  const mode = formData.get('locationMode');
+  {
+    const confirmed = formData.get('locationConfirmed') === 'on';
+    const providerValid = mode === 'provider' && verifyAddress(String(formData.get('locationToken') ?? ''),
+      user.id, draft.address, draft.latitude, draft.longitude, process.env.GEOAPIFY_API_KEY?.trim() ?? '');
+    const manualValid = mode === 'manual' && String(formData.get('locationCity') ?? '').trim().length > 1
+      && String(formData.get('locationCity')).length <= 100 && isIsraeliLocation(draft.latitude, draft.longitude);
+    if (!confirmed || (!providerValid && !manualValid)) {
+      return { error: 'בחרו כתובת מחדש או אשרו מיקום ידני תקין.' };
+    }
+  }
 
   // Photo URLs use an anonymous listing UUID. Storage owner_id enforces access
   // without exposing the account ID in public photo paths.

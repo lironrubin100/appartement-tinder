@@ -9,6 +9,7 @@ import { LISTING_PHOTO_MAX, LISTING_PHOTO_MIN, validateListingDraft } from '@/li
 import { publishListing } from '@/lib/listings/actions';
 import { resizeImage } from '@/utils/photos';
 import { listingError, localePrefix, type Locale } from '@/lib/listings/text';
+import AddressField from '@/components/map/AddressField';
 
 export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPrivatePhone: boolean; locale?: Locale }) {
   const t = (he: string, en: string) => locale === 'en' ? en : he;
@@ -58,6 +59,11 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
     }
     const form = event.currentTarget;
     const formData = new FormData(form);
+    if (formData.get('locationConfirmed') !== 'on' || !String(formData.get('latitude') ?? '').trim()
+      || !String(formData.get('longitude') ?? '').trim()) {
+      setMessage(t('בחרו כתובת או סמנו מיקום ידנית ואשרו שהמיקום נכון.', 'Choose an address or place the pin manually and confirm the location.'));
+      return;
+    }
     const validationError = validateListingDraft({
       title: String(formData.get('title') ?? ''),
       address: String(formData.get('address') ?? ''),
@@ -117,11 +123,7 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
             <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type="number" min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
             <Input name="availableFrom" label={t("תאריך כניסה", "Available from")} type="date" required />
           </div>
-          <Input name="address" label={t("כתובת מדויקת", "Exact address")} placeholder={t("רחוב ומספר", "Street and number")} required maxLength={200} helperText={t("הכתובת המדויקת נשארת פרטית. במודעה יוצג אזור משוער בלבד.", "The exact address stays private. Only an approximate area is public.")} />
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Input name="latitude" label={t("קו רוחב", "Latitude")} placeholder="31.2520" type="number" step="any" required helperText={t("לדיוק המפה בלבד; הוא לא יוצג לציבור.", "Used for map positioning; never shown publicly.")} />
-            <Input name="longitude" label={t("קו אורך", "Longitude")} placeholder="34.7915" type="number" step="any" required helperText={t("לדיוק המפה בלבד; הוא לא יוצג לציבור.", "Used for map positioning; never shown publicly.")} />
-          </div>
+          <AddressField locale={locale} />
 
           <fieldset className="space-y-3 rounded-shutaf-md border border-card-border p-4">
             <legend className="text-sm font-medium text-ink">{t("חדרים פנויים ומחיר", "Available rooms and prices")}</legend>

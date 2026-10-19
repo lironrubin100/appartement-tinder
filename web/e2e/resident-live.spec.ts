@@ -411,8 +411,11 @@ test('new resident, accepted introduction, configurable group and private viewin
     await owner.locator('[name=bedrooms]').fill('2');
     await owner.locator('[name=availableFrom]').fill('2026-11-01');
     await owner.locator('[name=address]').fill('QA PRIVATE VIEWING ADDRESS');
+    await owner.getByRole('button', { name: 'Address not found? Enter and adjust location manually', exact: true }).click();
+    await owner.locator('[name=locationCity]').fill('Beer Sheva');
     await owner.locator('[name=latitude]').fill('31.252');
     await owner.locator('[name=longitude]').fill('34.791');
+    await owner.locator('[name=locationConfirmed]').check();
     await owner.locator('[name=roomPrice]').fill('2000');
     await owner
       .locator('#photos')

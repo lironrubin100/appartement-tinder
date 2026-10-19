@@ -1421,6 +1421,8 @@ export type Database = {
       };
     };
     Functions: {
+      reserve_geocoding_request: { Args: { p_actor: string }; Returns: boolean };
+      pause_geocoding_provider: { Args: Record<PropertyKey, never>; Returns: undefined };
       accept_like: { Args: { p_like_id: string }; Returns: string };
       accept_listing_inquiry: {
         Args: { p_inquiry_id: string };

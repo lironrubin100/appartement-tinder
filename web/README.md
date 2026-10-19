@@ -49,6 +49,29 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Learn More
 
+### Address autocomplete
+
+The composer uses Geoapify autocomplete through authenticated `POST /api/geocode`.
+Set **Secret** `GEOAPIFY_API_KEY` in Production/Preview; never prefix it with
+`NEXT_PUBLIC_`. Apply migration `20261019092152_geocoding_budget.sql` before lookup.
+Missing key/budget fails closed with retry/manual fallback, never unlimited traffic.
+
+The shared private budget caps this integration at 2,000 lookups per UTC day,
+4 per second and 30 per account per minute. Use a key/account dedicated to Shutaf;
+other Geoapify usage shares its free quota. Provider 429 pauses lookup for a minute.
+Keep Geoapify/OpenStreetMap attribution visible; no paid plan is required.
+
+Selections have private actor-bound 15-minute HMAC receipts; text edits invalidate
+them. Publish validates confirmation/receipt before uploads. Manual entry requires
+address, city, an explicitly confirmed private pin and plausible Israeli coordinates.
+No lookup metadata is published in listings.
+
+Local contracts: `node --test scripts/address-lookup.test.mjs`.
+Mocked UI contracts: start an owned `next dev --webpack -p 3107` with synthetic
+Supabase public configuration, then `node scripts/address-ui-contract.mjs`.
+The script creates/removes a temporary test page; never publish that page.
+These contracts do not replace real-provider HE/EN desktop/390px acceptance.
+
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.

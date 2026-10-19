@@ -3,6 +3,7 @@ export const localePrefix = (locale: Locale) => locale === 'en' ? '/en' : '';
 export function listingError(message: string, locale: Locale) {
   if (locale === 'he') return message;
   const messages: Record<string, string> = {
+    'בחרו כתובת מחדש או אשרו מיקום ידני תקין.': 'Select the address again or confirm a valid manual location.',
     'יש להזין כותרת למודעה.': 'Enter a listing title.',
     'יש להזין את הכתובת המדויקת של הדירה.': 'Enter the exact address.',
     'יש להזין קו רוחב תקין עבור מיקום הדירה.': 'Enter a valid latitude.',
