@@ -10,10 +10,13 @@ const reply = (body: object, status: number) => NextResponse.json(body, {
 
 export async function POST(request: Request) {
   const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin) return reply({ error: 'unavailable' }, 403);
+  if (origin && origin !== new URL(request.url).origin) {
+    console.warn('geocode:origin_rejected');
+    return reply({ error: 'unavailable' }, 403);
+  }
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return reply({ error: 'sign_in' }, 401);
+  if (!user) { console.warn('geocode:sign_in_required'); return reply({ error: 'sign_in' }, 401); }
   if (Number(request.headers.get('content-length')) > 1024) return reply({ error: 'invalid_query' }, 400);
   let body;
   try { body = await request.json(); } catch { return reply({ error: 'invalid_query' }, 400); }
@@ -22,17 +25,19 @@ export async function POST(request: Request) {
     return reply({ error: 'invalid_query' }, 400);
   }
   const key = process.env.GEOAPIFY_API_KEY?.trim();
-  if (!key) return reply({ error: 'unavailable' }, 503);
+  if (!key) { console.warn('geocode:missing_key'); return reply({ error: 'unavailable' }, 503); }
   try {
     const admin = createAdminClient();
     const { data: allowed, error } = await admin.rpc('reserve_geocoding_request', { p_actor: user.id });
     // Missing/unavailable budget fails closed; manual entry stays available.
-    if (error) return reply({ error: 'unavailable' }, 503);
+    if (error) { console.error('geocode:budget_unavailable', error.code); return reply({ error: 'unavailable' }, 503); }
     if (!allowed) return reply({ error: 'rate_limited' }, 429);
     const result = await lookupAddresses(query, body.language, key, user.id);
+    if (result.status !== 200) console.warn('geocode:provider_unavailable', result.status);
     if (result.status === 429) await admin.rpc('pause_geocoding_provider');
     return reply(result.status === 200 ? { suggestions: result.suggestions } : { error: 'unavailable' }, result.status);
   } catch {
+    console.error('geocode:request_unavailable');
     // Never log provider URLs/errors, address queries or raw results.
     return reply({ error: 'unavailable' }, 503);
   }
