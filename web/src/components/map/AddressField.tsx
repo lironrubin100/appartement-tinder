@@ -25,6 +25,7 @@ export default function AddressField({ locale }: { locale: Locale }) {
   const [longitude, setLongitude] = useState('');
   const [city, setCity] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  const [lookupCode, setLookupCode] = useState('idle');
   const point = latitude && longitude && isIsraeliLocation(Number(latitude), Number(longitude))
     ? { latitude: Number(latitude), longitude: Number(longitude) } : null;
 
@@ -38,6 +39,7 @@ export default function AddressField({ locale }: { locale: Locale }) {
         const response = await fetch('/api/geocode', { method: 'POST', cache: 'no-store',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: address.trim(), language: locale }), signal: controller.signal });
+        if (current) setLookupCode(`http_${response.status}`);
         if (!response.ok) {
           if (current) { setStatus(response.status === 429 ? 'limited' : 'error'); setSuggestions([]); }
           return;
@@ -48,7 +50,7 @@ export default function AddressField({ locale }: { locale: Locale }) {
         setActive(-1);
         setStatus(body.suggestions.length ? 'idle' : 'empty');
       } catch {
-        if (current) { setSuggestions([]); setStatus('error'); }
+        if (current) { setSuggestions([]); setStatus('error'); setLookupCode('transport_or_response_error'); }
       }
     }, 300);
     return () => { current = false; clearTimeout(timer); controller.abort(); };
@@ -92,7 +94,7 @@ export default function AddressField({ locale }: { locale: Locale }) {
           ))}
         </ul>
       )}
-      <div role="status" aria-live="polite" className="text-sm text-muted-text">
+      <div role="status" aria-live="polite" data-lookup-code={lookupCode} className="text-sm text-muted-text">
         {status === 'loading' && <span className="block h-5 animate-pulse rounded bg-neutral-bg-soft">{t('מחפשים כתובות…', 'Searching addresses…')}</span>}
         {status === 'empty' && t('לא נמצאה כתובת מתאימה. נסו להוסיף עיר או סמנו מיקום ידנית.', 'No matching address. Add a city or choose the location manually.')}
         {status === 'error' && t('חיפוש הכתובות אינו זמין כרגע. אפשר לנסות שוב או להזין ידנית.', 'Address search is unavailable. Retry or enter the location manually.')}

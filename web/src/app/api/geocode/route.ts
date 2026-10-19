@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
     const { data: allowed, error } = await admin.rpc('reserve_geocoding_request', { p_actor: user.id });
     // Missing/unavailable budget fails closed; manual entry stays available.
-    if (error) { console.error('geocode:budget_unavailable', error.code); return reply({ error: 'unavailable' }, 503); }
+    if (error) { console.error('geocode:budget_unavailable', error.code); return reply({ error: 'budget_unavailable' }, 503); }
     if (!allowed) return reply({ error: 'rate_limited' }, 429);
     const result = await lookupAddresses(query, body.language, key, user.id);
     if (result.status !== 200) console.warn('geocode:provider_unavailable', result.status);
