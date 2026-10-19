@@ -21,19 +21,26 @@ try {
   for (const locale of ['he', 'en']) {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     let mode = 'success';
+    let requestBody;
     await page.route('**/api/geocode', async (route) => {
+      requestBody = route.request().postDataJSON();
       if (mode === 'limited') return route.fulfill({ status: 429, json: { error: 'rate_limited' } });
       if (mode === 'empty') return route.fulfill({ json: { suggestions: [] } });
       if (mode === 'error') return route.abort();
+      if (mode === 'grouped') return route.fulfill({ json: { suggestions: [
+        { label: 'Synthetic City', city: 'Synthetic City', kind: 'city', accuracy: 'city', latitude: 31.25, longitude: 34.79, token: '' },
+        { label: 'Synthetic Region', city: '', kind: 'region', accuracy: 'county', latitude: 31.25, longitude: 34.79, token: '' },
+        { label: 'Synthetic Neighborhood, Synthetic City', city: 'Synthetic City', kind: 'neighborhood', accuracy: 'suburb', latitude: 31.25, longitude: 34.79, token: '' },
+      ] } });
       return route.fulfill({ json: { suggestions: [{ label: 'Synthetic address 22, Beer Sheva',
-        latitude: 31.25, longitude: 34.79, city: 'Beer Sheva', accuracy: 'building', token: 'synthetic-receipt' }] } });
+        latitude: 31.25, longitude: 34.79, city: 'Beer Sheva', street: 'Synthetic address', houseNumber: '22', kind: 'address', accuracy: 'building', token: 'synthetic-receipt' }] } });
     });
     const failures = [];
     page.on('pageerror', (error) => failures.push(error.message));
     await page.goto(`http://localhost:3107/qa-address-contract?locale=${locale}`);
     const input = page.getByRole('combobox');
     await input.fill('synthetic 22');
-    await expect(page.getByRole('listbox')).toBeVisible();
+    await expect(page.getByRole('option')).toHaveCount(1);
     await input.press('ArrowDown');
     await input.press('Enter');
     await expect(page.locator('[name=locationToken]')).toHaveValue('synthetic-receipt');
@@ -42,6 +49,30 @@ try {
     await input.fill('edited address');
     await expect(page.locator('[name=locationToken]')).toHaveValue('');
     await expect(page.locator('[name=latitude]')).toHaveValue('');
+    mode = 'grouped';
+    await input.fill('Synthetic City');
+    await expect(page.getByRole('option')).toHaveCount(3);
+    await expect(page.getByRole('group', { name: locale === 'he' ? 'עיר / יישוב' : 'City / town', exact: true })).toBeVisible();
+    await expect(page.getByRole('group', { name: locale === 'he' ? 'אזור' : 'Region', exact: true })).toBeVisible();
+    await input.press('ArrowUp');
+    await expect(input).toHaveAttribute('aria-activedescendant', /option-2$/);
+    await page.getByRole('button', { name: 'Synthetic City', exact: true }).click();
+    await expect(input).toHaveValue('');
+    await expect(page.locator('[name=locationToken]')).toHaveValue('');
+    await expect(page.locator('[name=latitude]')).toHaveValue('');
+    mode = 'success';
+    await input.fill('Synthetic street 22');
+    await expect(page.getByRole('option')).toHaveCount(1);
+    expect(requestBody.scope).toBe('Synthetic City');
+    await page.getByRole('button', { name: locale === 'he' ? 'רחוב' : 'Street', exact: true }).click();
+    await expect(page.getByRole('option')).toHaveCount(1);
+    expect(requestBody.category).toBe('street');
+    await input.press('ArrowDown');
+    await input.press('Enter');
+    await expect(page.locator('[name=locationToken]')).toHaveValue('synthetic-receipt');
+    await expect(page.getByText(locale === 'he' ? 'מספר בית' : 'House number', { exact: true })).toBeVisible();
+    await input.fill('edit scoped address');
+    await page.getByRole('button', { name: locale === 'he' ? 'כל הארץ' : 'All Israel', exact: true }).click();
     mode = 'limited';
     await input.fill('limited address');
     await expect(page.getByRole('status')).toContainText(locale === 'he' ? 'המתינו דקה' : 'Wait a minute');
@@ -61,7 +92,7 @@ try {
     await expect(page.locator('[name=locationConfirmed]')).not.toBeChecked();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect(failures).toEqual([]);
-    console.log(`${locale} 390px: keyboard selection, coordinates, edit invalidation, 429, empty, network error and manual confirmation passed`);
+    console.log(`${locale} 390px: grouped location types, optional filters, area refinement without coordinates, parsed components, keyboard selection, edit invalidation, errors and manual fallback passed`);
     await page.close();
   }
 } finally {

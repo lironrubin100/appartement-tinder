@@ -52,6 +52,12 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 ### Address autocomplete
 
 The composer uses Geoapify autocomplete through authenticated `POST /api/geocode`.
+Free-form input is parsed by the provider into city, street and house-number
+components. Suggestions are grouped as addresses, city/town, region, neighborhood
+and street; optional category filters reuse the same request budget (no fan-out).
+Choosing an area refines the next query and never creates a publishable selection
+receipt. Only street/address results can populate the private location; the owner
+still confirms/corrects the pin. Provider coverage determines available groups.
 Set **Secret** `GEOAPIFY_API_KEY` in Production/Preview; never prefix it with
 `NEXT_PUBLIC_`. Apply migration `20261019092152_geocoding_budget.sql` before lookup.
 Missing key/budget fails closed with retry/manual fallback, never unlimited traffic.

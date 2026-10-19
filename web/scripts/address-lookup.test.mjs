@@ -15,7 +15,7 @@ for (const name of ['address-types', 'geocoding']) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText);
 }
-const { signAddress, verifyAddress, normalizeAddresses, lookupAddresses } = require(join(directory, 'geocoding.js'));
+const { signAddress, verifyAddress, normalizeAddresses, normalizeLocations, lookupAddresses } = require(join(directory, 'geocoding.js'));
 const selection = { label: 'Synthetic address', latitude: 31.25, longitude: 34.79, city: 'Beer Sheva', accuracy: 'building' };
 
 test('provider receipts bind exact selection, actor, expiry and key; tampering fails', () => {
@@ -75,6 +75,36 @@ test('English labels use structured address components and retain street-only ac
       country_code: 'il', result_type: 'street', lat: 31.25, lon: 34.79 }] });
   assert.equal(result[0].label, 'Rager 22, Beer Sheva');
   assert.equal(result[1].accuracy, 'street');
+});
+
+test('location dropdown classifies provider components and never accepts an area as a private address', async () => {
+  const base = { country_code: 'il', lat: 31.25, lon: 34.79 };
+  const data = { results: [
+    { ...base, result_type: 'city', city: 'באר-שבע' },
+    { ...base, result_type: 'suburb', suburb: 'רמות', city: 'באר שבע' },
+    { ...base, result_type: 'county', county: 'באר שבע והסביבה' },
+    { ...base, result_type: 'street', street: 'רגר', city: 'באר שבע', formatted: 'רגר, באר שבע' },
+    { ...base, result_type: 'building', street: 'רגר', housenumber: '22', city: 'באר שבע', formatted: 'רגר 22, באר שבע' },
+  ] };
+  const results = normalizeLocations(data);
+  assert.deepEqual(results.map((row) => row.kind), ['city', 'neighborhood', 'region', 'street', 'address']);
+  assert.equal(results[0].label, 'באר שבע');
+  assert.equal(results[4].houseNumber, '22');
+  assert.equal(results[4].street, 'רגר');
+  assert.deepEqual(normalizeLocations(data, 'city').map((row) => row.kind), ['city']);
+  const area = results[0];
+  assert.equal(verifyAddress(signAddress(area, 'actor', 'key'), 'actor', area.label, area.latitude, area.longitude, 'key'), false);
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = async (url) => {
+      assert.equal(url.searchParams.get('text'), 'רגר 22, באר שבע');
+      assert.equal(url.searchParams.get('type'), 'city');
+      return Response.json(data);
+    };
+    const response = await lookupAddresses('רגר 22', 'he', 'key', 'actor', 'city', 'באר שבע');
+    assert.equal(response.suggestions[0].token, '');
+    assert.equal(response.suggestions.length, 1);
+  } finally { globalThis.fetch = original; }
 });
 
 test('private shared budget enforces actor/day/rate/circuit and denies ordinary clients', async () => {

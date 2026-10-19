@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { lookupAddresses } from '@/lib/listings/geocoding';
+import { locationCategories } from '@/lib/listings/address-types';
 
 export const runtime = 'nodejs';
 const reply = (body: object, status: number) => NextResponse.json(body, {
@@ -21,7 +22,10 @@ export async function POST(request: Request) {
   let body;
   try { body = await request.json(); } catch { return reply({ error: 'invalid_query' }, 400); }
   const query = typeof body?.query === 'string' ? body.query.trim() : '';
-  if (query.length < 3 || query.length > 200 || !['he', 'en'].includes(body?.language)) {
+  const category = body?.category ?? 'all';
+  const scope = body?.scope ?? '';
+  if (query.length < 3 || query.length > 200 || !['he', 'en'].includes(body?.language)
+    || !locationCategories.includes(category) || typeof scope !== 'string' || scope.length > 200) {
     return reply({ error: 'invalid_query' }, 400);
   }
   const key = process.env.GEOAPIFY_API_KEY?.trim();
@@ -35,7 +39,7 @@ export async function POST(request: Request) {
     if (error) { console.error('geocode:budget_unavailable', error.code); return reply({ error: 'budget_unavailable' }, 503); }
     if (!allowed) return reply({ error: 'rate_limited' }, 429);
     stage = 'provider_request';
-    const result = await lookupAddresses(query, body.language, key, user.id);
+    const result = await lookupAddresses(query, body.language, key, user.id, category, scope);
     if (result.status !== 200) console.warn('geocode:provider_unavailable', result.status);
     if (result.status === 429) await admin.rpc('pause_geocoding_provider');
     return reply(result.status === 200 ? { suggestions: result.suggestions } : { error: 'unavailable' }, result.status);

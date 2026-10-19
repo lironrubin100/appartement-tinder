@@ -1,3 +1,7 @@
+export type LocationKind = 'region' | 'city' | 'neighborhood' | 'street' | 'address';
+export type LocationCategory = 'all' | Exclude<LocationKind, 'address'>;
+export const locationCategories: LocationCategory[] = ['all', 'city', 'region', 'neighborhood', 'street'];
+
 export type AddressSuggestion = {
   label: string;
   latitude: number;
@@ -5,6 +9,9 @@ export type AddressSuggestion = {
   city: string;
   accuracy: string;
   token: string;
+  kind?: LocationKind;
+  street?: string;
+  houseNumber?: string;
 };
 
 export function isIsraeliLocation(latitude: number, longitude: number) {
