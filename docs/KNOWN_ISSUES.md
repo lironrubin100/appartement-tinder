@@ -2,6 +2,11 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20October2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 
+## LISTING-LOCATION-CONFIRM-001 — Early location confirmation can reset
+
+- Observed once on 20 October 2026 in production Chrome at 390px: immediately after entering manual coordinates, an automated click on the location confirmation checkbox did not leave it checked. The same journey passed after allowing the map to settle; Hebrew and English publication then succeeded.
+- State: observed, cause not established, not fixed. Check whether map initialization or a delayed location callback resets confirmation, reproduce without relying on timing assumptions, and verify any fix across reload, manual edits and both locales. The failure did not publish an unconfirmed location.
+
 ## MAP-CARTO-KEY-001 — Basemap shows API KEY REQUIRED instead of streets
 
 - Reported and reproduced: 19 October 2026, authenticated production Chrome at `appartement-tinder-appartinder.vercel.app/map`; owner confirmed. Listings and markers load.
