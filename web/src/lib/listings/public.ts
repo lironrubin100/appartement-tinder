@@ -21,8 +21,8 @@ export const getPublicListing = cache(async (id: string) => {
 export async function listingMetadata(id: string, locale: ListingLocale): Promise<Metadata> {
   const listing = await getPublicListing(id);
   const description = locale === 'he'
-    ? `${listing.available_room_count} חדרים פנויים · ₪${listing.min_room_price}–${listing.max_room_price} לחדר · אזור משוער בבאר שבע`
-    : `${listing.available_room_count} available rooms · ₪${listing.min_room_price}–${listing.max_room_price} per room · Approximate area in Beer Sheva`;
+    ? `${listing.available_room_count} חדרים פנויים · ₪${listing.min_room_price}–${listing.max_room_price} לחדר · אזור משוער`
+    : `${listing.available_room_count} available rooms · ₪${listing.min_room_price}–${listing.max_room_price} per room · Approximate area`;
   return {
     title: `${listing.title} | Shutaf`, description,
     alternates: { canonical: listingPath(id, locale), languages: { he: listingPath(id), en: listingPath(id, 'en') } },

@@ -23,6 +23,12 @@ git diff --check
 
 `test:db` runs actual disposable PGlite SQL/RLS using the pinned dev dependency. It connects to no Supabase project and needs no credentials. It covers onboarding privacy/rollback, introductions/quota/pass expiry, group admission/capacity/consent/history, blocking and inquiry authorization/address access. Its bootstrap omits one obsolete revoke for a column moved to `profile_private`; it is not a live-schema clone or a concurrency/Realtime test.
 
+### Isolated Docker baseline when migrations lack a bootstrap
+
+The tracked migrations begin after the original schema was installed, so `supabase start` in a fresh project can fail on missing `profiles`. On 20 October 2026, an isolated copy of `supabase/` successfully replayed the migration chain after an earlier local-only bootstrap migration containing `supabase/schema.sql` and `supabase/rls.sql` from Git commit `a0ca6aa`, in that order. Set a unique local `project_id`, check ports and existing containers first, and never add this historical bootstrap migration to the production chain. The current schema snapshot cannot replace it because it already contains later structural changes. See the SL02 and location-privacy handoffs for exact evidence and outstanding gaps.
+
+The canonical profile and SL02 listing photo ownership functions currently pin the shared project's public Storage origin. For an isolated local acceptance run, their origins were replaced only inside the disposable database with its local API origin; this tests ownership behavior locally but does not establish portable configuration or a live migration. Set local URL/key only in the test process, verify the target is the intended loopback service, and never print credentials. Local browser results and PGlite do not prove hosted changes, live provider coverage, or production acceptance.
+
 ## 3. Prepare real isolated accounts
 
 `web/.env.local` needs the app's public Supabase URL and anon key. Use existing configured values; never print the file or request a service-role key. The browser tests use ordinary authenticated clients.

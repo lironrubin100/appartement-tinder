@@ -19,6 +19,8 @@ export function listingError(message: string, locale: Locale) {
     'כל תמונה צריכה להיות קטנה מ־12MB.': 'Each photo must be smaller than 12MB.',
     'יש לקצר את פרטי המודעה.': 'Shorten the listing details.',
     'לפני הפרסום יש להוסיף מספר טלפון פרטי בהגדרות הפרופיל.': 'Add a private phone number to your profile before publishing.',
+    'לא הצלחנו לזהות את ניסיון הפרסום. נסו שוב.': 'Could not identify this publication attempt. Please retry.',
+    'ניסיון הפרסום השתנה. פתחו טיוטה חדשה לפני פרסום.': 'This publication attempt has changed. Start a new draft before publishing.',
     'לא הצלחנו לפרסם את המודעה. נסו שוב בעוד רגע.': 'Could not publish the listing. Please retry.',
   };
   return messages[message] ?? 'Something went wrong. Check the details and try again.';

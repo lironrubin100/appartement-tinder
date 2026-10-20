@@ -1583,6 +1583,14 @@ export type Database = {
         Args: { p_draft: Json; p_listing_id: string };
         Returns: string;
       };
+      publish_apartment_once: {
+        Args: { p_draft: Json; p_request_key: string };
+        Returns: string;
+      };
+      cancel_listing_publication: {
+        Args: { p_request_key: string };
+        Returns: string;
+      };
       remove_group_member: {
         Args: { p_group: string | null; p_member: string };
         Returns: undefined;

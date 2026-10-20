@@ -40,7 +40,7 @@ export async function PublicListing({
       </header>
       <h1 className="mb-3 text-3xl font-bold">{listing.title}</h1>
       <p className="mb-5 text-muted-text">
-        {en ? 'Approximate area in Beer Sheva' : 'אזור משוער בבאר שבע'} ·{' '}
+        {en ? 'Approximate area' : 'אזור משוער'} ·{' '}
         {listing.bedrooms} {en ? 'bedrooms' : 'חדרים בדירה'}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">

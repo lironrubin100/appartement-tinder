@@ -6,12 +6,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Input } from '@/components/ui';
 import { LISTING_PHOTO_MAX, LISTING_PHOTO_MIN, validateListingDraft } from '@/lib/listings/validation';
-import { publishListing } from '@/lib/listings/actions';
+import { discardListingAttempt, publishListing } from '@/lib/listings/actions';
 import { resizeImage } from '@/utils/photos';
 import { listingError, localePrefix, type Locale } from '@/lib/listings/text';
 import AddressField from '@/components/map/AddressField';
+import { loadListingDraft, removeListingDraft, saveListingDraft, type SavedAddress, type SavedListingDraft } from '@/lib/listings/draft-store';
 
-export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPrivatePhone: boolean; locale?: Locale }) {
+export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished }: { accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void }) {
   const t = (he: string, en: string) => locale === 'en' ? en : he;
   const router = useRouter();
   const [photos, setPhotos] = useState<File[]>([]);
@@ -20,9 +21,51 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const busy = useRef(false);
+  const requestKey = useRef<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finished = useRef(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [initialDraft, setInitialDraft] = useState<SavedListingDraft | null>(null);
+  const [addressDraft, setAddressDraft] = useState<SavedAddress | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [storageError, setStorageError] = useState(false);
   const photoUrls = useMemo(() => photos.map((photo) => URL.createObjectURL(photo)), [photos]);
 
   useEffect(() => () => photoUrls.forEach(URL.revokeObjectURL), [photoUrls]);
+
+  useEffect(() => {
+    let current = true;
+    loadListingDraft(accountId).then((draft) => {
+      if (!current) return;
+      if (draft?.version === 1) {
+        setInitialDraft(draft); setAddressDraft(draft.address); setPhotos(draft.photos);
+        setRoomPrices(draft.roomPrices.length ? draft.roomPrices : ['']); setBedrooms(draft.bedrooms);
+        requestKey.current = draft.requestKey;
+      }
+      setDraftLoaded(true);
+    }).catch(() => { if (current) { setStorageError(true); setDraftLoaded(true); } });
+    return () => { current = false; };
+  }, [accountId]);
+
+  function snapshot(form: HTMLFormElement): SavedListingDraft {
+    const data = new FormData(form);
+    return { version: 1, title: String(data.get('title') ?? ''), bedrooms,
+      availableFrom: String(data.get('availableFrom') ?? ''), billsIncluded: data.get('billsIncluded') === 'on',
+      description: String(data.get('description') ?? ''), roomPrices, photos, address: addressDraft, requestKey: requestKey.current };
+  }
+
+  useEffect(() => {
+    if (!draftLoaded || !formRef.current || submitting || finished.current) return;
+    const draft = snapshot(formRef.current);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      void saveListingDraft(accountId, draft).then(() => setStorageError(false)).catch(() => setStorageError(true));
+    }, 250);
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+    // The snapshot is taken after the corresponding form and state updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountId, draftLoaded, revision, bedrooms, roomPrices, photos, addressDraft, submitting]);
 
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
@@ -53,7 +96,7 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current) return;
-    if (!hasPrivatePhone) {
+    if (requiresPrivatePhone && !hasPrivatePhone) {
       setMessage(t("לפני הפרסום יש להוסיף מספר טלפון פרטי בהגדרות הפרופיל.", "Add a private phone number to your profile before publishing."));
       return;
     }
@@ -86,6 +129,11 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
     setMessage('');
     let published = false;
     try {
+    requestKey.current ??= crypto.randomUUID();
+    formData.set('requestKey', requestKey.current);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    try { await saveListingDraft(accountId, snapshot(form)); setStorageError(false); }
+    catch { setStorageError(true); return; }
     formData.delete('photos');
     const compressedPhotos = await Promise.all(
       photos.map(async (photo) => new File([await resizeImage(photo)], `${photo.name.replace(/\.[^.]+$/, '')}.jpg`, { type: 'image/jpeg' }))
@@ -98,6 +146,9 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
     }
     if ('listingId' in result) {
       published = true;
+      finished.current = true;
+      await removeListingDraft(accountId).catch(() => setStorageError(true));
+      onPublished?.();
       router.push(`${localePrefix(locale)}/compose/published/${result.listingId}`);
     }
     } catch {
@@ -110,20 +161,49 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
     }
   }
 
+  async function discardDraft() {
+    if (busy.current || !window.confirm(t('למחוק את הטיוטה השמורה במכשיר הזה?', 'Discard the draft saved on this device?'))) return;
+    busy.current = true;
+    setSubmitting(true);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    try {
+      if (requestKey.current) {
+        const result = await discardListingAttempt(requestKey.current);
+        if ('error' in result) {
+          setMessage(t('לא הצלחנו למחוק את הטיוטה בבטחה. נסו שוב.', 'Could not safely discard the draft. Please retry.'));
+          return;
+        }
+        if (result.status === 'published') {
+          finished.current = true;
+          await removeListingDraft(accountId).catch(() => setStorageError(true));
+          onPublished?.();
+          router.push(`${localePrefix(locale)}/compose/published/${requestKey.current}`);
+          return;
+        }
+      }
+      finished.current = true;
+      await removeListingDraft(accountId);
+      window.location.reload();
+    } catch { finished.current = false; setStorageError(true); }
+    finally { busy.current = false; setSubmitting(false); }
+  }
+
+  if (!draftLoaded) return <p role="status" className="p-6">{t('טוענים טיוטה…', 'Loading draft…')}</p>;
+
   return (
     <div className="min-h-[calc(100vh-80px)] w-full bg-page-bg p-4 md:p-8">
       <div className="mx-auto max-w-2xl rounded-shutaf-lg border border-card-border bg-white p-6 shadow-sm md:p-8">
         <h1 className="mb-2 text-3xl font-bold text-ink">{t("פרסום דירה חדשה", "Publish an apartment")}</h1>
         <p className="mb-8 text-sm text-muted-text">{t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
 
-        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+        <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => setRevision((value) => value + 1)} noValidate>
           <fieldset disabled={submitting} className="space-y-6">
-          <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} required maxLength={100} />
+          <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} defaultValue={initialDraft?.title ?? ''} required maxLength={100} />
           <div className="grid gap-6 sm:grid-cols-2">
             <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type="number" min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
-            <Input name="availableFrom" label={t("תאריך כניסה", "Available from")} type="date" required />
+            <Input name="availableFrom" label={t("תאריך כניסה", "Available from")} type="date" defaultValue={initialDraft?.availableFrom ?? ''} required />
           </div>
-          <AddressField locale={locale} />
+          <AddressField locale={locale} initialDraft={initialDraft?.address} onDraftChange={setAddressDraft} />
 
           <fieldset className="space-y-3 rounded-shutaf-md border border-card-border p-4">
             <legend className="text-sm font-medium text-ink">{t("חדרים פנויים ומחיר", "Available rooms and prices")}</legend>
@@ -154,18 +234,18 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
           </fieldset>
 
           <label className="flex cursor-pointer items-start gap-3 rounded-shutaf-md border border-card-border p-4 text-sm text-ink">
-            <input name="billsIncluded" type="checkbox" className="mt-0.5 size-4 accent-orange" />
+            <input name="billsIncluded" type="checkbox" defaultChecked={initialDraft?.billsIncluded ?? false} className="mt-0.5 size-4 accent-orange" />
             <span><strong className="font-semibold">{t("החשבונות כלולים במחיר", "Bills included")}</strong><span className="mt-1 block text-muted-text">{t("סמנו רק אם המחיר של כל חדר כולל חשבונות שוטפים.", "Select only if every room price includes bills.")}</span></span>
           </label>
           <p className="rounded-shutaf-md bg-neutral-bg-soft p-3 text-sm text-muted-text">
-            {hasPrivatePhone
-              ? t("הטלפון הפרטי המקושר לחשבון ישמש ליצירת קשר. הוא אינו מוצג במודעה.", "Your account phone stays private. All inquiries happen in Shutaf.")
+            {!requiresPrivatePhone || hasPrivatePhone
+              ? t("מספר הטלפון בחשבון נשאר פרטי. כל הפניות מתבצעות בשותף.", "Your account phone stays private. All inquiries happen in Shutaf.")
               : <>{t("לפני הפרסום יש להוסיף מספר טלפון פרטי.", "Add a private phone number before publishing.")} <Link href="/profile/edit" className="text-teal underline">{t("עריכת פרופיל", "Edit profile")}</Link></>}
           </p>
 
           <div>
             <label htmlFor="description" className="mb-2 block text-sm font-medium text-ink">{t("תיאור הדירה", "Apartment description")}</label>
-            <textarea id="description" name="description" maxLength={2000} rows={4} placeholder={t("ספרו על הדירה, האזור ומה חשוב לדעת...", "Tell renters about the apartment and the area...")} className="w-full rounded-shutaf-md border border-card-border bg-white px-4 py-2.5 text-ink placeholder:text-muted-text focus:border-transparent focus:outline-none focus:ring-2 focus:ring-orange" />
+            <textarea id="description" name="description" defaultValue={initialDraft?.description ?? ''} maxLength={2000} rows={4} placeholder={t("ספרו על הדירה, האזור ומה חשוב לדעת...", "Tell renters about the apartment and the area...")} className="w-full rounded-shutaf-md border border-card-border bg-white px-4 py-2.5 text-ink placeholder:text-muted-text focus:border-transparent focus:outline-none focus:ring-2 focus:ring-orange" />
           </div>
 
           <fieldset>
@@ -187,9 +267,18 @@ export default function ComposeForm({ hasPrivatePhone, locale = 'he' }: { hasPri
           </fieldset>
 
           {message && <p role="alert" className="rounded-shutaf-md border border-error/30 bg-error/5 p-3 text-sm text-error">{message}</p>}
+          {storageError && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לשמור טיוטה במכשיר. בדקו את הגדרות הדפדפן ונסו שוב.', 'Could not save the draft on this device. Check browser storage settings and retry.')}</p>}
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="submit" className="flex-1" disabled={submitting || !hasPrivatePhone}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>
-            <Button type="button" variant="ghost" className="flex-1" onClick={() => history.back()}>{t("ביטול", "Cancel")}</Button>
+            <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>
+            <Button type="button" variant="ghost" className="flex-1" onClick={async () => {
+              if (saveTimer.current) clearTimeout(saveTimer.current);
+              if (formRef.current) {
+                try { await saveListingDraft(accountId, snapshot(formRef.current)); }
+                catch { setStorageError(true); return; }
+              }
+              if (onClose) onClose(); else history.back();
+            }}>{t("סגירה", "Close")}</Button>
+            <Button type="button" variant="ghost" className="flex-1" onClick={discardDraft}>{t("מחיקת טיוטה", "Discard draft")}</Button>
           </div>
           </fieldset>
           {submitting && <p role="status" className="text-sm text-body-text">{t("מכינים את התמונות ומפרסמים את המודעה…", "Preparing photos and publishing…")}</p>}

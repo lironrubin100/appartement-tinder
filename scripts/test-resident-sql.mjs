@@ -13,7 +13,7 @@ await db.exec(`create role anon; create role authenticated; create schema auth; 
 create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
 create table storage.buckets(id text primary key,name text,public boolean);
-create table storage.objects(id uuid primary key,bucket_id text,name text);
+create table storage.objects(id uuid primary key,bucket_id text,name text,owner_id text);
 create function storage.foldername(text) returns text[] language sql as $$ select string_to_array($1,'/') $$;`);
 await db.exec(await read('supabase/schema.sql'));
 // The legacy bootstrap retains one revoke for a column moved to profile_private.
@@ -28,7 +28,9 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261015084841_group_conversations.sql'),
   await read('supabase/migrations/20261015084850_inquiry_acceptance_guards.sql'),
   await read('supabase/migrations/20261017082317_lister_safe_browsing.sql'),
-  await read('supabase/migrations/20261017101500_convert_resident_to_lister.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261017101500_convert_resident_to_lister.sql'),
+  await read('supabase/migrations/20261020204057_private_random_listing_location.sql'),
+  await read('supabase/migrations/20261020204548_listing_retry_owned_photos.sql')]) await db.exec(sql);
 
 const ids = Array.from({ length: 25 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
 for (const id of ids) await db.query('insert into auth.users(id) values($1)', [id]);
@@ -45,6 +47,102 @@ for (let i = 0; i < ids.length; i++) {
     [i === listerIndex ? `Lister ${i}` : `Resident ${i}`]
   );
 }
+// D2/B2: a completed resident can publish without a phone; a nonresident cannot.
+await db.exec('reset role');
+await db.query('update public.profile_private set phone=null where profile_id = any($1::uuid[])', [[ids[0], ids[listerIndex]]]);
+const listingId = '10000000-0000-4000-8000-000000000001';
+const basePhotoUrl = 'https://npbduvjnqnbydolmdpsc.supabase.co/storage/v1/object/public/apartment-photos/';
+for (let i = 1; i <= 3; i++) await db.query('insert into storage.objects(id,bucket_id,name,owner_id) values($1,$2,$3,$4)',
+  [`20000000-0000-4000-8000-00000000000${i}`, 'apartment-photos', `${listingId}/${i}.jpg`, ids[0]]);
+const listingDraft = JSON.stringify({ title: 'Test home', address: 'Test address', latitude: 31.2, longitude: 34.8,
+  bedrooms: 2, billsIncluded: false, availableFrom: '2026-12-01', description: '',
+  photos: [1, 2, 3].map(i => `${basePhotoUrl}${listingId}/${i}.jpg`), photoDigests: ['one', 'two', 'three'], roomPrices: [2000, 2600] });
+await as(0);
+assert.equal((await rpc('select public.publish_apartment_once($1,$2::jsonb) id', [listingId, listingDraft])).id, listingId);
+assert.equal((await rpc('select public.publish_apartment_once($1,$2::jsonb) id', [listingId, listingDraft])).id, listingId);
+assert.equal((await rpc('select public.cancel_listing_publication($1) result', [listingId])).result, 'published');
+const position = await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]);
+const metres = Math.hypot((position.public_lat - position.lat) * 111320,
+  (position.public_lng - position.lng) * 111320 * Math.cos(position.lat * Math.PI / 180));
+assert.ok(metres >= 300 && metres <= 700, `public displacement ${metres}m outside approved range`);
+await db.query("update public.apartments set status='taken' where id=$1", [listingId]);
+await db.query("update public.apartments set status='active' where id=$1", [listingId]);
+assert.deepEqual(await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]), position);
+await rejected('select * from public.random_listing_public_point(32.085,34.781)');
+await db.exec('reset role');
+await db.query('update public.apartments set lat=lat,lng=lng where id=$1', [listingId]);
+assert.deepEqual(await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]), position);
+const randomPoints = await db.query('select public_lat,public_lng from generate_series(1,30) cross join lateral public.random_listing_public_point(32.085 + 0*generate_series,34.781)');
+assert.equal(new Set(randomPoints.rows.map(row => `${row.public_lat},${row.public_lng}`)).size, 30);
+for (const point of randomPoints.rows) {
+  const distance = Math.hypot((point.public_lat - 32.085) * 111320, (point.public_lng - 34.781) * 111320 * Math.cos(32.085 * Math.PI / 180));
+  assert.ok(distance >= 300 && distance <= 700);
+}
+const oldAngle = (await rpc('select mod(abs(hashtextextended($1::text,0)),360)::float8 angle', [listingId])).angle * Math.PI / 180;
+const oldRecovered = randomPoints.rows.filter(point => Math.abs(point.public_lat - Math.cos(oldAngle) * 500 / 111320 - 32.085) < 0.00000001);
+assert.ok(oldRecovered.length < 2, 'old public-ID formula should not recover the independently random points');
+for (const latitude of [29.4, 33.4]) {
+  const point = await rpc('select * from public.random_listing_public_point($1,34.781)', [latitude]);
+  const distance = Math.hypot((point.public_lat - latitude) * 111320, (point.public_lng - 34.781) * 111320 * Math.cos(latitude * Math.PI / 180));
+  assert.ok(distance >= 300 && distance <= 700);
+}
+await db.exec('begin');
+await db.query('update public.apartments set lat=32.085,lng=34.781 where id=$1', [listingId]);
+const corrected = await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]);
+assert.notDeepEqual([corrected.public_lat, corrected.public_lng], [position.public_lat, position.public_lng]);
+assert.ok(Math.hypot((corrected.public_lat - corrected.lat) * 111320, (corrected.public_lng - corrected.lng) * 111320 * Math.cos(corrected.lat * Math.PI / 180)) >= 300);
+await db.exec('rollback');
+await as(0);
+await rejected('select public.publish_apartment_once($1,$2::jsonb)', [listingId, listingDraft.replace('Test home', 'Different home')]);
+assert.equal((await rpc('select count(*)::int count from public.apartment_rooms where apartment_id=$1', [listingId])).count, 2);
+await db.query('update public.apartment_rooms set monthly_price=2700 where apartment_id=$1 and monthly_price=2000', [listingId]);
+assert.equal((await rpc('select price from public.apartments where id=$1', [listingId])).price, 2600);
+await as(listerIndex);
+await rejected('select public.publish_apartment($1,$2::jsonb)', ['10000000-0000-4000-8000-000000000002', listingDraft]);
+await as(1);
+await rejected('select public.publish_apartment_once($1,$2::jsonb)', [listingId, listingDraft]);
+await rejected('select * from public.listing_publication_requests');
+await rejected('insert into public.apartments(id,lister_id,source,title,lat,lng,price,bedrooms) values($1,$2,$3,$4,$5,$6,$7,$8)',
+  ['10000000-0000-4000-8000-000000000004', ids[1], 'user', 'Bypass', 31.2, 34.8, 1000, 1]);
+await as(0);
+await rejected('update public.apartments set lat=31.3 where id=$1', [listingId]);
+const rollbackId = '10000000-0000-4000-8000-000000000003';
+const cancelledId = '10000000-0000-4000-8000-000000000005';
+const referencedId = '10000000-0000-4000-8000-000000000006';
+await db.exec('reset role');
+await db.exec('begin');
+await db.query('update public.apartments set photos=$1 where id=$2', [[`${basePhotoUrl}${referencedId}/1.jpg`], listingId]);
+await as(0);
+await rejected('select public.cancel_listing_publication($1)', [referencedId]);
+await db.exec('rollback');
+await as(0);
+assert.equal((await rpc('select public.cancel_listing_publication($1) result', [cancelledId])).result, 'cancelled');
+assert.equal((await rpc('select public.cancel_listing_publication($1) result', [cancelledId])).result, 'cancelled');
+await rejected('select public.publish_apartment_once($1,$2::jsonb)', [cancelledId, listingDraft]);
+await rejected('select public.publish_apartment($1,$2::jsonb)', [cancelledId, listingDraft]);
+await db.exec('reset role');
+for (let i = 1; i <= 3; i++) await db.query('insert into storage.objects(id,bucket_id,name,owner_id) values($1,$2,$3,$4)',
+  [`30000000-0000-4000-8000-00000000000${i}`, 'apartment-photos', `${rollbackId}/${i}.jpg`, ids[0]]);
+await as(0);
+const badDraft = JSON.stringify({ ...JSON.parse(listingDraft), photos: [1, 2, 3].map(i => `${basePhotoUrl}${rollbackId}/${i}.jpg`), roomPrices: [2000, 0] });
+await rejected('select public.publish_apartment_once($1,$2::jsonb)', [rollbackId, badDraft]);
+await db.exec('reset role');
+assert.equal((await rpc('select count(*)::int count from public.apartments where id=$1', [rollbackId])).count, 0);
+assert.equal((await rpc('select count(*)::int count from public.listing_publication_requests where request_key=$1', [rollbackId])).count, 0);
+// Fail after the parent insert, during the child write, to prove transaction rollback.
+await db.exec(`create function public.test_fail_room_write() returns trigger language plpgsql as $$
+begin raise exception 'synthetic room failure'; end $$;
+create trigger test_fail_room_write before insert on public.apartment_rooms
+for each row execute function public.test_fail_room_write();`);
+await as(0);
+const validRollbackDraft = JSON.stringify({ ...JSON.parse(listingDraft), photos: [1, 2, 3].map(i => `${basePhotoUrl}${rollbackId}/${i}.jpg`) });
+await rejected('select public.publish_apartment_once($1,$2::jsonb)', [rollbackId, validRollbackDraft]);
+await db.exec('reset role');
+assert.equal((await rpc('select count(*)::int count from public.apartments where id=$1', [rollbackId])).count, 0);
+assert.equal((await rpc('select count(*)::int count from public.listing_publication_requests where request_key=$1', [rollbackId])).count, 0);
+await db.exec('drop trigger test_fail_room_write on public.apartment_rooms; drop function public.test_fail_room_write();');
+await db.exec('reset role');
+await db.query("update public.profile_private set phone='private-phone' where profile_id = any($1::uuid[])", [[ids[0], ids[listerIndex]]]);
 await as(0);
 const publicProfile = await rpc('select * from public.profiles_public where id=$1', [ids[1]]);
 assert.equal(publicProfile.name, 'Resident 1'); assert.ok(!('birth_date' in publicProfile)); assert.ok(!('phone' in publicProfile));
@@ -98,7 +196,7 @@ await as(0); await rpc('select public.remove_group_member($1,$2)', [foundGroup.i
 await as(3); assert.equal((await db.query('select * from public.messages where conversation_id=$1', [group.id])).rows.length, 0);
 
 // Apartment inquiry acceptance: availability, ownership, idempotency and address isolation.
-await as(7);
+await db.exec('reset role');
 const apartment = await rpc("insert into public.apartments(lister_id,source,title,address,lat,lng,price,bedrooms) values($1,'user','Local fixture','Private exact address',31.25,34.79,2000,3) returning id", [ids[7]]);
 await as(6); const inquiry = await rpc('select public.create_listing_inquiry($1) id', [apartment.id]);
 assert.equal((await db.query('select * from public.listing_address_access where apartment_id=$1', [apartment.id])).rows.length, 0);

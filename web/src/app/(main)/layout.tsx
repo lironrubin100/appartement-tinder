@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
-import { BottomNav } from '@/components/navigation';
+import { ComposerNavigation } from '@/components/navigation/ComposerNavigation';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { authPath, safeReturnTo } from '@/utils/navigation';
@@ -30,6 +30,9 @@ export default async function MainLayout({
     redirect(authPath('onboarding', returnTo, locale));
 
   const isLister = profile.mode === 'lister';
+  const { data: privateProfile } = !isLister
+    ? await supabase.from('profile_private').select('phone').eq('profile_id', user.id).maybeSingle()
+    : { data: null };
   const en = (await headers()).get('x-shutaf-locale') === 'en';
 
   return (
@@ -58,7 +61,7 @@ export default async function MainLayout({
       </main>
 
       {/* Mobile bottom navigation (fixed) */}
-      {!isLister && <BottomNav />}
+      {!isLister && <ComposerNavigation key={user.id} accountId={user.id} locale={locale} hasPrivatePhone={Boolean(privateProfile?.phone?.trim())} />}
     </div>
   );
 }

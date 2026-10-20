@@ -6,26 +6,27 @@ import { Input } from '@/components/ui/Input';
 import type { AddressSuggestion, LocationCategory, LocationKind } from '@/lib/listings/address-types';
 import { isIsraeliLocation, locationCategories } from '@/lib/listings/address-types';
 import type { Locale } from '@/lib/listings/text';
+import type { SavedAddress } from '@/lib/listings/draft-store';
 
 const PrivateLocationPicker = dynamic(() => import('./PrivateLocationPicker'), { ssr: false,
   loading: () => <div className="h-64 animate-pulse rounded-shutaf-md bg-neutral-bg-soft" /> });
 
-export default function AddressField({ locale }: { locale: Locale }) {
+export default function AddressField({ locale, initialDraft, onDraftChange }: { locale: Locale; initialDraft?: SavedAddress | null; onDraftChange?: (draft: SavedAddress) => void }) {
   const t = (he: string, en: string) => locale === 'en' ? en : he;
   const id = useId();
   const searchRoot = useRef<HTMLDivElement>(null);
-  const [address, setAddress] = useState('');
-  const [selected, setSelected] = useState<AddressSuggestion | null>(null);
+  const [address, setAddress] = useState(initialDraft?.address ?? '');
+  const [selected, setSelected] = useState<AddressSuggestion | null>(initialDraft?.selected ?? null);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'empty' | 'error' | 'limited'>('idle');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [retry, setRetry] = useState(0);
-  const [manual, setManual] = useState(false);
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [city, setCity] = useState('');
-  const [confirmed, setConfirmed] = useState(false);
+  const [manual, setManual] = useState(initialDraft?.manual ?? false);
+  const [latitude, setLatitude] = useState(initialDraft?.latitude ?? '');
+  const [longitude, setLongitude] = useState(initialDraft?.longitude ?? '');
+  const [city, setCity] = useState(initialDraft?.city ?? '');
+  const [confirmed, setConfirmed] = useState(initialDraft?.confirmed ?? false);
   const [lookupCode, setLookupCode] = useState('idle');
   const [category, setCategory] = useState<LocationCategory>('all');
   const [scope, setScope] = useState('');
@@ -39,6 +40,10 @@ export default function AddressField({ locale }: { locale: Locale }) {
   const categoryLabel = (value: LocationCategory) => value === 'all' ? t('הכול', 'All') : groups.find(({ kind }) => kind === value)!.label;
   const point = latitude && longitude && isIsraeliLocation(Number(latitude), Number(longitude))
     ? { latitude: Number(latitude), longitude: Number(longitude) } : null;
+
+  useEffect(() => {
+    onDraftChange?.({ address, selected, manual, latitude, longitude, city, confirmed });
+  }, [address, selected, manual, latitude, longitude, city, confirmed, onDraftChange]);
 
   useEffect(() => {
     if (open && active >= 0) document.getElementById(`${id}-option-${active}`)?.scrollIntoView({ block: 'nearest' });

@@ -12,7 +12,7 @@ interface NavItem {
   badge?: number;
 }
 
-export function BottomNav() {
+export function BottomNav({ onCompose }: { onCompose?: () => void }) {
   const pathname = usePathname();
   const en = pathname?.startsWith('/en/');
 
@@ -63,6 +63,7 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            onClick={item.href.endsWith('/compose') && onCompose ? (event) => { event.preventDefault(); onCompose(); } : undefined}
             className={`
               flex flex-col items-center justify-center gap-1 flex-1 h-full
               md:flex-row md:flex-none md:gap-2
