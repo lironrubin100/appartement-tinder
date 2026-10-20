@@ -25,6 +25,7 @@ You are acting as a Staff-Level Solutions Architect and Lead Developer. We are b
 3.  **Implement:** Build in vertical slices.
 4.  **Verify:** Check syntax and logic.
 5.  **Leave a handoff:** Update the shared status row and `docs/workstreams/<work-id>.md` at meaningful checkpoints and before ending a task. Include outcome, branch or detached HEAD, worktree, changed files, decision IDs, verification evidence/date, uncommitted work, live migrations, PR/preview/deployment state, blockers and the next concrete step. Refresh `docs/WORKTREE_INVENTORY.md` with `node scripts/project-status.mjs --write --shared`. Mark missing or stale evidence explicitly; implementation, verification, merge and deployment are separate states. Documentation updates do not authorize commits, pushes, merges or deployments.
+6.  **Tell the owner what comes next:** At the end of each completed stage or interrupted project task, state the next concrete step in the final user-facing response, in plain language, and say why it is next. Identify the packet when applicable; distinguish unfinished verification or blockers from a new feature. Consult the current register and selector where relevant, and flag stale or conflicting records instead of presenting a guess as confirmed. This complements the handoff; it does not replace it or interrupt authorized automatic continuation.
 
 ### Local-first database workflow — standing owner preference (18 October 2026)
 

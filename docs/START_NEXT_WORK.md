@@ -26,6 +26,8 @@ If a check fails, fix or diagnose it. Record `verification-incomplete` when requ
 
 Once every required assertion for this packet passes, record `verified` and evidence below, update the shared handoff/status and refresh inventory. Run the selector again; continue if another packet is eligible. At a turn/context boundary leave the exact next step and partial state, so a weaker successor does not start over. `verified` is scoped local evidence, not merge/deployment. Final integration packet SL16 still checks combined behavior.
 
+In the final response to the owner, also state the next concrete step and why it is next, using plain language and the packet ID when applicable. Distinguish incomplete verification or a blocker from a new feature, and disclose stale or conflicting records. This user-facing update complements the durable handoff and does not stop authorized automatic continuation.
+
 ## Execution state contract
 
 `planning/packets.json` owns approved planning prerequisites/contracts; `planning/execution-state.json` owns only execution progress. DECISIONS remains product authority; shared PROJECT_STATUS is cross-chat navigation and workstreams contain detailed evidence. Do not duplicate product rules or alter prerequisites just to unblock dispatch.
