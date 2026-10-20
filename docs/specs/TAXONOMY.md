@@ -1,6 +1,14 @@
 # Structured taxonomy v1 — adopted MVP baseline
 
-17 October 2026. Owner explicitly adopted this baseline under C2, with later wording/visual refinement allowed. C1's 31 source headings remain traceable below. C13 approved weights/threshold remain unchanged: 12 factors, total weight15, >=3 comparable factors and weight6 before percentage. Do not replace this with a different eight-factor formula. No application fields/migrations changed by this document.
+17 October 2026. Owner explicitly adopted this baseline under C2, with later wording/visual refinement allowed. C1's 31 source headings remain traceable below. C13 approved weights/threshold remain unchanged: 12 factors, total weight15, >=3 comparable factors and weight6 before percentage. Do not replace this with a different eight-factor formula. The17October adoption document itself changed no application fields/migrations; the implemented20October snapshot is recorded next.
+
+## Implemented snapshot — 20 October 2026
+
+The approved31-category typed manifest and HE/EN options exist in [taxonomy.ts](../../web/src/lib/contracts/taxonomy.ts); bounded configuration/public allowlisting is in [config.ts](../../web/src/lib/contracts/config.ts). The conservative legacy adapter keeps only exact meanings and never infers disclosure or replacement identity answers. The [test-only scoring reference](../../scripts/lib/scoring-reference.mjs) checks the comparison rules below; it is not the production matching engine.
+
+Canonical resident facts/private preferences/disclosure are now consumed by onboarding, profile editing and safe person/group projections in39fdcee, published in final2877c38. [generate-profile-schema.mjs](../../scripts/generate-profile-schema.mjs) derives the SQL option schema from that manifest; the focused canonical SQL suite checks53-option parity, and20October12 contract tests plus8 selector tests passed. [DATA_CONTRACTS](DATA_CONTRACTS.md#implemented-profile-and-chat-contracts--20-october-2026) records actual tables/RPCs and local→live migration versions. The [release record](../releases/2026-10-20-profiles-chat.md) separates original fresh onboarding/Storage checks from current Production persistence tests and the still-unexecuted Google roundtrip.
+
+Apartment field adapters/validators exist as shared contracts, but full composer/storage adoption and production scoring remain successor work. A31-category manifest does not mean31 new compulsory resident questions or that all apartment facts have been migrated. Required resident core fields remain the four below; other facts and private preferences are progressively completable. No category/option/weight change is made by this status update.
 
 ## Storage and validation contract
 
@@ -12,7 +20,7 @@ For each scored resident field store private `accepted_<field>[]` and `preferred
 
 `R` and `A` IDs map one-to-one to source headings in MATCHING.md. Option ordering is display only, never an implicit numerical distance. Slash separates stable option IDs; matching localized labels follow in parentheses in same order.
 
-| ID / source heading | Final proposed question label HE / EN | Normalized field and values |
+| ID / source heading | Approved question label HE / EN | Normalized field and values |
 | --- | --- | --- |
 | R01 Gender Dynamic | הרכב הבית / Household composition | Source heading retained; no new gender-identity intake field, desired-gender preference, filter or scoring in MVP. Group member count is real membership, not inferred identity. Existing voluntarily disclosed data requires migration/privacy review; do not automatically republish it. |
 | R02 Cleanliness | ניקיון במרחב המשותף / Shared-space cleanliness | `cleanliness`: very_tidy/tidy_shared/relaxed (נקי מאוד/סדר במרחב המשותף/גישה נינוחה). Weight2. |
@@ -46,7 +54,7 @@ For each scored resident field store private `accepted_<field>[]` and `preferred
 | A14 Internet Infrastructure | תשתית אינטרנט / Internet infrastructure | internet_type fiber/cable_dsl/mobile/none/unknown (סיבים/כבלים או DSL/סלולרי/אין/לא נמסר); optional advertised_mbps 1..10000; no speed guarantee or inference service cost included. |
 | A15 Roommate Cap | מספר דיירים מרבי / Maximum occupants | max_occupants integer1..30; independent from bedrooms/current residents/available rooms and group capacity E2. Owner-provided claim, no legal occupancy certification. |
 
-## Exact comparison rules for this proposal
+## Adopted exact comparison rules
 
 For ordinary single fact f: directional fit1 if in preferred set; 0.5 if accepted but not preferred; 0 if outside stated accepted set. If preferred empty and accepted supplied, accepted matches1. Unset preference or missing/explicit flexible/varies/discuss/other fact means unknown. Do not infer acceptance from own lifestyle. Ordinal closeness examples in historical MATCHING are withdrawn: enum order is not a scoring algorithm.
 
@@ -60,4 +68,4 @@ Examples: only cleanliness/sleep/guests all compatible ->100 at weight6 and3 fac
 
 ## Implementation/review boundary
 
-C2 adopted this baseline. Collect housing-relevant behavior only; no new marital/military/gender identity intake. Field split does not authorize new sensitive-data collection. Reuse canonical existing appliance/bills facts through adapters, not duplicate columns per heading. Generate locale dictionaries/validators from this approved table into one typed manifest, with no new options/weights invented by executor. Test all options/unknown states and original31 mapping. Final visual styling is separate from this typed questionnaire; no design rewrite is necessary to implement unread/intake packets.
+C2 adopted this baseline. Collect housing-relevant behavior only; no new marital/military/gender identity intake. Field split does not authorize new sensitive-data collection. Reuse canonical existing appliance/bills facts through adapters, not duplicate columns per heading. The locale dictionaries/validators have been generated into the linked typed manifest; preserve their parity with this approved table, without new options/weights invented by an executor. The option/unknown/original31 tests are implemented and must continue passing. Final visual styling is separate from this typed questionnaire; no design rewrite is necessary to implement unread/intake packets.

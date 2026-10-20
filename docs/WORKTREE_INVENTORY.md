@@ -1,6 +1,6 @@
 # Git branch and worktree inventory
 
-Generated: 20 Oct 2026, 11:32 (Asia/Jerusalem); 2026-10-20T08:32:23.466Z.
+Generated: 20 Oct 2026, 11:49 (Asia/Jerusalem); 2026-10-20T08:49:39.023Z.
 
 Primary checkout: /workspace/appartement-tinder. Comparison: local integration branch `work`. Cached GitHub reference: unavailable; this script does not fetch or infer deployment state.
 
@@ -10,18 +10,18 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Branch | HEAD | Local changes | HEAD in work? | Git lock |
 | --- | --- | --- | --- | --- | --- |
-| /workspace/appartement-tinder | work | 39fdcee4 | 6 tracked; 0 untracked entries | Yes | No |
+| /workspace/appartement-tinder | work | 2877c38a | 12 tracked; 2 untracked entries | Yes | No |
 
 ## Local branches
 
 | Branch | HEAD | Upstream | HEAD in work? |
 | --- | --- | --- | --- |
-| work | 39fdcee | None | Yes |
+| work | 2877c38 | None | Yes |
 
 ## Last commit descriptions (context only)
 
 | Checkout | Last commit description |
 | --- | --- |
-| /workspace/appartement-tinder | Complete canonical resident profiles and private account editing |
+| /workspace/appartement-tinder | Record production acceptance and support installed test browsers |
 
 Refresh with `node scripts/project-status.mjs --write` in the primary checkout, or `node scripts/project-status.mjs --write --shared` from a linked worktree. This only reads Git and writes this Markdown snapshot; it never stages, commits, checks out, fetches, merges, pushes, deploys or removes a worktree.

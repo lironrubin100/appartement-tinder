@@ -34,7 +34,7 @@ graph TB
     Disc --> RPC
     Chat --> RT
     Chat --> RPC
-    Prof --> DB
+    Prof --> RPC
     Post --> DB
     SSR --> DB
     Auth --> DB
@@ -76,8 +76,9 @@ J2-J7/J10 technical defaults are now decided; exact adapters/limits in docs/spec
 *   **Why:** Keep one authority and correct retry/unsave semantics; optimize only after measured query need with a reconciliation path.
 
 ### 3.4 Chat Previews
-*   **The Model:** A `last_message_id` reference on the `conversations` table.
-*   **Why:** Fetching every message from every conversation just to build the inbox preview list causes massive payload bloat.
+*   **Implemented:** `list_chat_inbox()` returns authorized previews using a latest-visible-message lateral query ordered by server `message_seq`; it does not download each thread's history or require a `last_message_id` column.
+*   **Unread authority:** `conversation_members.last_read_seq` advances only through `mark_conversation_read`, which locks the membership, rechecks access and clamps the requested sequence to authorized visible history. Counts exclude the caller's own messages and system messages, and respect `visible_after_seq`. Device timestamps cannot move the marker into the future or regress another tab's marker.
+*   **Client synchronization:** `ChatThread` marks rendered history read only while the document is visible and focused, deduplicates persisted messages and catches up on reconnect. `InboxSync` refreshes the inbox from authorized signals. `send_chat_message` uses a unique `(conversation,sender,request_key)` so exact retries return the original message and a changed body conflicts. This delivered SL08.1 repair does not certify the remaining SL08.2 typing, receipts and leave semantics.
 
 ### 3.5 Image Processing Pipeline
 *   **The Model:** Client-side compression before upload.
@@ -103,7 +104,13 @@ RLS cannot express "any column except these two".
 Accepting a like creates a conversation, adds two members and posts a message. This happens via one `SECURITY DEFINER` function (`accept_like`).
 
 **4.4 Profile privacy uses separate private data and an explicit public projection.**
-Contact details, birth date, budget, move-in date, and student email live in an owner-only `profile_private` row. Public profile reads go through an allowlisted projection that returns age (never birth date), profile fields, selected public badges, and no contact details. Direct reads of private fields are not granted to other authenticated users.
+Full name, contact details, birth date, budget, move-in date, and student email live in an owner-only `profile_private` row. Public names are server-formatted first name and last initial. Public profile reads go through an allowlisted projection that returns age (never birth date), bio/photo, selected public badges and consciously disclosed canonical `lifestyle_facts`; no contact details or private preferences. Legacy identity fields are not republished or inferred into canonical facts.
+
+Canonical resident data uses owner-readable, RPC-write-only `profile_lifestyle` (validated facts, disclosure selection, taxonomy version and revision) and `profile_lifestyle_private` (private accepted/preferred options, pet/strict constraints and quiet hours). The approved [TAXONOMY](docs/specs/TAXONOMY.md) is represented by `web/src/lib/contracts/taxonomy.ts`; `scripts/generate-profile-schema.mjs` derives the SQL field schema, with option-parity checks. Missing answers remain distinct from an explicitly answered empty set. The scoring reference is test-only; canonical questionnaire adoption does not complete production SL07 matching.
+
+`save_resident_profile` atomically writes public/private account data, facts, preferences and disclosure, checks expected revision and stores an actor/operation/request-key payload hash/result. Completion requires server-validated adulthood, name, bio, four core facts and a real caller-owned Storage photo; drafts may remain incomplete and later edits cannot de-onboard a completed resident. Gallery writes verify the configured Storage origin, bucket, path and owner; authoritative primary-photo writes bypass neither gallery ownership nor the completed-profile photo invariant. Direct name/bio/authoritative-photo updates are revoked.
+
+Nonresident intake retains `save_onboarding` with a mandatory 18+ declaration on new lister completion, persisted privately as `adult_confirmed_at`. `save_lister_profile` edits private full name/phone/agency with the same revision/retry protection. Incomplete intake can be corrected; a completed or converted lister cannot regain resident capability through the resident endpoint. Explicit B10 conversion preserves private canonical state and direct history, refuses active group membership and hides resident discovery participation. Existing demos are retained without inventing answers, disclosure or retrospective adult declarations.
 
 Apartment addresses and exact coordinates are also private. Public listing projections exclude exact address/coordinates, contact information and private owner data. The planned safe pin is persisted random displacement independent of public ID (TECHNICAL_DEFAULTS); the deterministic 500m source transform remains an identified migration/verification gap, not evidence the replacement is live. Private location reads require a valid accepted apartment-context grant (renter inquiry or accepted poster invitation), under D4 block/deletion rules.
 
@@ -180,7 +187,7 @@ Sourced from the design handoff (`design_handoff_shutaf_design_system/`). These 
 Minimum state the app needs per screen group — a starting point for whatever state/data-fetching layer gets picked (React Query, Zustand, plain Server Components + `fetch`, etc. — existing React/local/server state first; no mandatory new state library under I3):
 
 - **Session/user**: residency (resident vs. non-resident property poster; no resident search mode), verification status, language preference.
-- **Profile**: approved structured facts/preferences, with nonexclusive facts separated rather than forcing every category into one single-select value. C1 inventory retained, C2 normalized baseline adopted 17 October, wording refinements allowed.
+- **Profile**: canonical facts, separate private preferences and explicit disclosed-field selection; persisted revision and an exact-payload retry key. Shared `ResidentProfileForm` drives resumable resident onboarding and editing; lister editing uses its account-only RPC. C1 inventory retained; C2 normalized baseline adopted17October and implemented in39fdcee.
 - **Map/Discover**: viewport bounds → pin query, favorited listing IDs, Discover tab (Individuals or Groups, independent of account and group membership), swipe queue and decisions.
 - **Group**: up to four members per group, multiple memberships allowed; safe public lifestyle summary, no member-derived public budget. Optional explicitly entered group-search budget private to members (E1/E6). Chat cards use per-viewer personal saves, no group wishlist entity (E7).
 - **Chats**: pending likes queue, active thread list, per-thread message history, unread counts.
@@ -188,4 +195,10 @@ Minimum state the app needs per screen group — a starting point for whatever s
 - **Monetization (later)**: potential Pro entitlements require approved commercial policy; no paywall in initial MVP. Save-counter identity remains private under G1/G2, not exposed by frontend blur.
 
 
-17 October checkpoint: ordered dispatch [WORK_PLAN](docs/WORK_PLAN.md), bounded [EXECUTION_PACKETS](docs/EXECUTION_PACKETS.md). Nonresident posters browse safe people and send apartment-bound invitations; recipient acceptance precedes chat/address. Saver identities remain private. Technical/moderation defaults adopted; runtime evidence remains separate. DECISIONS.md wins.
+Historical planning checkpoint, 17 October (requirements, not completion evidence): ordered dispatch [WORK_PLAN](docs/WORK_PLAN.md), bounded [EXECUTION_PACKETS](docs/EXECUTION_PACKETS.md). Nonresident posters browse safe people and send apartment-bound invitations; recipient acceptance precedes chat/address. Saver identities remain private. Technical/moderation defaults adopted; runtime evidence remains separate. DECISIONS.md wins.
+
+## 8. Implementation evidence — 20 October 2026
+
+Chat sequence/read repair and shared typed contracts shipped in `95f333b`; canonical resident/private account workflows shipped in `39fdcee`. Release record `2877c38` adds production acceptance and browser-harness support. The [canonical profile handoff](docs/workstreams/2026-10-19-sl01-canonical-profile.md) records live migrations, ordinary-client privacy/photo/age checks, fresh HE/EN onboarding and editing, and the production nine-test regression covering chat, persisted editors, startup preference, signout and safe auth returns. The [chat handoff](docs/workstreams/2026-10-19-cloud-mvp-progress.md) retains the earlier SL08.1 authorization and two-browser evidence.
+
+These are bounded implementation results. Full interactive Google account/provider roundtrip remains unexecuted; a302 provider start is not acceptance. SL01.2 retains that verification gap. Listing phone-policy/retry/draft work and later chat/matching capabilities are separate pending packets; this checkpoint does not claim whole-project completion.

@@ -2,6 +2,12 @@
 
 Date:19 October2026. Owner: autonomous overnight continuation; root owns integration/migration application. Checkout `/workspace/appartement-tinder`, branch `work`, base `400a4095c495ec72b2af46265f2268e886002fb9`, clean at start. User explicitly requested continuation through the work plan while unavailable; prior publication, exact synthetic data, shared-target and test-environment authorizations persist. No paid resources/destructive unrelated operations.
 
+## Current result — 20 October 2026
+
+Canonical implementation39fdcee is published in final release `2877c38a21e2b183805451a265354a19aa64faf2`; active Production deployment `dpl_CmU7JB992cBpTMvRf4DivtAcHZGA` is READY on https://appartement-tinder.vercel.app. Domain mapping rechecked for the documentation audit.20October Production browser9/9 and final release HTTP3/3 passed; app/schema diff39fdcee→2877c38 is empty. Full SL01.2 remains verification-incomplete only for an actual Google-account roundtrip.
+
+[Consolidated release,55-file coverage, migration mapping and all evidence](../releases/2026-10-20-profiles-chat.md). The checkpoint sections below are dated history; an earlier pending/in-progress sentence does not override this result. No SL02 code was implemented. Current retained fixtures:20 synthetic users,7 photos,0 temporary blocks.
+
 ## Outcome/plan
 
 Finish missing approved local SL01.2 work: canonical31-taxonomy resident facts and private preferences/disclosure, mandatory adult name/photo/bio/four core facts on completion, resumable drafts, localized profile editing, safe public projection and badge/startup compatibility. Preserve single account and B10 resident-to-lister direction; no automatic lister-to-resident return or old-demo invalidation. Google real-provider acceptance is separate; a password fixture cannot substitute for it. Decisions B1/B2/B5/B6/B9/B10/C2/I9/I16/I19/I22 and DATA_CONTRACTS/TECHNICAL_DEFAULTS/TAXONOMY; existing age/read fixes reused.
@@ -26,7 +32,7 @@ Finish missing approved local SL01.2 work: canonical31-taxonomy resident facts a
 
 Docker local Postgres remains unavailable due managed vfs extraction/no-space failure recorded in prior handoff. Shared target npbduvjnqnbydolmdpsc: owner confirms no real users until explicitly otherwise, only current executor. Recheck live exact columns/functions/history before any reviewed compatible migration. Fresh separate exact-ID fixture run (do not overwrite prior nine retained demos); owned real photo uploads, outsider direct reads, malformed fields/unknown-vs-none, requiredness rollback, revision/idempotency/conflict, draft reload, editing, conversion/group refusal, HE/EN390px+desktop. Retain useful new demos as requested; remove only newly created temporary block objects, record actual retained uploads/rows. No real provider success without the actual channel/account.
 
-State: backend implemented and live ordinary-client verified; localized UI/browser acceptance in progress. Next: complete browser/regression checks, build and publication; Google actual-provider acceptance remains separate.
+Historical state at the initial implementation checkpoint: backend ready, browser/publication pending. Superseded by the current result and20October production verification above.
 
 
 ## Live checkpoint — 19 October, 21:59 UTC
@@ -52,7 +58,7 @@ Browser harness first run exposed duplicate Next route-announcer `role=alert` an
 
 Retention audit22:11 UTC: all20 exact-ID synthetic Auth users/profiles retained (original9 + canonical9 + isolated photo-guard1 + fresh final lister1),7 owned Storage objects/7 gallery rows,0 temporary blocks,0 completed canonical residents lacking an actually owned photo. Ignored manifests and credential-free reports retain target/IDs; passwords never tracked. Teardown was deliberately not executed because the owner wants persistent demos. Reusable explicit-disposal tooling now generates guarded exact-ID prepare-cleanup.sql and preflights all owners before any Storage removal. Syntax/lint and disposable SQL wrong-email/external-peer/external-admin refusal checks passed. Preparation only: no disposal SQL or Storage cleanup was executed; retained demos are intact.
 
-Publication preparation: application checks complete; normal commit/push under standing owner authorization, with full Google packet acceptance kept incomplete. Deployment and production acceptance will be recorded after actual results.
+Historical pre-publication checkpoint: checks complete, publication not yet confirmed at that moment. Superseded by the current final release and production evidence above.
 
 
 ## Production verification — 20 October 2026, 11:32 IDT
@@ -64,3 +70,8 @@ Fresh release checks20October: full TypeScript exit0; final production build exi
 Fresh ordinary-client release privacy/retained-photo checks4 scenario groups passed: outsider reads of all four owner tables empty, explicit-only public canonical facts and abbreviated name/no private fields, original owner full name retained, real owned photo fetch200. Exact server20October age boundary rechecked: DOB2008-10-21 denied atomically, DOB2008-10-20 accepted/idempotent retry; original DOB/state restored, revision only +2. `qa-chat-authorization.mjs` rerun passed4 scenario groups with exact new temporary block removed in finally. No production `error`/`fatal` runtime-log groups returned for this deployment during the15-minute review window. No paid resources or new migration required in this final review.
 
 All useful synthetic demo users/photos/chats retained. Ignored manifests and safe reports remain under `web/.qa`; credentials not tracked. The full Google interactive account/provider roundtrip is still unexecuted; a configured302 start does not satisfy it. SL01.2 remains verification-incomplete only for that assertion. Bounded verified canonical functionality is live; further listing phone-policy/retry/draft work is a separately identified next task, not included in this release.
+
+
+## Final publication metadata reconciled — 20 October documentation audit
+
+The11:32IDT checkpoint below referenced the first canonical release39fdcee because it preceded the documentation/test-harness followup. Final tracked release2877c38 was pushed to master; automatic Production `dpl_CmU7JB992cBpTMvRf4DivtAcHZGA` reached READY and owns the actual public alias. Three final HTTP checks passed at08:34:51UTC/11:34:51IDT. A duplicate manual deployment `dpl_DTDorKxoo8J1mv15cK4RCJGJtjio` was canceled after the automatic build existed; it never replaced the active alias. Private final evidence `web/.qa/release-20261020.json`; public summary and full file mapping now live in the consolidated release document. There is no uncommitted application/schema implementation from SL02.

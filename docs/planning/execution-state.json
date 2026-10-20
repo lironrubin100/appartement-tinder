@@ -95,30 +95,78 @@
         {
           "command_or_scenario": "Production https://appartement-tinder.vercel.app at bf8fe9d / deployment dpl_DRuE82VP1VYuJw7Atc9RcHG84fXe: HE1280px + EN390px two-browser journeys2/2 passed in51.9s",
           "result": "passed"
+        },
+        {
+          "command_or_scenario": "20October Production39fdcee application / final2877c38 identical app: HE1280px+EN390px chat2/2 within9/9 runner; ordinary chat authorization4 groups rerun passed, temporary block removed.",
+          "result": "passed"
         }
-      ]
+      ],
+      "release_sha": "2877c38a21e2b183805451a265354a19aa64faf2",
+      "deployment_id": "dpl_CmU7JB992cBpTMvRf4DivtAcHZGA",
+      "release_summary": "docs/releases/2026-10-20-profiles-chat.md",
+      "last_reviewed_at": "2026-10-20T08:34:51.753Z"
     },
     "SL00.2": {
       "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md",
       "worktree": "/workspace/appartement-tinder",
-      "source_sha": "95f333bb5d7587122e9e72a9296b48bd14e3f3e0",
+      "source_sha": "39fdcee4982bc8184181dc7cf4d061f4402b93c0",
       "diff_sha256": "clean",
-      "verified_at": "2026-10-19T21:32:26.080Z",
+      "verified_at": "2026-10-20T08:34:51.753Z",
       "status": "verified",
-      "outcome": "Approved31-category typed facts/private preferences/HE-EN options/config contract and compatible legacy adapter generated;11 contracts tests including test-only C2/C13 scoring oracle pass. No canonical UI/SQL rollout claimed.",
+      "outcome": "31-category typed facts/private preferences/HE-EN options/config allowlist/conservative legacy adapter and public canonical renderer implemented.20October12 contract tests+8 selector tests pass, plus canonical SQL53-option parity, TypeScript/build. Canonical resident consumers implemented inSL01.2; production matching/apartment adoption/config persistence remain separate.",
       "checks": [
         {
-          "command_or_scenario": "node --test scripts/test-contracts.mjs:11 passed; typecheck, targeted ESLint and final production build exit0",
+          "command_or_scenario": "20October node --test scripts/test-contracts.mjs scripts/test-next-work.mjs:12+8 passed; canonical SQL53-option parity; full TypeScript and production build exit0.",
           "result": "passed"
         }
-      ]
+      ],
+      "release_sha": "2877c38a21e2b183805451a265354a19aa64faf2",
+      "deployment_id": "dpl_CmU7JB992cBpTMvRf4DivtAcHZGA",
+      "release_summary": "docs/releases/2026-10-20-profiles-chat.md"
     },
     "SL01.2": {
       "status": "verification-incomplete",
       "handoff": "docs/workstreams/2026-10-19-sl01-canonical-profile.md",
       "worktree": "/workspace/appartement-tinder",
-      "outcome": "Canonical resident/lister profiles and privacy/owned-photo/core/draft/edit/startup/signout functionality deployed at39fdcee. Fresh20October Production HE/EN browser9/9, SQL53 options, contract/selector20, build/types and ordinary authorization/age/privacy checks passed. Full Google interactive account-provider roundtrip remains unexecuted; keep this packet verification-incomplete for that assertion.",
-      "source_sha": "39fdcee4982bc8184181dc7cf4d061f4402b93c0"
+      "outcome": "Canonical application39fdcee deployed in final2877c38 / dpl_CmU7JB992cBpTMvRf4DivtAcHZGA READY. Resident/lister completion/edit/private preferences/disclosure/owned-photo/age/draft/startup/signout verified.20October Production9/9, SQL53 options, contract/selector20, build/types and ordinary authorization/privacy/age passed. Only actual Google interactive roundtrip remains unexecuted; packet stays verification-incomplete.",
+      "source_sha": "39fdcee4982bc8184181dc7cf4d061f4402b93c0",
+      "release_sha": "2877c38a21e2b183805451a265354a19aa64faf2",
+      "deployment_id": "dpl_CmU7JB992cBpTMvRf4DivtAcHZGA",
+      "release_summary": "docs/releases/2026-10-20-profiles-chat.md",
+      "last_reviewed_at": "2026-10-20T08:34:51.753Z",
+      "remaining_acceptance": [
+        "Actual Google account consent/sign-in/callback roundtrip; configured302 provider start alone is not acceptance."
+      ],
+      "checks": [
+        {
+          "command_or_scenario": "19October fresh HE1280px+EN390px canonical draft/reload/ownedJPEG/core/disclosure/preferences/edit2 passed; corrected fresh lister intake1/1 on built local server+shared Supabase.",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "19October canonical ordinary-client9 scenario groups; realStorage last-photo guard isolated1-account run; real Discover canonical-ref introduction1/1.",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "20October Production profile-persistence/chat-unread/resident-auth-guest runner9/9 in1.6m, including native-focus two-browser chat and lister/resident startup/signout/private editor.",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "20October exact server18 boundary rejected2008-10-21 atomically and accepted2008-10-20; retry stable, originalDOB restored.",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "20October ordinary-client profile privacy/photo4 groups and chat authorization4 groups; temporary block removed.",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "20October final Production2877c38 both login pages+safe external callback HTTP3/3; actual domain mapped to READY deployment; no app/schema diff from browser-tested39fdcee.",
+          "result": "passed"
+        },
+        {
+          "command_or_scenario": "20October canonical PGlite53 options,12 contracts+8 selector tests, full TypeScript/build and planning/whitespace passed.",
+          "result": "passed"
+        }
+      ]
     },
     "SL02.1": {
       "status": "pending"

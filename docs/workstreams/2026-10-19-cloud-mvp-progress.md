@@ -2,6 +2,12 @@
 
 Owner: current autonomous cloud goal; checkout `/workspace/appartement-tinder`, branch `work`, starting SHA `c2df1494251be183f1e723dd8fb046a2a2d7fc50` (clean).
 
+## Current result / successor — 20 October 2026
+
+SL08.1 and SL00.2 were verified/published in95f333b/bf8fe9d and remain included in active release2877c38, Production `dpl_CmU7JB992cBpTMvRf4DivtAcHZGA` READY.20October actual Production chat HE/EN2/2 (within9/9 regression), ordinary chat authorization4 groups,12 contracts+8 selector tests and final build/types passed. Canonical profile successor39fdcee is now implemented/published; its remaining full-packet acceptance is Google interactive sign-in. See [current release/file/evidence map](../releases/2026-10-20-profiles-chat.md) and [canonical handoff](2026-10-19-sl01-canonical-profile.md).
+
+Earlier sections are dated execution history. Statements about no hosted mutation, blocked runtime or pending publication describe their checkpoint only, not the current deployed state. Current retention is20 total synthetic demos across separate runs; the original9 in this handoff remain intact.
+
 ## Plan and boundaries
 
 - Repair cross-platform dispatch validation without rewriting historical paths/evidence; reconcile SL01.1 from its published owning handoff.
@@ -18,7 +24,7 @@ Owner: current autonomous cloud goal; checkout `/workspace/appartement-tinder`, 
 - SL08.1 defect confirmed in source: client wall-clock writes on mount and insert, even hidden tabs; inbox compares timestamps instead of sequence. Sequence and group visibility cutoff already exist.
 - Initial dependency installation failed because default npm cache `/home/agent/.npm` is outside writable roots; retry uses `/tmp/shutaf-npm-cache`, preserving lockfile integrity.
 
-## Current state
+## Initial state — historical checkpoint
 
 SL08.1 implementation in progress. No migration applied to hosted project, no accounts/uploads created, no deployment performed. This checkout is the calling task's sole registered checkout; preserve it until integration or recoverable handoff.
 
@@ -56,7 +62,7 @@ Owner clarified: no real app users until explicitly announced otherwise; current
 - Retained fixture policy:9 new synthetic identities in ignored `.env.qa.local` + `.qa/run.json`; original existing demos untouched. No uploads in these checks. No accounts deleted by owner request; do not call zero-user cleanup a result. Fixture passwords never tracked; failure artifacts are ignored/private.
 - Security advisors compared before/after: existing view/RLS/auth advisories unchanged; authenticated-only function advisory count26→28 corresponds to the two intentional guarded new RPC endpoints. No new anonymous callable endpoint. Existing advisories are not claimed resolved (reference: https://supabase.com/docs/guides/database/database-linter).
 
-Publication: pending final integration at this checkpoint. Sole checkout remains `/workspace/appartement-tinder`, branch `work`; no additional worktree created. Next packet is remaining SL01.2 profile completion; broad packet must not be marked complete from the age fix alone.
+Historical publication checkpoint: pending final integration at that moment. Sole checkout remains `/workspace/appartement-tinder`, branch `work`; no additional worktree created. Next packet is remaining SL01.2 profile completion; broad packet must not be marked complete from the age fix alone.
 
 ## Publication and production acceptance
 

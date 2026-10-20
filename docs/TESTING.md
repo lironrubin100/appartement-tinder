@@ -63,7 +63,7 @@ Acceptance uses one worker and no mocked routes:
 | `e2e/resident-auth-guest.spec.ts` | Four tests: guest login/signup UI, RTL/LTR, protected return paths and external/looping callback rejection; no mail |
 | `e2e/resident-live.spec.ts` | One full test: new resident draft/resume/photo/traits → introduction → actual recipient acceptance → persistent two-way live chat → consent-based group creation → majority/any-member admission, four-member cap and new-message-only history → outsider/block denial → new lister/public listing → guest login return → inquiry → owner acceptance → private address and live chat |
 
-Eight passing tests is the current acceptance baseline. Fixtures 0–3 serve the listing tests; 4–8 serve the resident/group/viewing test. Start a new run with fresh users for release evidence. Guest-only tests may run alone without fixtures; direct integration specs deliberately skip without fixtures, which is **not** completed integration verification.
+The eight-test result is the historical 15 October acceptance baseline, not the count or completeness of the current expanded suites. Fixtures 0–3 serve the listing tests; 4–8 serve the resident/group/viewing test. Start a new run with fresh users for release evidence. Guest-only tests may run alone without fixtures; direct integration specs deliberately skip without fixtures, which is **not** completed integration verification.
 
 If Chromium is absent, use installed Chrome/Edge through `PLAYWRIGHT_CHANNEL` or install the Playwright browser where allowed. If browser processes are sandbox-blocked, use the supported execution escalation with the concrete test command. Missing service credentials do not block ordinary client testing. Diagnose one failure before retrying; do not replace assertions with sleeps. Use the runner's trace on retry/temporary debug capture when needed, and review authentication/private data before sharing artifacts.
 
@@ -104,7 +104,7 @@ This removes the temporary credentials and SQL files, including `prepare-cleanup
 
 Update the workstream and `PROJECT_STATUS.md`: date, checkout/commit, server type, live migration versions, exact command, passed/failed/skipped counts, real journey/privacy assertions, cleanup counts and remaining limitations. Distinguish a local passing suite from a deployed commit. Update `docs/WORKTREE_INVENTORY.md` with `node scripts/project-status.mjs --write --shared` when Git ownership/state changes.
 
-The existing suite proves password-login journeys; it does not prove an entire external Google consent flow, load/concurrent transaction behavior or full translation of older Map/Settings/profile-editor screens. Extend tests when those areas change. A real interactive MFA/consent/CAPTCHA or unavailable required account permission can require a narrow user action; state the exact blocker, finish independent checks and explain how the automated run resumes. Do not assign the entire testing job back to the user.
+Password-fixture suites prove those tested login journeys; they do not prove an entire external Google consent flow or load/capacity behavior. The canonical profile/editor now has dedicated HE/EN evidence below; that does not establish full translation of unrelated older screens. Extend tests when those areas change. A real interactive MFA/consent/CAPTCHA or unavailable required account permission can require a narrow user action; state the exact blocker, finish independent checks and explain how the automated run resumes. Do not assign the entire testing job back to the user.
 
 ## Focused contracts, unread and adult-resident checks (19 October 2026)
 
@@ -117,3 +117,61 @@ With this run's nine exact-ID fixtures prepared/checked, `npm run test:unread` r
 Cloud networking: Node 24 ordinary clients/server may need `NODE_USE_ENV_PROXY=1`. Set `PLAYWRIGHT_PROXY_SERVER` only when the configured managed proxy is needed; localhost/127.0.0.1 are bypassed for the owned local app. Preserve certificate verification. Owner explicitly approved trusting this environment's managed proxy CA for browser testing after automatic review explained the trust-store change; this is scoped to the test cloud environment, never an instruction to disable TLS or alter a production user's device. Import the configured public CA only in an execution context with the authorized NSS-store write permission, and launch the browser in that context. No credential values belong in logs, traces, status files or Git.
 
 The guest/auth suite honors `PLAYWRIGHT_BASE_URL`, including the actual production public alias. `PLAYWRIGHT_EXECUTABLE_PATH` optionally selects an already installed Chromium executable; otherwise Playwright uses its usual browser/channel configuration. This only changes the test harness and never disables certificate verification.
+
+
+## Canonical profile and release verification — 20 October 2026
+
+Use the [canonical profile handoff](workstreams/2026-10-19-sl01-canonical-profile.md) for source/deployment/date-specific evidence. Application `39fdcee4982bc8184181dc7cf4d061f4402b93c0` is included unchanged in final release `2877c38a21e2b183805451a265354a19aa64faf2`, mapped to READY Production `dpl_CmU7JB992cBpTMvRf4DivtAcHZGA`; the source/live migration mapping is in [DATA_CONTRACTS](specs/DATA_CONTRACTS.md#implemented-profile-and-chat-contracts--20-october-2026). Read those records before treating an older fixture setup or suite count as current. No test command below authorizes a new target or disposal of retained demos.
+
+### Local SQL, manifest and contract checks
+
+```sh
+# Repository root; Node 24 supports the TypeScript manifest imports.
+node scripts/test-canonical-profile-sql.mjs
+node scripts/generate-profile-schema.mjs --check
+node scripts/test-resident-sql.mjs
+node scripts/test-resident-age.mjs
+node --test scripts/test-contracts.mjs scripts/test-next-work.mjs
+node scripts/check-planning.mjs
+```
+
+The canonical PGlite suite loads both reviewed profile migrations and validates 53 resident manifest-option mappings plus required fields/adulthood, photo metadata ownership, disclosure/private fields, names, revision/request-key semantics, lister editing/adult declaration, retained-data conversion, group/trait guards and incomplete intake correction. It connects to no hosted project. The separate resident/chat suite verifies sequence/read/send authorization and retries; `test:age` retains the earlier narrow age suite. The contract/selector result recorded for this release is 20 passed. `generate-profile-schema --check` detects SQL definition drift from the TS manifest; it is not a migration application or runtime acceptance test. Production C13 scoring is still separate from the test-only oracle.
+
+### Fresh profile fixtures versus retained-demo checks
+
+The canonical scripts use their own ignored `.env.profile-qa.local` credentials and `.qa/profile/run.json` target/ID record, rather than the default `.env.qa.local` run. Prepare a fresh profile run only when fresh onboarding is needed, using the fixture helper's `QA_FIXTURE_COUNT=9`, `QA_FIXTURE_PREFIX=qa-profile`, `QA_FIXTURE_MANIFEST=.env.profile-qa.local` and `QA_FIXTURE_DIRECTORY=.qa/profile` overrides. Apply only that run's reviewed provisioning SQL and run its helper check with the same overrides. Never overwrite a retained manifest. A different `PROFILE_QA_MANIFEST` may be supplied to `canonical-profile.spec.ts` for a separately provisioned fresh browser fixture; retained-demo suites have their own fixed-manifest expectations.
+
+| Command/file, from `web` | Fixture/side-effect boundary and actual evidence |
+| --- | --- |
+| `node scripts/qa-canonical-profile.mjs` | Fresh profile-run indices 3–8 only; indices 0–2 reserved for browser intake. Refuses preexisting completed/canonical/gallery state. Nine ordinary-client scenario groups passed on 19 October: actual PNG upload/byte fetch, forged/foreign photo rejection, required-field atomic rollback, fresh-session draft reload, concurrent CAS/idempotency, private full name/preferences/disclosure, lister consent/edit/conversion, actual accepted chat/group admission and group-conversion refusal. Retains useful demos/photos/chats; report `.qa/profile/acceptance.json`. Do not rerun it against those now-completed accounts. |
+| `npx playwright test e2e/canonical-profile.spec.ts --workers=1 --headed` | Fresh canonical HE desktop/EN 390px intake, owned JPEG upload, draft/resume, required core facts, private preferences and consciously disclosed fields; also new lister completion/edit. Original corrected checks are separately dated in the handoff. Requires fresh fixture ownership; an earlier test-only lister redirect assertion was corrected, and a separate fresh final lister run passed 1/1. |
+| `npx playwright test e2e/canonical-discovery.spec.ts --workers=1 --headed` | Original 19 October 1/1 check verified abbreviated peer name, localized disclosed canonical fact and a real trait-attached introduction. It changes the designated sender's pass/introduction state; it is not a read-only sweep or an authorization to rewrite other retained fixtures. |
+| `node scripts/qa-canonical-age.mjs` | Existing profile-run index 5 only. Reads current own payload/revision, rejects DOB one day beyond the actual server cutoff with zero mutation, accepts the exact cutoff/idempotent retry, then restores original DOB and all other fields through the same RPC; revision increases exactly twice. Requires freshly queried server-clock evidence described below. Saves `.qa/profile/age-boundary.json`; does not create fixtures or replace photos. Passed again on 20 October using server cutoff 2008-10-20 (2008-10-21 rejected). |
+| `node scripts/qa-profile-photo-guard.mjs` | A separate fresh single-account `qa-photo-guard` run only, under `.env.photo-guard-qa.local` / `.qa/photo-guard`. Actual sole-gallery DELETE and sole-object Storage API removal must fail; cache-busted retrieval must still return exact PNG bytes. 19 October passed: Storage 500/P0001, subsequent GET 200/exact bytes, gallery/primary unchanged. It retains that demo. Never repurpose a previous demo for this destructive-negative check; the script's isolated new-path recovery is only for its own new synthetic object if Storage unexpectedly removes bytes. Report `.qa/photo-guard/acceptance.json`. |
+
+For the repeatable age check, query the confirmed project's server clock read-only through the connector:
+
+```sql
+select current_date::text as server_date,
+       (current_date - interval '18 years')::date::text as adult_cutoff,
+       ((current_date - interval '18 years')::date + 1)::text as next_day;
+```
+
+Write only those returned values plus `target` and `observed_at` into ignored `.qa/profile/server-age-clock.json`; the script requires evidence less than one hour old. Do not calculate the authoritative cutoff from the device clock, hardcode yesterday's date or expose credentials. A DOB-restoration failure must be recovered on that exact fixture and recorded before continuing.
+
+### Actual deployed regression, distinct from original onboarding
+
+From `web`, the recorded 20 October release runner was:
+
+```sh
+PLAYWRIGHT_BASE_URL=https://appartement-tinder.vercel.app \
+PLAYWRIGHT_EXECUTABLE_PATH=/usr/bin/chromium \
+npx playwright test e2e/profile-persistence.spec.ts e2e/chat-unread.spec.ts \
+  e2e/resident-auth-guest.spec.ts --workers=1 --headed
+```
+
+The optional executable path is for the cloud's installed Chromium; use the appropriate browser setting on another machine. Run headed/native-focus checks within an owned display/Xvfb session, with the managed proxy/CA setup above when required. This command does not start or deploy the application: the base URL chooses the actual target, whose backend still must be checked independently.
+
+Actual Production result: **9/9 passed in 1.6 minutes**, with no mocked routes or skips. It rechecked two-browser HE/EN sequence unread/visible read/reconnect/retry, retained resident/lister private editor/startup persistence/signout, and guest/deep-link/callback safety. It did not rerun fresh onboarding on the already retained browser users. The same day's separate ordinary release privacy/photo checks passed four scenario groups; the exact server age boundary and four chat authorization scenario groups were rechecked, with only the newly created temporary block removed. No new schema migration was needed for that release review. Refer to the handoff for the exact runtime-log window and individual original intake/discovery dates; a READY deployment alone is not this acceptance evidence.
+
+Full Google interactive account/provider/callback acceptance remains **unexecuted**. The recorded 302 start redirect to Google proves provider configuration/start only. Keep that SL01.2 assertion verification-incomplete, while distinguishing the bounded canonical functionality actually implemented and verified. Current UI/server text length counting also differs for some emoji-heavy strings; neither SQL-option parity nor the browser suites should be described as resolving that known limit.

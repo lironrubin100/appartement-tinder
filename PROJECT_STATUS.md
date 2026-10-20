@@ -1,8 +1,28 @@
 # Shutaf project status
 
-Updated: 20 October 2026 (Asia/Jerusalem). Historical runtime acceptance dates below remain15October. This is the shared operational register for all local chats and linked worktrees. Product rules remain in DECISIONS.md. Read this file and one relevant handoff before exploring code.
+Updated: 20 October 2026 (Asia/Jerusalem). Current evidence is dated inline; historical acceptance retains its original date. This is the shared operational register for all local chats and linked worktrees. Product rules remain in DECISIONS.md. Read this file and one relevant handoff before exploring code.
 
-## What is verified working
+## Current published application — 20 October 2026
+
+- **Production:** [appartement-tinder.vercel.app](https://appartement-tinder.vercel.app), release `2877c38a21e2b183805451a265354a19aa64faf2`, deployment `dpl_CmU7JB992cBpTMvRf4DivtAcHZGA` **READY**. Domain-to-deployment mapping rechecked during this documentation audit. The later queued duplicate deployment was canceled and is not the active public alias.
+- **Implementation:** canonical profiles `39fdcee`; chat/contracts `95f333b`. Release2877c38 changes documentation and the test harness only; app/schema diff from39fdcee is empty.
+- **Complete change/evidence/file map:** [19–20 October release summary](docs/releases/2026-10-20-profiles-chat.md). It maps all55 files changed during this continuation, all4 local/live migration versions, test targets, retained fixtures and unfinished work.
+- **Packet state:** SL08.1 and SL00.2 verified; canonical SL01.2 functionality published and verified, with the packet still `verification-incomplete` solely for the unexecuted actual Google-account roundtrip. SL02.1 findings are documented, not implemented.
+
+## What is verified working now
+
+| Capability | Actual evidence / date | Source and publication |
+| --- | --- | --- |
+| Canonical resident draft/completion/edit, required adult/name/owned photo/bio/core4, optional facts and private preferences |19October fresh HE1280px/EN390px onboarding+edit;9 ordinary-client groups;20October Production private editor/startup/signout regression |39fdcee, included in active2877c38 release |
+| Private full names, explicit public fact disclosure, owner-only private tables, gallery and last-photo protection |19October actual Storage last-object refusal/exact-byte retrieval; safe person/group/intro projection;20October outsider/privacy/photo review4 groups | Four reviewed live migrations listed below;39fdcee |
+| Nonresident short intake/adult declaration and revision-safe private account editing |19October fresh corrected intake1/1 on built local server+shared backend;20October Production lister edit/reload passed; actual API conversion-retention/group-refusal checks19October |39fdcee; full Google acceptance remains separate |
+| Correct persistent unread/read, hidden-tab focus behavior, retry-safe send and reconnect |20October actual Production HE/EN two-browser2/2 as part of9/9 runner; ordinary-client outsider/block/concurrent retry4 groups passed |95f333b, retained through active2877c38 |
+|31-category typed contracts, HE/EN options, conservative legacy adapter, explicit-none handling and safe config allowlist |20October12 contract+8 selector tests; canonical SQL53 option parity suite; full TypeScript/build passed |95f333b + public renderer/parity additions39fdcee; production scoring not replaced |
+| Guest/auth return and both locales, safe callback errors |20October actual Production4/4 guest/browser checks; final2877c38 both login pages+external callback3 HTTP checks |Active2877c38 deployment |
+
+## Historical listing/group baseline — 15 October 2026
+
+The table below retains its original verification date and does not certify a new full listing/group lifecycle run after the canonical changes. Use the dated current rows above for this continuation.
 
 | Capability | Verification | Where the code is | Integration / deployment |
 | --- | --- | --- | --- |
@@ -13,22 +33,26 @@ Updated: 20 October 2026 (Asia/Jerusalem). Historical runtime acceptance dates b
 | Individuals/Groups discovery, introductions, personal and configurable group chats | Fresh separate browser accounts; recipient acceptance, live delivery/reload, consent, admission votes, capacity and private history | Implementation snapshot c80e9b2 | Three live migrations applied; merged/pushed in c80e9b2 |
 | Public listing → sign-in return → persistent inquiry → owner acceptance → private address/chat | Fresh guest/renter/owner/outsider browser and ordinary-client checks | Implementation snapshot c80e9b2 | Three live migrations applied; merged/pushed in c80e9b2 |
 
-These are local acceptance results from 15 October, not a claim about the deployed app. [Full verification](docs/LISTING_SLICES_VERIFICATION.md).
+
+[Historical full verification](docs/LISTING_SLICES_VERIFICATION.md).
 
 ## Registered workstreams
 
+Current cloud entries are identified explicitly. Older rows retain historical source/checkout references; they are not claims that those other-machine checkouts are active in this cloud environment.
+
 | Work ID | Outcome / state | Location | Next step |
 | --- | --- | --- | --- |
-| [2026-10-19-sl01-canonical-profile](docs/workstreams/2026-10-19-sl01-canonical-profile.md) | Published canonical profiles at39fdcee / Production dpl_28mLV3rEaJ56fKtPPPs89qdKpRyD READY. Fresh20October Production HE/EN browser9/9, SQL53 options, contract/selector20, full build/types and ordinary authorization/age/privacy checks passed. Full Google roundtrip remains unexecuted. | Cloud `/workspace/appartement-tinder`, branch `work`, application `39fdcee` | Verified live at https://appartement-tinder.vercel.app. Retain Google acceptance gap; next separately scoped work is SL02.1 resident phone policy, retry-safe publishing and composer drafts/overlay. |
-| [2026-10-19-cloud-mvp-progress](docs/workstreams/2026-10-19-cloud-mvp-progress.md) | Verified SL08.1 unread/read/reconnect/retry flow and SL00.2 typed31-category contracts. Bounded SL01.2 adult-resident fix live-verified; full profile packet remains incomplete. HE/EN browser2/2, contract/selector19, SQL/age suites and production build passed. | Application `95f333b`, production `bf8fe9d`; cloud `/workspace/appartement-tinder`, branch `work`; live migrations `20261019211840` + `20261019212312` | Published bf8fe9d; Production dpl_DRuE82VP1VYuJw7Atc9RcHG84fXe READY, real HE/EN production browser2/2 passed. Next: remaining SL01.2; nine synthetic demos retained. |
+| [2026-10-20-documentation-reconciliation](docs/workstreams/2026-10-20-documentation-reconciliation.md) | Documentation audit/reconciliation: current release, all55 changed files, technical contracts, testing commands, defects and execution evidence aligned. No app/schema change. | Cloud `/workspace/appartement-tinder`, branch `work`, audit base2877c38 | Coverage55/55,130 local links, planning/selector8 and independent factual reviews passed; documentation-only commit/push under standing authorization. |
+| [2026-10-19-sl01-canonical-profile](docs/workstreams/2026-10-19-sl01-canonical-profile.md) | Canonical app39fdcee published in final2877c38 / dpl_CmU7JB992cBpTMvRf4DivtAcHZGA READY.20October Production9/9, SQL53 options, contract/selector20, build/types and ordinary authorization/age/privacy passed. | Cloud `/workspace/appartement-tinder`, branch `work`; [consolidated release](docs/releases/2026-10-20-profiles-chat.md) | Google interactive roundtrip remains unexecuted; SL02.1 listing phone/retry/draft findings documented for separate work. |
+| [2026-10-19-cloud-mvp-progress](docs/workstreams/2026-10-19-cloud-mvp-progress.md) | Historical19October checkpoint verified SL08.1 and SL00.2 with browser2/2 and19 contract/selector tests.20October successor evidence is now linked: contracts12+selector8, Production chat2/2; full canonical profile implemented with Google acceptance pending. | Historical implementation95f333b / first releasebf8fe9d; included in current2877c38. Live migrations20261019211840 +20261019212312. | Historical19October2/2 retained; fresh20October Production chat2/2 passed. Canonical followup now implemented; only Google acceptance remains for SL01.2. |
 | [2026-10-19-address-autocomplete](docs/workstreams/2026-10-19-address-autocomplete.md) | Published grouped free-form autocomplete with automatic provider-component parsing, optional city/region/neighborhood/street filters, duplicate-free labels and private area refinement. Seven logic/SQL tests, HE/EN 390px UI contracts and production build passed; real HE/EN addresses and city refinement verified. | Application 9d75218; Production dpl_7eTiwhstodM2otJjdCyi1Ymm195e READY; existing migration unchanged | Bounded autocomplete work complete. Region/neighborhood coverage depends on provider; full SL02.1 listing lifecycle not recertified. Retire this checkout only after chat inactive. |
-| [2026-10-19-carto-api-key](docs/workstreams/2026-10-19-carto-api-key.md) | Published and verified: CARTO key wiring plus phone map height fix; real streets/pins/attribution on HE/EN desktop and 390px. | Current a6de chat, detached `87e7f11` | Complete. Address autocomplete is separate missing work; see 2026-10-19-address-autocomplete. |
-| [2026-10-17-sl01-intake-and-safe-browsing](docs/workstreams/2026-10-17-sl01-intake-and-safe-browsing.md) | SL01.1 completed and published: safe lister Discover/Map browsing, explicit one-way resident→lister conversion and the guarded Chats group-read regression fix. Live migrations `20261017095908_lister_safe_browsing`, `20261018082834_convert_resident_to_lister` and `20261018100000_list_accessible_groups` were verified; browser conversion and focused Chats acceptance passed. | `ed601e3` on `origin/master`; current b6f7 checkout pending retirement | Select the next eligible packet using `START_NEXT_WORK.md`; retain demo fixtures per owner direction and retire this redundant checkout. |
-| [2026-10-17-sl00-baseline](docs/workstreams/2026-10-17-sl00-baseline.md) | SL00.1 baseline verified locally: PGlite and TypeScript passed; no local Supabase runtime/environment is available, and no hosted mutation occurred. Build compiled/generated artifacts but final exit capture is incomplete. | Current b6f7 checkout, detached `6926eb4` | Reconcile SL01.1 intake/startup routing locally; browser acceptance needs an identified isolated backend or separate named-hosted-target authorization. |
+| [2026-10-19-carto-api-key](docs/workstreams/2026-10-19-carto-api-key.md) | Published and verified: CARTO key wiring plus phone map height fix; real streets/pins/attribution on HE/EN desktop and 390px. | Historical a6de checkout, detached `87e7f11` | Complete. Address autocomplete is separate missing work; see 2026-10-19-address-autocomplete. |
+| [2026-10-17-sl01-intake-and-safe-browsing](docs/workstreams/2026-10-17-sl01-intake-and-safe-browsing.md) | SL01.1 completed and published: safe lister Discover/Map browsing, explicit one-way resident→lister conversion and the guarded Chats group-read regression fix. Live migrations `20261017095908_lister_safe_browsing`, `20261018082834_convert_resident_to_lister` and `20261018100000_list_accessible_groups` were verified; browser conversion and focused Chats acceptance passed. | Historical source `ed601e3`; b6f7 retirement state belongs to the dated owning handoff | Select the next eligible packet using `START_NEXT_WORK.md`; retain demo fixtures per owner direction and retire this redundant checkout. |
+| [2026-10-17-sl00-baseline](docs/workstreams/2026-10-17-sl00-baseline.md) | SL00.1 baseline verified locally: PGlite and TypeScript passed; no local Supabase runtime/environment is available, and no hosted mutation occurred. Build compiled/generated artifacts but final exit capture is incomplete. | Historical b6f7 checkout, detached `6926eb4` | Reconcile SL01.1 intake/startup routing locally; browser acceptance needs an identified isolated backend or separate named-hosted-target authorization. |
 | [2026-10-15-planning-readiness](docs/workstreams/2026-10-15-planning-readiness.md) | Approved MVP plan and autonomous next-feature workflow; package8304667 and cleanup0fd75bf pushed/primary integrated;21 packets and primary selector checks pass. | Main project; bd33 active maintenance branch | Say work on the next feature; START_NEXT_WORK and next-work.mjs select SL00.1 initially; reconcile existing implementation. |
-| [2026-10-17-worktree-consolidation](docs/workstreams/2026-10-17-worktree-consolidation.md) |13->2 registered worktrees;11 archived/retired,3 merged branches removed; checksum/bundle/patch recovery verified. | Primary + current bd33 only; private recovery catalog ARCHIVED_WORK | Reuse primary by default; no per-packet worktree. Retire current maintenance checkout only after this chat is inactive. |
+| [2026-10-17-worktree-consolidation](docs/workstreams/2026-10-17-worktree-consolidation.md) |13->2 registered worktrees;11 archived/retired,3 merged branches removed; checksum/bundle/patch recovery verified. | Historical primary+bd33 inventory; private recovery catalog ARCHIVED_WORK | Reuse primary by default; no per-packet worktree. Retire current maintenance checkout only after this chat is inactive. |
 | [2026-10-15-map-m02](docs/workstreams/2026-10-15-map-m02.md) | CARTO Positron tiles and OSM/CARTO attribution deployed to Vercel Production from `a150a7c`; static checks, Preview and production auth-route smoke checks passed. Authenticated phone-width map imagery remains unverified because this checkout has no disposable QA fixture. | `C:/Users/User/.codex/worktrees/60b8/appartement tinder`, `codex/map-m02-carto` | For fuller release evidence, run the focused attribution test and inspect `/map` and `/en/map` with a disposable authenticated fixture. |
-| [2026-10-19-map-runtime-recovery](docs/workstreams/2026-10-19-map-runtime-recovery.md) | Published: CARTO is reachable, and the Map now surfaces recoverable listing-query and tile failures instead of rendering a blank map. Production deployment `dpl_9jeMmE3XJ2nePBhusDCJMVm2AqHd` is READY for `c1da7ee`. | `c1da7ee` on `origin/master`; current 92e7 checkout | Complete focused authenticated HE/EN phone-width browser acceptance with a disposable fixture; this is a remaining evidence gap, not a deployment block. |
+| [2026-10-19-map-runtime-recovery](docs/workstreams/2026-10-19-map-runtime-recovery.md) | Published: CARTO is reachable, and the Map now surfaces recoverable listing-query and tile failures instead of rendering a blank map. Production deployment `dpl_9jeMmE3XJ2nePBhusDCJMVm2AqHd` is READY for `c1da7ee`. | Historical source `c1da7ee`; 92e7 checkout reference | Complete focused authenticated HE/EN phone-width browser acceptance with a disposable fixture; this is a remaining evidence gap, not a deployment block. |
 | [2026-10-15-resident-journeys](docs/workstreams/2026-10-15-resident-journeys.md) | Three migrations applied; eight real browser acceptance tests passed; QA cleanup audited zero; reusable testing workflow verified | Integrated master; historical d5e9 checkout retired17October | Completed and pushed; use the next-feature handoff |
 | [2026-10-15-listing-slices](docs/workstreams/2026-10-15-listing-slices.md) | Three reverified apartment journeys; implementation 5f3bc7f integrated into local master | Integrated master; historical d5e9 source retired after archival | Use START_NEXT_WORK; current MVP product decisions settled |
 | [2026-10-15-work-register](docs/workstreams/2026-10-15-work-register.md) | Shared index, handoff workflow and Git inventory | Main checkout documents; historical d5e9 source integrated | Update this index and the owning handoff during future work |
@@ -39,11 +63,22 @@ Current workflow: [START_NEXT_WORK](docs/START_NEXT_WORK.md) selects the next el
 
 ## All branches and worktrees
 
-[Generated Git inventory](docs/WORKTREE_INVENTORY.md):2 registered worktrees (primary + current chat),6 local branches. Eleven inactive worktrees retired17October after verified recovery archival; unique historical branches retained as history pointers, not active work folders. Git containment is separate from runtime verification.
+[Generated Git inventory](docs/WORKTREE_INVENTORY.md): the current cloud checkout has **1 registered worktree and1 local branch** (`work`). The earlier Windows-machine inventories and17October archive records are historical; this cloud inventory is not evidence about another machine. Git containment is separate from runtime verification.
 
 Retired M01/M07/safety/auth/old-onboarding/map drafts are mapped to current packets in [ARCHIVED_WORK](docs/ARCHIVED_WORK.md). Consult the selected draft only when its packet needs it; no global re-audit or automatic merge of obsolete decisions.
 
 ## Shared database and publication state
+
+Current continuation migration map (reviewed and applied19October; history rechecked20October):
+
+| Local file suffix | Actual live version |
+| --- | --- |
+| `20261019210659_monotonic_chat_read_markers.sql` | `20261019211840` |
+| `20261019212059_resident_adult_validation.sql` | `20261019212312` |
+| `20261019214904_canonical_resident_profiles.sql` | `20261019215717` |
+| `20261019215827_allow_incomplete_intake_correction.sql` | `20261019215905` |
+
+The current owner-requested retention audit is **20 synthetic users/profiles,7 photos,0 temporary blocks,0 completed canonical residents missing an owned photo**. Exact IDs/purposes are in ignored per-run manifests; no passwords in Git. Historical zero-count cleanup records below refer to earlier disposable runs, not these retained demos.
 
 - Standing owner confirmation, 19 October 2026 (current cloud goal): there are **no real users anywhere in the app until the owner explicitly says otherwise**. The current cloud agent is the **only active executor**, including database changes. Synthetic demo users are desired even outside QA so the owner can inspect the app; create/retain exact-ID synthetic fixtures without asking again within this scope. Do not modify existing retained demos to satisfy pristine-test assumptions. Recheck this record and live migration history before hosted schema changes; pause if real-user state or competing ownership changes. This confirms the existing AGENTS local-first fallback gate; local Docker Postgres image currently fails vfs extraction with no space left on device.
 
@@ -52,7 +87,7 @@ Retired M01/M07/safety/auth/old-onboarding/map drafts are mapped to current pack
 - On 17–18 October, the owner explicitly authorized and the team applied `20261017095908_lister_safe_browsing`, `20261018082834_convert_resident_to_lister` and `20261018100000_list_accessible_groups` to the shared project. Their execution grants and authorization guards were verified. The last migration replaces an unauthorized server-side direct group-table read with an authorized RPC.
 - On 19 October, `ed601e38350fdbb097ce8d006883f007c7493a73` was pushed to `origin/master`; Vercel production deployment `dpl_9WpQCm6zThU9HoK34AsQ8x3epcxq` reached `READY` for that exact SHA. Browser conversion and focused Chats regression coverage passed. The retained synthetic fixture state means the prior full lifecycle test was not rerun after the Chats fix; this is tracked in its handoff rather than represented as a full-suite pass.
 - Verified application snapshot: c80e9b2 includes the earlier apartment snapshot 5f3bc7f and resident/group implementation. Fast-forwarded local master and pushed to GitHub on 15 October; remote SHA confirmed c80e9b2e8c372ca5a926602ed16ea3342bbc85fc. No PR was created. Vercel automatic production deployment dpl_8CY6gLxmF4uiuRsXSMbwuoWdHLUL reached READY from that exact commit; appartement-tinder.vercel.app was assigned to it. Read-only deployed smoke checks returned login HTTP 200 and missing listing HTTP 404. This is deployment evidence, separate from the local eight-test multi-account acceptance. The nested map experiment was subsequently archived17October with its unique history and local state preserved.
-- Four temporary QA accounts and their profiles/listings/photos were removed and zero remaining QA rows/objects were confirmed. Fixture passwords were removed from disk.
+- Historical15October cleanup: four temporary QA accounts and their profiles/listings/photos were removed and zero remaining QA rows/objects were confirmed. This is not the current20-demo retention audit.
 - Read cached Git facts as a snapshot. Neither a commit present in origin/master nor a successful local test proves that Vercel is running that version.
 
 ## How future chats keep this current
@@ -63,9 +98,9 @@ Retired M01/M07/safety/auth/old-onboarding/map drafts are mapped to current pack
 4. Refresh Git facts with node scripts/project-status.mjs --write --shared from a linked checkout. This reads Git and writes Markdown only. Add new outcomes to the table above only with actual verification evidence.
 5. If a record is stale, investigate its affected area. A whole-project audit is reserved for an explicit audit request or a scope that needs one. Never treat an old note as confirmed-current without the relevant narrow checks.
 
-The user-level project-orchestrator skill and primary AGENTS.md describe this lifecycle. The register is available across local worktrees on this computer. The register is committed on local master. The current register and handoffs were pushed with the verified implementation; future changes still need their own authorized publication.
+The user-level project-orchestrator skill and primary AGENTS.md describe this lifecycle. The register is shared across this checkout's local worktrees. In the current cloud it lives on branch `work`, whose verified application release was pushed to `origin/master`; older Windows/local-master references are historical. This documentation reconciliation is committed/pushed separately under standing owner authorization; neither Git containment nor a documentation commit certifies a new application acceptance run.
 
-## Resident acceptance and reusable testing
+## Historical resident acceptance — 15 October; current reusable testing
 
 The user explicitly approved the shared MVP migration and requested a master push after verification. Fresh real Chrome against an owned production server: eight passed (1.9 minutes), including three listing regressions, four guest/auth checks and the full resident/group/viewing journey. Final build, TypeScript, targeted ESLint and disposable SQL/RLS checks passed. Nine QA identities and their related data/uploads were removed; all five cleanup counts were zero; server stopped and credentials deleted.
 
@@ -73,7 +108,7 @@ The user explicitly approved the shared MVP migration and requested a master pus
 
 Apple signup is deferred. No full Google OAuth round trip, concurrency/load proof, full older-screen translation or public-launch approval is claimed. Integration and deployment are recorded separately below when completed.
 
-## Final integration checkpoint
+## Historical integration checkpoint — 15 October
 
 Implementation c80e9b2 was committed on codex/resident-journeys, fast-forwarded into local master and pushed successfully; GitHub remote SHA was independently confirmed. Six local branches and seven worktrees remain, with no additional checkout created. The nested map experiment was preserved. No blanket merge or deletion of old unverified work occurred. Both user-level and repository project-orchestrator skills contain the autonomous testing workflow. Next development starts with docs/NEXT_CONVERSATION_PROMPT.md and the three recommendations in docs/NEXT_MVP_FEATURES.md.
 
