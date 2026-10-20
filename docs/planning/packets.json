@@ -331,6 +331,17 @@
       "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
     },
     {
+      "id": "SL06.3",
+      "parent": "SL06",
+      "state": "ready",
+      "depends_on": ["SL06.1", "SL09.1", "SL10.1"],
+      "required_decisions": ["F4", "E8", "E3", "D4", "D18", "H1", "F1", "F3"],
+      "context_decisions": [],
+      "contracts": ["docs/REMAINING_MVP_PACKETS.md", "docs/specs/GROUP_LISTING_INQUIRIES.md"],
+      "live_gate": "Ordinary group card -> each member consents -> one inquiry -> owner acceptance -> separate persistent owner/group chat; outsider and roommate-history separation; race/membership/revocation checks separately required for full verification",
+      "release_gate": "Current target/data/migration ownership and compatible hosted expansion verified; no real-user release claim from demo acceptance"
+    },
+    {
       "id": "SL09.1",
       "parent": "SL09",
       "state": "ready",
@@ -442,6 +453,7 @@
       "state": "ready",
       "depends_on": [
         "SL06.2",
+        "SL06.3",
         "SL08.2",
         "SL12.1"
       ],
@@ -559,6 +571,7 @@
         "SL04.1",
         "SL05.1",
         "SL06.2",
+        "SL06.3",
         "SL07.1",
         "SL09.1",
         "SL10.1",

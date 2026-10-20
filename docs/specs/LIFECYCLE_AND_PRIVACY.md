@@ -8,6 +8,8 @@ State: owner Q16/Q17/Q21/Q22/Q23/Q30 confirmed product rules on 16 October 2026.
 
 D18 is confirmed: roommate-group formation, accepted inquiry and lease signing do not imply one another.
 
+20 October owner amendment F4/E8: an apartment shared into a roommate chat can receive a group inquiry only after every current member explicitly approves. Before unanimity there is no owner-facing request. Owner acceptance opens a separate owner/group apartment conversation; the roommate-only chat remains private. Membership changes invalidate pending consent; no newcomer automatically inherits an accepted conversation/address grant. Individual inquiry remains available. See [GROUP_LISTING_INQUIRIES](GROUP_LISTING_INQUIRIES.md); approval is not implementation evidence.
+
 | Object | Proposed state/field | Controller | Meaning |
 | --- | --- | --- | --- |
 | Apartment | draft / published / unpublished / removed | Owner; reviewer may restrict | Publication, separate from room occupancy |

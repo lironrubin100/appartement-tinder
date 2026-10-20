@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-17",
-  "decision_source_sha256": "4d1fea1fdf7875d873a63e72479c85d9e52b331138d11df94fafc32685c2754e",
+  "date": "2026-10-20",
+  "decision_source_sha256": "b2a2d6654cd89595d4bef3b1a63cdf3e69f0ee98fcbef89da1f76e2f039231cf",
   "meaning": "Generated coverage only. DECISIONS.md remains authority; primary slice assigns ownership, not approval or execution readiness.",
   "counts": {
     "decided": 130,
@@ -412,7 +412,7 @@
     },
     {
       "id": "F4",
-      "title": "Can you message a lister without matching?",
+      "title": "Individual, group and poster apartment inquiries",
       "status": "DECIDED",
       "primary_slice": "SL06"
     },

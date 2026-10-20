@@ -4,6 +4,8 @@ Owner-approved in this conversation, recorded 17 October 2026. Canonical rules: 
 
 ## Capability matrix
 
+20 October F4/E8 amendment adds a separate renter-initiated unanimous group inquiry after native group sharing; see [GROUP_LISTING_INQUIRIES](GROUP_LISTING_INQUIRIES.md). It does not change the person-recipient consent of reverse poster outreach or authorize contacting a group without its approval.
+
 | Action | Guest | Account-only nonresident poster | Completed resident profile |
 | --- | --- | --- | --- |
 | Safe active apartment/map | Yes | Yes | Yes |

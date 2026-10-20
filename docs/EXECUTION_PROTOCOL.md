@@ -2,6 +2,8 @@
 
 This is the operational contract for future slice work. DECISIONS.md remains authoritative. A planning proposal is never permission to resolve product policy or mutate an external environment.
 
+20 October owner amendment: [implementation_plan.md](../implementation_plan.md) is the explicit one-micro-task dispatch mode. It prioritizes ordinary, persistent core journeys and group apartment contact before broad failure-injection/load/hardening, with deferred defects recorded. Execute one checklist task and ask before the next when that mode is requested. Full packet verification/release remains separate; source records and target ownership still apply. F4/E8 group inquiry approval and unanimity are specified in [GROUP_LISTING_INQUIRIES](specs/GROUP_LISTING_INQUIRIES.md), not inferred from historical slice exclusions.
+
 ## Dispatch and readiness
 
 For “next feature”/“continue” requests, use START_NEXT_WORK.md and `node scripts/next-work.mjs --json`; no owner packet selection is required. Progress is in planning/execution-state.json, separately from approved planning readiness. Existing implementation must be reconciled, not rebuilt from pending ledger entries.

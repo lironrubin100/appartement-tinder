@@ -26,8 +26,10 @@ Apartment-attached furniture D15 and general resale are explicitly post-MVP afte
 
 ## Proposed proof journeys
 
+Owner priority update, 20 October: first make the core callable whenever an investor demonstration is needed, using labeled synthetic users; no demonstration recording or broad launch setup is required now. Broader hardening follows the working ordinary journeys in [implementation_plan.md](../implementation_plan.md). The full pilot gates below remain distinct from this early demonstration milestone.
+
 1. **Available room:** an actual lister/resident publishes two rooms; a guest sees safe public information; a resident saves/inquires; owner accepts; both chat and authorized resident sees address; owner changes a room's availability without losing the other.
-2. **Find people then a place:** resident completes profile; sees a plausible compatibility explanation; introduction is accepted; both consent to form a group; they share an active listing inside their group chat and continue apartment hunting. Creating the group never closes a listing.
+2. **Find people then a place:** resident completes profile; sees a plausible compatibility explanation; introduction is accepted; both consent to form a group and share an active listing. Each current member explicitly approves Contact owner; only unanimity sends one group inquiry. Owner acceptance opens a separate owner/group conversation while the roommate-only chat stays private. Individual inquiry remains available. Creating the group or accepting inquiry never closes a listing (F4/E8/D18; owner amendment 20 October).
 3. **Trust and recovery:** stranger cannot obtain exact address or private profile fields; block takes effect through direct APIs and groups; report reaches reviewer; invalid upload/provider failure leaves a recoverable state; account exit follows approved data policy.
 4. **Bring users back:** offline recipient receives an enabled message/inquiry notification, follows an authorized deep link, resumes the correct conversation; disable stops future sends.
 

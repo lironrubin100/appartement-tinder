@@ -2,6 +2,8 @@
 
 17 October 2026. Owner approved product/technical baseline; this describes local work, not completed behavior. Read [WORK_PLAN](WORK_PLAN.md), [protocol](EXECUTION_PROTOCOL.md), [initial packets](EXECUTION_PACKETS.md) and parent [SLICES](SLICES.md). Source of truth is DECISIONS.md. [packets.json](planning/packets.json) lists normative decisions/dependencies separately from context research. Parent readiness does not imply runtime completion.
 
+20 October owner amendment: prioritize a demonstrable working core, especially group apartment sharing and individual/group owner contact. [implementation_plan.md](../implementation_plan.md) sequences one micro-task at a time: ordinary working journeys first, broader hardening afterwards. This is not a full-packet verification waiver. New approved F4/E8 scope is SL06.3 below, bringing the current manifest to 22 packets; the original slice catalog is preserved, with its old group-contact exclusion explicitly superseded by this amendment.
+
 Every packet inherits: reconcile actual module/RPC/migration signatures before editing; preserve dirty work; use baseline local-target guard and exact synthetic fixture lifecycle from SL00.1/TESTING; validate syntax/type/build/targeted lint and affected database invariants, then ordinary-client browser/persistence/authorization. Real HE/EN phone and desktop checks apply to changed user journeys. Mocks, PGlite, static checks and live-provider/device delivery are labeled separately. Before finish record SHA/backend/migrations/commands/assertions/cleanup and update shared handoff; no commit/push/hosted migration/deployment implied. Existing verified behavior is reused.
 
 Default disposable identities: ownerA,ownerB,residentA,residentB,outsider, later groupMember. Use exact generated IDs; remove owner Storage via Storage API before DB/auth cleanup and audit zero. Never probe real residents or run shared config quota changes. Each listed scenario is an assertion, not a test result.
@@ -96,6 +98,16 @@ Default disposable identities: ownerA,ownerB,residentA,residentB,outsider, later
 - Scope/stop: No unlimited landlord direct-message privilege, no profile enrollment merely from browsing.
 - Deliverable: narrow missing implementation or evidence-only no-change result; local compatibility migration if needed; affected checks and visible outcome; limitations and next packet in workstream handoff. Unmet provider/legal gate prevents release, not unrelated approved local work.
 
+## SL06.3 — Unanimous group inquiry to apartment owner
+
+- Parent/dependencies: SL06; SL06.1, SL09.1, SL10.1. Required artifacts: individual inquiry/owner acceptance, revisioned group membership, shared native listing card and authenticated conversation. No dependency on reverse poster outreach or final matching score.
+- Required decisions: F4, E8, E3, D4, D18, H1, F1, F3. Context/release research: none specific beyond common target/release guard.
+- Module anchors: docs/specs/GROUP_LISTING_INQUIRIES.md; group shared card, consent progress, owner inbox, group inquiry/accept RPC and apartment-context conversation/address grants.
+- Ordered work: group/listing consent round bound to membership revision; caller-only approval; unanimity atomically sends one owner-facing inquiry; owner accepts into a separate owner-plus-consenting-members conversation. Keep personal inquiries and the roommate-only chat independent. Each current member must consent; admin/majority is insufficient.
+- Required fixtures/assertions: two roommates plus owner; first vote means no owner request/notification, last vote sends one; owner acceptance creates one distinct conversation and individually authorized grants; owner cannot read roommate-only history; changed membership invalidates pending consent, newcomer has no inherited chat/address; repeated/racing vote or accept creates one result; block/unavailable/withdraw/reconfirm rules hold.
+- Scope/stop: ordinary working journey first under implementation_plan; race/revocation/failure-injection evidence afterwards before full verified status. No reservation, automatic occupancy, shared property ownership, automatic new-member grants or group-to-group feature.
+- Deliverable: actual changed source/migration map, ordinary scenario and separate hardening results; no implementation or completion claim from this planning amendment.
+
 ## SL09.1 — Form and operate consent-based roommate group
 
 - Parent/dependencies: SL09; SL01.2, SL08.2. Required artifacts are completed predecessor packet handoffs/contracts, not just their ready labels.
@@ -138,7 +150,7 @@ Default disposable identities: ownerA,ownerB,residentA,residentB,outsider, later
 
 ## SL13.1 — Deliver opt-out transactional notifications
 
-- Parent/dependencies: SL13; SL06.2, SL08.2, SL12.1. Required artifacts are completed predecessor packet handoffs/contracts, not just their ready labels.
+- Parent/dependencies: SL13; SL06.2, SL06.3, SL08.2, SL12.1. Required artifacts are completed predecessor packet handoffs/contracts, not just their ready labels.
 - Required decisions: F7, L5, I20, K2, J13. Context/release research: K3, J8.
 - Module anchors: settings/outbox worker, sender adapter, manifest/service-worker subscription binding.
 - Ordered work: Emit event/outbox atomically; event/master/channel switches and preserve existing-off; lease/retry/dedupe30s heartbeat60s bursts per TECHNICAL_DEFAULTS; email safe locale deep link, supported opt-in push; suppression at actual send.
@@ -178,7 +190,7 @@ Default disposable identities: ownerA,ownerB,residentA,residentB,outsider, later
 
 ## SL16.1 — Pilot acceptance, honest demonstration and operations
 
-- Parent/dependencies: SL16; SL04.1, SL05.1, SL06.2, SL07.1, SL09.1, SL10.1, SL11.1, SL12.1, SL13.1, SL14.1, SL15.1. Required artifacts are completed predecessor packet handoffs/contracts, not just their ready labels.
+- Parent/dependencies: SL16; SL04.1, SL05.1, SL06.2, SL06.3, SL07.1, SL09.1, SL10.1, SL11.1, SL12.1, SL13.1, SL14.1, SL15.1. Required artifacts are completed predecessor packet handoffs/contracts, not just their ready labels.
 - Required decisions: A9, A10, A11, J13, K5, L7, M3. Context/release research: K3, M1, M2, M5.
 - Module anchors: docs/TESTING.md acceptance suites, firstparty event report, operator runbook, deployment mapping.
 - Ordered work: Ordinary signup limited marketing, no invitation platform; run full pilot proof journeys against named isolated target, labels QA/demo/pilot; sourceevent denominators, D1/D7 returns and7day reply cohorts; operator sanction/outbox/deletion recovery and restore rehearsal; explicit hosted release authorization remains separate.

@@ -1,6 +1,6 @@
 # Decision coverage snapshot
 
-Generated 2026-10-17 from DECISIONS.md. Navigation only; DECISIONS.md remains authoritative. Primary slice owns preparation/closure, not approval. Deferred placement does not silently defer a DECIDED v1 capability.
+Generated 2026-10-20 from DECISIONS.md. Navigation only; DECISIONS.md remains authoritative. Primary slice owns preparation/closure, not approval. Deferred placement does not silently defer a DECIDED v1 capability.
 
 142 rows: 130 DECIDED variants, 5 OPEN, 7 RESEARCH. Unresolved rows are not all new owner questions; many concern technical choices or later releases.
 
@@ -73,7 +73,7 @@ Generated 2026-10-17 from DECISIONS.md. Navigation only; DECISIONS.md remains au
 | F1 | DECIDED | SL08 | Realtime or polling |
 | F2 | DECIDED | SL08 | Read receipts, typing indicators |
 | F3 | DECIDED | SL10 | Message types |
-| F4 | DECIDED | SL06 | Can you message a lister without matching? |
+| F4 | DECIDED | SL06 | Individual, group and poster apartment inquiries |
 | F5 | DECIDED | SL08 | Unmatch / leave conversation |
 | F6 | DECIDED | SL14 | Message retention |
 | F7 | DECIDED | SL13 | Push notification triggers and copy |

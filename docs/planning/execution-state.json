@@ -16,6 +16,7 @@
     "SL06.2",
     "SL09.1",
     "SL10.1",
+    "SL06.3",
     "SL11.1",
     "SL12.1",
     "SL13.1",
@@ -193,6 +194,9 @@
       "status": "pending"
     },
     "SL10.1": {
+      "status": "pending"
+    },
+    "SL06.3": {
       "status": "pending"
     },
     "SL11.1": {

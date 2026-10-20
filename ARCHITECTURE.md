@@ -2,6 +2,8 @@
 
 Companion to `DECISIONS.md`. Where this document and the register disagree, the register wins.
 
+20 October 2026 planning update (F4/E8): group apartment contact is MVP scope. Store a group/listing consent round bound to the current membership revision, one consent per member, and one owner-facing inquiry only after unanimity. Owner acceptance creates a separate apartment-context conversation with the owner plus the consenting membership snapshot; it does not add the owner to the roommate-only conversation. Group size cap applies to the roommate group, not to the owner added to this separate conversation. Recheck membership, listing state and participant authorization atomically. Individual inquiry identity remains distinct. Exact contract and implementation boundary: [GROUP_LISTING_INQUIRIES](docs/specs/GROUP_LISTING_INQUIRIES.md). No schema or runtime implementation is claimed.
+
 Scale target: **1,000 active listings, 3,000 registered renters, a few hundred concurrent users at peak**.
 
 ---

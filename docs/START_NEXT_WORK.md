@@ -2,6 +2,8 @@
 
 Owner authorization: select and execute the next approved local MVP work autonomously. Preserve decisions and scope. The objective is a working product for a university-funding demonstration. Do not restart a product interview or wait for the owner to choose an ID.
 
+20 October owner-requested micro-task mode: when dispatched to [implementation_plan.md](../implementation_plan.md), follow its physical checklist order and complete **one task**, then request permission for the next task. Its first milestone is ordinary working core journeys, including unanimous group owner contact (new SL06.3), before broad hardening. This specific mode overrides the older continue-until-done loop below; it does not mark whole packets verified from partial demo evidence. The packet selector remains unchanged and is used for packet-level status/dependency reconciliation, not to silently reorder this explicitly requested micro-task queue. Default packet continuation outside this mode retains the normal policy.
+
 ## One reusable instruction
 
 > Continue the Shutaf MVP autonomously following AGENTS.md and docs/START_NEXT_WORK.md. Select the next eligible packet, implement the missing approved work, verify it and update the execution ledger and shared handoff. Continue to the next eligible packet while you can make meaningful progress. Preserve settled decisions and unrelated work. Under the standing owner authorization of 19 October 2026, commit, non-force push, integrate and publish routine verified changes without another confirmation; ask only for critical actions. Hosted migrations retain AGENTS.md target/data/ownership gates.
