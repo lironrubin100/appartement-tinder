@@ -173,8 +173,8 @@
       "status": "verification-incomplete",
       "handoff": "docs/workstreams/2026-10-20-sl02-listing-continuation.md",
       "worktree": "C:/Users/User/.codex/worktrees/e175/appartement tinder",
-      "reason": "Phone policy, retry-safe publication, private drafts and discard are implemented and tested locally; live publication and privacy migrations are applied. Live ordinary-client publication, retry, outsider denial, discard, legacy RPC and status update passed with synthetic fixtures. Frontend integration, deployment and live browser acceptance remain incomplete. Canonical profile Google acceptance remains separately incomplete.",
-      "revisit_when": "Integrate current master without overwriting the other executor, deploy and verify the affected live browser journeys, and record remaining provider and acceptance evidence."
+      "reason": "Phone policy, retry-safe publication, private drafts and discard are implemented; live publication and privacy migrations are applied. Live ordinary-client and English 390px production-browser publication with synthetic fixtures passed; the browser test mocked the address provider. Hebrew production-browser and current real-provider acceptance remain incomplete; canonical profile Google acceptance remains separately incomplete.",
+      "revisit_when": "Complete remaining HE production and real-provider acceptance, review any outstanding hardening evidence and update the packet; retain demo fixtures and recheck current master."
     },
     "SL03.1": {
       "status": "pending"
