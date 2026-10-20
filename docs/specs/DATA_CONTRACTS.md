@@ -15,7 +15,7 @@ State: 17 October technical delegation adopted; J1-J7/J10-J14/K5 closed. Exact m
 | Introduction/pass | Actor + individual/group target; one target type | No public list of private interactions | State/quota/time/trait snapshot; pass expiry |
 | Group | Admin, current members, admission policy/version | Safe derived member card; no inferred private budget | Votes/invites/membership history/private group search preference |
 | Conversation | Kind/member links; monotonic sequence boundary | None | Messages/card refs, membership/history cutoff, read markers |
-| Listing inquiry | Requester + apartment owner/listing | None | State, accepted conversation/grant references |
+| Listing inquiry | Individual requester or unanimously consenting group + apartment owner/listing | None | Consent round/membership revision, state, accepted conversation and per-person grants; individual/group contexts stay distinct |
 | Address grant | Accepted inquiry + requester + listing/location version | None | Revocable precise-location reads under approved lifecycle |
 | Report/action | Reporter + subject/object + protected reviewer action | No reporter/content leakage | Reasons, evidence, audit, restriction/reversal |
 | Notification | Event→recipient/channel delivery; optional device subscription | None | Preferences, endpoint credentials, sender/outbox state |
@@ -76,6 +76,7 @@ Proposed stable error meanings: unauthenticated, forbidden/not-found as privacy 
 
 - Publish/update apartment and rooms: transaction; owner check; version comparison; stable request key; photos referenced only after valid ownership check. Failed transaction must not leave public partial inventory.
 - Accept intro/inquiry: lock affected request and relevant conversation/capacity; recheck block/availability/member state; unique relationship/conversation guard; same logical retry returns existing outcome.
+- Group apartment inquiry (F4/E8, owner update 20 October): [GROUP_LISTING_INQUIRIES](GROUP_LISTING_INQUIRIES.md) defines caller-only consent, current-membership unanimity before dispatch and owner acceptance into a separate apartment conversation. No owner access to roommate-only chat and no automatic newcomer address/history inheritance. Proposed new APIs are not existing implementation.
 - Group membership: capacity and electorate version checked under lock; invitation acceptance is explicit; membership version changes invalidate stale votes as approved; join cutoff set atomically with membership.
 - Quotas: server clock and approved day/timezone; atomic count/consumption including accepted sent intros; concurrent last allowed send cannot overrun. Do not refund quota for deletion/retry unless policy explicitly allows it.
 - Send message: the sequence/request-key implementation is recorded above. A minimal outbox transaction is a separate requirement if an outbox is enabled; do not infer one from retry-safe sending.

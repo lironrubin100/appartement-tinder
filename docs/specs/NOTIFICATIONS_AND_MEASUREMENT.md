@@ -4,6 +4,8 @@ State: 17 October technical defaults adopted; event keys/defaults/heartbeat/dedu
 
 ## Channel and event contract
 
+F4/E8 amendment, 20 October: a group consent round is private to the roommate group. Emit the owner-facing `listing_inquiry_received` only once when all current members have approved and the group inquiry is committed; a first vote or shared card does not notify the owner. Owner acceptance uses the separate apartment conversation, never the roommate-only thread. See [GROUP_LISTING_INQUIRIES](GROUP_LISTING_INQUIRIES.md).
+
 Owner Q27 confirms email/supported push and action events in updated F7/L5: messages, inquiries, invitations/admission requests needing response, with master/event/channel controls and redundant-email suppression during active reading. Keep distinct event keys rather than a generic match count. D7 hidden/renewal notices must reach owner-visible status and configured channel handling. Saved-search/area new-listing monitors are explicitly later Q28, not MVP dependencies.
 
 Separate system event enablement (operator) from a recipient's master, per-event and per-channel choices. Device subscription is not user consent to every event. Proposed dispatch eligibility = allowed event/channel AND active eligible account AND master enabled AND effective event preference AND verified reachable email or authorized current push subscription AND conversation/history/block rights at send time. Recheck after queue delay/retry, not only when enqueued.
