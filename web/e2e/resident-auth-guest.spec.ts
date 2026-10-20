@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Read-only browser checks. Authenticated journeys require the pending migrations.
-test.use({ baseURL: 'http://localhost:3000' });
+test.use({ baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000' });
 
 test('English sign-in and sign-up preserve the locale and render usable forms', async ({
   page,
