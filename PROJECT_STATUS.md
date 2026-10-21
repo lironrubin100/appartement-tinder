@@ -126,6 +126,6 @@ Deployment checkpoint: c80e9b2 is verified READY in production; follow-up handof
 
 ## Owner management priority — 21 October 2026
 
-Direct owner-approved planning update: preserve the completed1.1–1.4 checkpoints at6d24755. SL04.2 is in progress: task **4.9** reconstructed ownership and the next task is **4.10**. Canonical D16/I4/F4 and LISTING_MANAGEMENT define all-poster Profile access, private cloud multi-drafts/photos, explicit public edits and per-listing/aggregate inquiries. Google/full packet and DISCOVER-LISTER-LIVE-001 gaps remain. See the execution handoff for 4.9 runtime evidence and limits.
+Direct owner-approved planning update: preserve the completed1.1–1.4 checkpoints at6d24755. SL04.2 is in progress: tasks **4.9–4.10** verified, the Profile entry is deployed, and **4.11** is next. Canonical D16/I4/F4 and LISTING_MANAGEMENT define all-poster Profile access, private cloud multi-drafts/photos, explicit public edits and per-listing/aggregate inquiries. Google/full packet and DISCOVER-LISTER-LIVE-001 gaps remain. See the execution handoff for bounded runtime evidence and limits.
 
 Planning source f185 is publishing only docs/selector; execution remains with the existing6b9e checkout after synchronization. No competing migration claim. [Planning handoff](docs/workstreams/2026-10-21-owner-management-plan.md); [execution handoff](docs/workstreams/implementation-plan-SL04.md). Old next-task2.2 and old uncommitted-f185 rows are superseded for this priority, not erased as historical records.
