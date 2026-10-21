@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-17",
+  "date": "2026-10-21",
   "meaning": "Local planning readiness only; baseline/artifact/runtime evidence checked during execution",
   "packets": [
     {
@@ -334,10 +334,26 @@
       "id": "SL06.3",
       "parent": "SL06",
       "state": "ready",
-      "depends_on": ["SL06.1", "SL09.1", "SL10.1"],
-      "required_decisions": ["F4", "E8", "E3", "D4", "D18", "H1", "F1", "F3"],
+      "depends_on": [
+        "SL06.1",
+        "SL09.1",
+        "SL10.1"
+      ],
+      "required_decisions": [
+        "F4",
+        "E8",
+        "E3",
+        "D4",
+        "D18",
+        "H1",
+        "F1",
+        "F3"
+      ],
       "context_decisions": [],
-      "contracts": ["docs/REMAINING_MVP_PACKETS.md", "docs/specs/GROUP_LISTING_INQUIRIES.md"],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/GROUP_LISTING_INQUIRIES.md"
+      ],
       "live_gate": "Ordinary group card -> each member consents -> one inquiry -> owner acceptance -> separate persistent owner/group chat; outsider and roommate-history separation; race/membership/revocation checks separately required for full verification",
       "release_gate": "Current target/data/migration ownership and compatible hosted expansion verified; no real-user release claim from demo acceptance"
     },
@@ -602,6 +618,39 @@
       ],
       "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
       "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
+    },
+    {
+      "id": "SL04.2",
+      "parent": "SL04",
+      "state": "ready",
+      "depends_on": [
+        "SL00.1",
+        "SL01.1"
+      ],
+      "required_decisions": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D9",
+        "D16",
+        "D18",
+        "B10",
+        "I4",
+        "I7",
+        "I21",
+        "F4",
+        "H1"
+      ],
+      "context_decisions": [],
+      "contracts": [
+        "docs/REMAINING_MVP_PACKETS.md",
+        "docs/specs/LISTING_MANAGEMENT.md",
+        "docs/specs/TECHNICAL_DEFAULTS.md"
+      ],
+      "live_gate": "Task 4.9 reconciles actual sign-in/intake/publication artifacts and target ownership before dependent changes; local ordinary-client owner/outsider, draft media, revision, publication and inbox acceptance required. No Google/full parent verification bypass.",
+      "release_gate": "Compatible target migration before dependent UI; standing publication and hosted data/ownership gates; HE/EN phone+desktop acceptance on exact release; no parent packet auto-completion."
     }
   ]
 }

@@ -34,3 +34,7 @@ New packet **SL06.3**, parent SL06, consumes SL06.1 individual inquiry, SL09.1 m
 At the owner's original request, docs/SLICES.md is preserved unchanged. Its SL06 exclusion “group acting as landlord requester until specified” is now superseded for this explicitly specified F4 feature, as is SL10's former exclusion of group landlord negotiation. No other catalog scope is promoted. The packet manifest, downstream PRD/architecture and new implementation plan carry this explicit amendment.
 
 Next implementation step is reconciliation of current source and the active work owner, then SL09/SL10 artifacts before SL06.3. No implementation or packet verification is implied by this approval.
+
+## Shared owner inbox — 21 October 2026
+
+Use the [listing management inbox](LISTING_MANAGEMENT.md). Tasks 6.9/6.11 extend its existing card/reader and accepted conversation link rather than a second pending list in Chats. Request kind/listing filters retain individual and group contexts. Membership validity (6.13) and retry/acceptance checks (6.14) are moved into the core before final group acceptance; no unauthorized history/address access is deferred as hardening.

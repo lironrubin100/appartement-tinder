@@ -121,3 +121,9 @@ Apple signup is deferred. No full Google OAuth round trip, concurrency/load proo
 Implementation c80e9b2 was committed on codex/resident-journeys, fast-forwarded into local master and pushed successfully; GitHub remote SHA was independently confirmed. Six local branches and seven worktrees remain, with no additional checkout created. The nested map experiment was preserved. No blanket merge or deletion of old unverified work occurred. Both user-level and repository project-orchestrator skills contain the autonomous testing workflow. Next development starts with docs/NEXT_CONVERSATION_PROMPT.md and the three recommendations in docs/NEXT_MVP_FEATURES.md.
 
 Deployment checkpoint: c80e9b2 is verified READY in production; follow-up handoff-only commit 1ef4aba was also pushed. Subsequent documentation commits do not change the verified application source. The current Git inventory remains a dated snapshot, not a live dashboard.
+
+## Owner management priority — 21 October 2026
+
+Direct owner-approved planning update: preserve the completed1.1–1.4 checkpoints at6d24755. SL04.2 is next, starting **4.9**, with51 serial tasks combining37 new tasks and14 moved existing tasks. Canonical D16/I4/F4 and LISTING_MANAGEMENT define all-poster Profile access, private cloud multi-drafts/photos, explicit public edits and per-listing/aggregate inquiries. No app/schema work or runtime verification was performed here. Google/full packet and DISCOVER-LISTER-LIVE-001 gaps remain.
+
+Planning source f185 is publishing only docs/selector; execution remains with the existing6b9e checkout after synchronization. No competing migration claim. [Planning handoff](docs/workstreams/2026-10-21-owner-management-plan.md); [execution handoff](docs/workstreams/implementation-plan-SL04.md). Old next-task2.2 and old uncommitted-f185 rows are superseded for this priority, not erased as historical records.

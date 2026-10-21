@@ -108,3 +108,7 @@ Business config: typed bounded registry with version, description, explicit `is_
 ## Specification exit gate
 
 J1 and paging/error/idempotency/query/config/rollout defaults adopted in TECHNICAL_DEFAULTS. C2 typed manifest generation and resident adoption are implemented as recorded above; apartment/runtime-scoring adoption remains separate, not a further major product choice. Only packets with required contracts settled are ready; live provider/legal evidence is separate.
+
+## Owner management amendment — 21 October 2026
+
+[LISTING_MANAGEMENT](LISTING_MANAGEMENT.md) is the approved contract for private multiple cloud drafts, explicit public edits, all-poster Profile access and the shared property/aggregate inquiry inbox. It extends D16/I4/F4 without changing address/history, room/intake independence, owner identity or recipient consent. A seen request is not an accepted request or a read chat message. Existing individual/group/reverse-outreach identities remain distinct; group consent-round internals are not owner inbox data. Approval is not implementation evidence.

@@ -2,7 +2,7 @@
 
 Owner authorization: select and execute the next approved local MVP work autonomously. Preserve decisions and scope. The objective is a working product for a university-funding demonstration. Do not restart a product interview or wait for the owner to choose an ID.
 
-20 October owner-requested micro-task mode: when dispatched to [implementation_plan.md](../implementation_plan.md), follow its physical checklist order and complete **one task**, then request permission for the next task. Its first milestone is ordinary working core journeys, including unanimous group owner contact (new SL06.3), before broad hardening. This specific mode overrides the older continue-until-done loop below; it does not mark whole packets verified from partial demo evidence. The packet selector remains unchanged and is used for packet-level status/dependency reconciliation, not to silently reorder this explicitly requested micro-task queue. Default packet continuation outside this mode retains the normal policy.
+20 October owner-requested micro-task mode: when dispatched to [implementation_plan.md](../implementation_plan.md), follow its physical checklist order and complete **one task**, then request permission for the next task. Its first milestone is ordinary working core journeys, including unanimous group owner contact (new SL06.3), before broad hardening. This specific mode overrides the older continue-until-done loop below; it does not mark whole packets verified from partial demo evidence. The selector now supports the explicit owner micro_task_dispatch described below; without it, ordinary packet behavior is unchanged. Default packet continuation outside this mode retains the normal policy.
 
 ## One reusable instruction
 
@@ -56,3 +56,10 @@ For uncommitted implementation, save its relevant tracked diff and untracked-fil
 Ask only for a concrete new contradiction/missing product choice that changes approved behavior, unavailable credential/target access needed for remaining work, an approval-dependent external action, or competing active ownership. Batch known questions and continue independent authorized work. Do not treat cosmetic polish, future business hypotheses or generic public-launch preparations as a reason to interrupt local MVP work.
 
 Apply the direct standing owner publication authorization in AGENTS.md; do not re-ask for routine verified commits, non-force pushes, integration or deployment. Hosted migrations and real-user bulk notifications retain their specific gates; critical actions require approval. If all local packets are verified, reconcile SL16 evidence and report the working demonstration plus actual remaining external gates; do not invent another roadmap or claim a public release/funding outcome.
+
+
+## Owner-priority micro-task dispatch — 21 October 2026
+
+The current owner priority is SL04.2, tasks4.9 through4.19 in physical checklist order (interleaved2.x/4.x/6.x), after completed task1.4. `micro_task_dispatch` in execution-state enumerates that exact order. `next-work.mjs --json` reads the actual plan and returns action `micro-task`, packet and task. A preceding unchecked task returns `finish-current-micro-task`; missing/inconsistent checklist or unverified packet prerequisites blocks dispatch. It never marks progress or skips an unchecked task. Complete one task, verify and publish normally, then ask before the next under the explicit micro-task mode.
+
+Once all milestone boxes are checked, reconcile SL04.2 evidence before ordinary packet selection resumes; no parent verification is inferred. Milestone two is dispatched through implementation_plan in its physical prerequisite order. Preserve incomplete Google, listing-hardening and live lister-discovery findings; none was fixed by reprioritization. See [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).

@@ -201,3 +201,16 @@ Default disposable identities: ownerA,ownerB,residentA,residentB,outsider, later
 ## Pilot dispatch gate
 
 Every required parent SL00–SL16 has a local packet path. SL17 assisted-supply operations and SL20+ future features remain deferred envelopes, not ready work. Pick only a packet whose predecessor artifacts actually exist; do not launch all ready labels simultaneously. Shared schema/config/API changes have one owner at a time. SL07 scoring refinement can be scheduled late while baseline discovery/group fixtures are preserved. SL16 is integration verification, never a substitute for each packet's own checks.
+
+## SL04.2 — Owner management, cloud drafts and individual inquiry inbox
+
+- Parent/dependencies: SL04; verified SL00.1 and SL01.1. Bounded owner-approved subset spanning SL02/SL04/SL06, not full SL04.1, SL02.1 or SL06.1 certification.
+- Contract: [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md). Required decisions: D1/D2/D3/D4/D5/D9/D16/D18/B10/I4/I7/I21/F4/H1.
+- Prerequisite artifacts: current implementation-plan SL00/SL01 handoffs (1.1–1.4), SL02 publication workstream and actual source/target signatures, listing ownership/media/publication receipts. Task 4.9 must reconcile them before dependent implementation. Missing capability blocks that task; incomplete Google/whole-map research is not a blanket local blocker or permission to invent verified evidence.
+- Dispatch: physical task IDs are in execution-state.micro_task_dispatch, starting 4.9 and ending 4.19 (51 tasks). One task, one focused diff, checks, routine publication and owner continuation gate. Runtime tests SQL/ordinary clients and HE/EN 390px/desktop are not replaced by structural validation.
+- Deliverables: Profile entry and correct owner CTA/nonself RPC; private multiple cross-device drafts/photos and local import; selected-draft receipt-safe publish; explicit atomic public edit; room/intake controls; one filtered property/aggregate individual inquiry inbox with optional opening message and separate seen state.
+- Fixtures: two posters (resident and B10), two apartments, two renters, two contexts for one draft owner and a separate outsider. Preserve retained demos. No unrelated listing reassignment/deletion.
+- Milestone assertions: draft A/B survive independent edits/reload; import retries once; media private; publish A leaves B; unsaved public edit stays private; stale revision denied; self-inquiry denied; property filter/seen/accept/decline/chat context correct; accepted chat survives unavailable/intake changes.
+- Live/release gates: local-first AGENTS target ownership/data gates; immutable additive migrations and ordinary-client checks; apply only authorized reviewed migration before UI connection; verify exact production SHA and browser behavior.
+- Non-goals: no automatic occupancy, ownership transfer, sixth nav tab, real notifications, new provider setup, matching, expiry renewal or reverse outreach. Those existing tasks remain. Group-sharing/consent work follows in the original prerequisite order and extends the same inbox.
+- Completion: only SL04.2 may become verified from this evidence. Do not change outstanding SL01.2/SL02.1/SL04.1/SL06 parent states just to satisfy dispatch.

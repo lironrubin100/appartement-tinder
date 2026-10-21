@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chooseNext, validateExecution } from './next-work.mjs';
+import { chooseNext, validateExecution, parseMicroTasks } from './next-work.mjs';
+import { readFileSync } from 'node:fs';
 const manifest = { packets: [
   {id:'A',state:'ready',depends_on:[]},
   {id:'B',state:'ready',depends_on:['A']},
@@ -32,3 +33,79 @@ test('relative evidence paths remain invalid', () => {
 });
 test('duplicate priority and unknown packet rejected', () => {const l=fresh();l.priority=['A','B','C','C'];l.packets.X={status:'pending'};assert.ok(validateExecution(manifest,l).length>=2);});
 test('completed plan never implies release', () => {const l=fresh();for(const row of Object.values(l.packets))row.status='verified';const next=chooseNext(manifest,l);assert.equal(next.action,'local-plan-complete');assert.equal(next.packet,null);});
+
+const ownerQueue = () => {
+  const ledger = fresh();
+  ledger.packets.A.status = 'verified';
+  ledger.packets.B.status = 'verification-incomplete';
+  ledger.micro_task_dispatch = { plan: 'implementation_plan.md', packet: 'C', after_task: '1.4',
+    task_ids: ['4.9', '2.16'], reason: 'Owner approved priority after active task' };
+  const checklist = parseMicroTasks('- [X] **משימה 1.4: current**\r\n- [ ] **משימה 4.9: owner**\r\n- [ ] **משימה 2.16: drafts**\r\n');
+  return { ledger, checklist };
+};
+
+test('owner dispatch chooses physical micro-task ahead of unrelated incomplete verification', () => {
+  const {ledger,checklist}=ownerQueue();
+  const next=chooseNext(manifest,ledger,checklist);
+  assert.equal(next.action,'micro-task');assert.equal(next.packet,'C');assert.equal(next.task,'4.9');
+  assert.equal(ledger.packets.B.status,'verification-incomplete');
+});
+test('owner dispatch preserves preceding unfinished work', () => {
+  const {ledger,checklist}=ownerQueue(); checklist[0].done=false;
+  assert.equal(chooseNext(manifest,ledger,checklist).action,'finish-current-micro-task');
+  assert.equal(chooseNext(manifest,ledger,checklist).task,'1.4');
+});
+test('owner dispatch advances to interleaved ID without numeric sorting', () => {
+  const {ledger,checklist}=ownerQueue(); checklist[1].done=true;
+  assert.equal(chooseNext(manifest,ledger,checklist).task,'2.16');
+});
+test('owner dispatch cannot bypass prerequisite, blocked state or premature verification', () => {
+  for (const state of ['unverified-prerequisite','blocked','verified']) {
+    const {ledger,checklist}=ownerQueue();
+    if(state==='unverified-prerequisite')ledger.packets.A.status='pending'; else ledger.packets.C.status=state;
+    assert.equal(chooseNext(manifest,ledger,checklist).action,'blocked');
+  }
+});
+test('missing, reordered, duplicated and unknown checklist tasks fail closed', () => {
+  for(const mutate of [()=>undefined, c=>c.slice(1), c=>[c[0],c[2],c[1]], c=>[...c,c[1]], c=>c.slice(0,2)]) {
+    const {ledger,checklist}=ownerQueue();
+    assert.equal(chooseNext(manifest,ledger,mutate(checklist)).action,'blocked');
+  }
+});
+test('checked milestone requires evidence then restores ordinary selection', () => {
+  const {ledger,checklist}=ownerQueue(); for(const task of checklist)task.done=true;
+  assert.equal(chooseNext(manifest,ledger,checklist).action,'reconcile-micro-task-evidence');
+  ledger.packets.C.status='verified';
+  assert.equal(chooseNext(manifest,ledger,checklist).packet,'B');
+});
+test('invalid dispatch metadata is rejected without changing ordinary validation', () => {
+  for(const patch of [{plan:'../outside.md'},{packet:'X'},{task_ids:['4.9','4.9']},{task_ids:[]},{reason:''},{after_task:'no-id'}]) {
+    const {ledger}=ownerQueue();Object.assign(ledger.micro_task_dispatch,patch);
+    assert.match(validateExecution(manifest,ledger).join('\n'),/Invalid owner micro-task dispatch/);
+  }
+});
+test('integrated production checklist is atomic and agrees with owner dispatch', () => {
+  const text=readFileSync(new URL('../implementation_plan.md',import.meta.url),'utf8');
+  const checklist=parseMicroTasks(text);
+  const ledger=JSON.parse(readFileSync(new URL('../docs/planning/execution-state.json',import.meta.url),'utf8'));
+  const actualManifest=JSON.parse(readFileSync(new URL('../docs/planning/packets.json',import.meta.url),'utf8'));
+  assert.equal(new Set(checklist.map(t=>t.id)).size,checklist.length);
+  assert.ok(checklist.length>=229);
+  // Each task has one file scope, instruction and acceptance field.
+  const sections=text.split(/(?=^- \[[ xX]\] \*\*משימה \d+\.\d+:)/m).slice(1);
+  for(const section of sections) {
+    const body=section.split(/^#{2,4} /m)[0];
+    for(const field of ['קבצים לעריכה/יצירה','הוראות טכניות ברורות','קריטריון קבלה'])
+      assert.equal(body.split(`**${field}:**`).length-1,1,`${body.split('\n')[0]} ${field}`);
+  }
+  assert.deepEqual(validateExecution(actualManifest,ledger),[]);
+  const next=chooseNext(actualManifest,ledger,checklist);
+  const first=checklist.find(t=>!t.done);
+  if(first && ledger.micro_task_dispatch.task_ids.includes(first.id)) {
+    assert.equal(next.action,'micro-task');assert.equal(next.packet,'SL04.2');assert.equal(next.task,first.id);
+  } else if(ledger.micro_task_dispatch.task_ids.some(id=>!checklist.find(t=>t.id===id).done)) {
+    assert.equal(next.action,'finish-current-micro-task');
+  } else {
+    assert.notEqual(next.action,'micro-task');
+  }
+});

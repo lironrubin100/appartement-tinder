@@ -101,3 +101,39 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 - State: source-confirmed by independent canonical review19October; not fixed; no live malformed-write reproduction claimed. taxonomy.ts uses JavaScript string.length (UTF16 code units), SQL uses char_length (Unicode codepoints).
 - Example: kitchen_other containing100 non-BMP emoji can exceed the160-unit client limit while staying within160 server characters. UI is stricter; this is a validation-consistency gap, not an authorization bypass.
 - Next: settle a consistent technical counting convention within the approved field limits, align validators/UI/SQL and add bounded Unicode cases. Do not silently widen product limits or mark53-option enum parity as text-length parity.
+
+## Owner management intake — 21 October 2026
+
+The following entries are tracked for SL04.2, not fixed by this planning update. Preserve earlier runtime evidence and synthetic demos.
+
+### LISTING-OWNER-ENTRY-001 — Owner management entry is missing or difficult to reach
+
+- State: Owner-reported 21 October; not freshly browser-reproduced by this planning work. Source has apartments.lister_id authorization and /my-listings; absence of ownership in the database is not established.
+- Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
+- Next: 4.9–4.14; reproduce both resident/nonresident posters and preserve existing listing identities.
+
+### LISTING-SELF-CONTACT-001 — Poster sees a contact-owner action for their own apartment
+
+- State: Owner-reported 21 October; source-confirmed existing ListingContact owner branch, so the precise failing entry/identity requires reproduction. No claim that self-inquiry RPC currently permits a write.
+- Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
+- Next: 4.9, 4.11–4.12; check UI and ordinary-client denial separately.
+
+### LISTING-OWNER-INBOX-001 — No usable per-property and aggregate requester inbox
+
+- State: Owner-reported 21 October; source confirms MyListingsPage currently has pending IDs/action buttons, not the approved safe sender/introduction/filterable inbox.
+- Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
+- Next: 6.1–6.5 and 6.22–6.29, then 6.9/6.11 for groups.
+
+### LISTING-DRAFT-LABELS-001 — Composer buttons do not describe draft/new/edit state
+
+- State: Owner-reported 21 October; exact visible states require task 4.9 / targeted browser reproduction. Saving a local draft exists; this report is not proof of lost data.
+- Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
+- Next: 2.25–2.29, 2.32 and 4.3/4.16; distinguish Save changes, Publish listing, Continue draft and save status.
+
+### LISTING-MULTI-DRAFT-001 — Only one device-local listing draft; no cross-device draft list
+
+- State: Source-confirmed 21 October: draft-store.ts keys IndexedDB by accountId and stores File[]; ComposeForm loads that one account draft. Multiple independent cloud drafts/photos are not implemented by this plan change.
+- Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
+- Next: 2.16–2.33; import existing draft explicitly and retain it until verified cloud transfer.
+
+21 October reconciliation of LISTING-COMPOSER-DRAFT-001: the newer source includes ComposerNavigation overlay and device-local IndexedDB photos; the older transient-state description is historical. This does not certify all overlay acceptance or resolve LISTING-MULTI-DRAFT-001. LISTING-PUBLISH-PHONE-001/RETRY-001 retain their dated original findings; current SL02 workstream/checked tasks describe later deployed fixes.

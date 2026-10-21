@@ -54,3 +54,7 @@ Named owner/operator; protected review queue; send-disable switch; registration/
 ## Required acceptance
 
 Mock sender proves enqueue/rollback/dedupe/retry/suppression; real configured test destination proves one actual email/push with ordinary account; channel disable and master-off suppress queued retry; blocked/left/deleted user receives nothing; another account cannot modify preferences/subscription; logout rebind prevents old-account push; links cannot redirect externally or expose unauthorized thread; analytics event count agrees with actual committed state after retried/rolled-back actions. Restore only fixture configuration under an isolated target, never global shared production limits.
+
+## Owner inquiry viewed marker — 21 October 2026
+
+[LISTING_MANAGEMENT](LISTING_MANAGEMENT.md) adds owner-only seen state for a sent inquiry when its details are opened. Loading a list does not mark it seen. It is independent of message unread/read counters and does not accept a request or create a notification. Existing F7 delivery rules remain; unsent group consent rounds produce no owner-facing notification.

@@ -95,3 +95,10 @@ Bounded dispatch: start with WORK_PLAN.md and EXECUTION_PACKETS.md. A ready pack
 
 
 Required MVP envelopes now dispatch via 21 packets in EXECUTION_PACKETS.md and REMAINING_MVP_PACKETS.md, with packetized parent status. Owner priority is a working university-funding demonstration, with concrete authorization correctness; cosmetic polish and generic public-launch/legal planning do not block independent local work. Do not reopen approved product choices.
+
+
+## Owner-priority micro-task dispatch — 21 October 2026
+
+The current owner priority is SL04.2, tasks4.9 through4.19 in physical checklist order (interleaved2.x/4.x/6.x), after completed task1.4. `micro_task_dispatch` in execution-state enumerates that exact order. `next-work.mjs --json` reads the actual plan and returns action `micro-task`, packet and task. A preceding unchecked task returns `finish-current-micro-task`; missing/inconsistent checklist or unverified packet prerequisites blocks dispatch. It never marks progress or skips an unchecked task. Complete one task, verify and publish normally, then ask before the next under the explicit micro-task mode.
+
+Once all milestone boxes are checked, reconcile SL04.2 evidence before ordinary packet selection resumes; no parent verification is inferred. Milestone two is dispatched through implementation_plan in its physical prerequisite order. Preserve incomplete Google, listing-hardening and live lister-discovery findings; none was fixed by reprioritization. See [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).

@@ -95,3 +95,7 @@ B10 transition clarification (17 October): a resident may intentionally become a
 ## Acceptance scenarios
 
 Two independent owners + requester + outsider; edit conflict and transaction rollback; partial-room availability; intake paused while group active; second acceptance retry/concurrent attempt; block through direct API/Realtime/previews; group member history cutoff; address grant revocation; listing-card unavailable state; deletion retry and admin fallback with rejected transfer. Each scenario must state approved expected outcome before execution.
+
+## Owner management amendment — 21 October 2026
+
+[LISTING_MANAGEMENT](LISTING_MANAGEMENT.md) is the approved contract for private multiple cloud drafts, explicit public edits, all-poster Profile access and the shared property/aggregate inquiry inbox. It extends D16/I4/F4 without changing address/history, room/intake independence, owner identity or recipient consent. A seen request is not an accepted request or a read chat message. Existing individual/group/reverse-outreach identities remain distinct; group consent-round internals are not owner inbox data. Approval is not implementation evidence.

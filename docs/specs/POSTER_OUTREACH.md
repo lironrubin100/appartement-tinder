@@ -33,3 +33,7 @@ Safe poster identity: approved display name and supplied profile image if any; l
 Use two eligible posters with separate apartments, a resident recipient, and outsider. Prove receiver consent, real pending-to-accept persistence, one conversation/grant under concurrent retries, own-listing enforcement, daily quota shared with resident invitations, private saver/phone/budget withholding, withdrawn/hidden/blocked denial, no notification to blocked/deleted recipient and correct HE/EN phone flow. Clean exact fixture accounts/uploads after testing.
 
 Integrate as a new packet under SL06, after SL01/SL03/SL04/SL08 contracts. It is additional approved work, not a claim existing renter-initiated inquiry code already implements reverse invitations.
+
+## Owner management amendment — 21 October 2026
+
+[LISTING_MANAGEMENT](LISTING_MANAGEMENT.md) is the approved contract for private multiple cloud drafts, explicit public edits, all-poster Profile access and the shared property/aggregate inquiry inbox. It extends D16/I4/F4 without changing address/history, room/intake independence, owner identity or recipient consent. A seen request is not an accepted request or a read chat message. Existing individual/group/reverse-outreach identities remain distinct; group consent-round internals are not owner inbox data. Approval is not implementation evidence.
