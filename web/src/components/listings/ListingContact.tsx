@@ -25,6 +25,19 @@ export async function ListingContact({
         {en ? 'Sign in to request a viewing' : 'התחברות ושליחת פנייה'}
       </Link>
     );
+  const { data: own, error: ownershipError } = await client
+    .from('apartments')
+    .select('id')
+    .eq('id', id)
+    .eq('lister_id', user.id)
+    .maybeSingle();
+  if (ownershipError) throw new Error('Could not verify listing ownership');
+  if (own)
+    return (
+      <Link className={style} href={localePath('/my-listings', locale)}>
+        {en ? 'Manage your listing' : 'ניהול המודעה שלי'}
+      </Link>
+    );
   const { data: profile } = await client
     .from('profiles')
     .select('onboarded')
@@ -36,18 +49,6 @@ export async function ListingContact({
         {en
           ? 'Complete your profile to contact the owner'
           : 'השלמת פרופיל ויצירת קשר'}
-      </Link>
-    );
-  const { data: own } = await client
-    .from('apartments')
-    .select('id')
-    .eq('id', id)
-    .eq('lister_id', user.id)
-    .maybeSingle();
-  if (own)
-    return (
-      <Link className={style} href={localePath('/my-listings', locale)}>
-        {en ? 'Manage your listing' : 'ניהול המודעה שלי'}
       </Link>
     );
   const { data: inquiry, error } = await client
