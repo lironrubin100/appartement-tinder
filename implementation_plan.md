@@ -258,7 +258,7 @@
 
 - [ ] **משימה 6.1: יצירת פנייה אישית שנשמרת**
   - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021000007_core_individual_inquiry.sql`, `supabase/tests/plan_core_inquiry.sql`, `scripts/test-resident-sql.mjs`.
-  - **הוראות טכניות ברורות:** התאם create_listing_inquiry באופן תואם לחתימה קיימת, עם intro אופציונלי עד 1000 Unicode codepoints/default NULL. session requester, listing פעיל/intake פתוח, nonself, pending יחיד בהקשר אישי. אין chat/address לפני accept. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
+  - **הוראות טכניות ברורות:** התאם create_listing_inquiry באופן תואם לחתימה קיימת, עם intro אופציונלי עד 500 Unicode codepoints/default NULL. session requester, listing פעיל/intake פתוח, nonself, pending יחיד בהקשר אישי. אין chat/address לפני accept. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** פנייה עם/בלי הודעה נראית לבעלים אחרי reload; חתימה ישנה עובדת; אין גישה מוקדמת לכתובת.
 
 - [ ] **משימה 6.2: אישור בעלים לפנייה אישית**
@@ -268,7 +268,7 @@
 
 - [ ] **משימה 6.22: שדה הודעת פתיחה בפנייה**
   - **קבצים לעריכה/יצירה:** `web/src/components/listings/RequestViewing.tsx`, `web/src/lib/listings/inquiries.ts`.
-  - **הוראות טכניות ברורות:** הוסף הודעה אופציונלית עד 1000 Unicode codepoints, בדיקת שרת תואמת וחיבור ל־RPC 6.1. כשל שומר טקסט ו־retry identity; אין עריכת טקסט של pending קיים באמצעות retry.
+  - **הוראות טכניות ברורות:** הוסף הודעה אופציונלית עד 500 Unicode codepoints, בדיקת שרת תואמת וחיבור ל־RPC 6.1. כשל שומר טקסט ו־retry identity; אין עריכת טקסט של pending קיים באמצעות retry.
   - **קריטריון קבלה:** פנייה עם/בלי הודעה נשמרת; retry אינו יוצר נוספת; הלקוח מציג הודעת שגיאה בלי למחוק טקסט.
 
 - [ ] **משימה 6.3: בדיקת חיבור הפנייה ומצב ממתין**

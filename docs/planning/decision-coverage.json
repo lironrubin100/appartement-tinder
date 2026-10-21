@@ -1,6 +1,6 @@
 {
   "date": "2026-10-21",
-  "decision_source_sha256": "e64f1d88d349ac81f18c2455b5c699d68452f6c782069ee10b38d6feae1a7cc4",
+  "decision_source_sha256": "f593d5a0b809c2418f4a0b7fa9b491a4c58474b90eb55c698465a7168fc21980",
   "meaning": "Generated coverage only. DECISIONS.md remains authority; primary slice assigns ownership, not approval or execution readiness.",
   "counts": {
     "decided": 130,

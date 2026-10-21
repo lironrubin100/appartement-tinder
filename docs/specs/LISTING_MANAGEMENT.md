@@ -36,7 +36,7 @@ Legacy IndexedDB remains an import source, not a competing multi-draft authority
 
 ## Owner inquiries
 
-Reuse existing inquiry and conversation identities. New individual inquiries accept an optional opening message, maximum 1000 Unicode codepoints on both server and client. Existing signatures/callers and NULL-message inquiries remain supported. This explicit default replaces the proposal's ambiguous reference to unspecified invitation limits. This is one introduction attached to the request, not pre-acceptance chat; changing the text of an existing pending request is not a retry.
+Reuse existing inquiry and conversation identities. New individual inquiries accept an optional opening message, maximum 500 Unicode codepoints on both server and client. Existing signatures/callers and NULL-message inquiries remain supported. This reuses the existing invitation maximum (likes_message_check and DiscoverClient both use 500); it does not widen it. This is one introduction attached to the request, not pre-acceptance chat; changing the text of an existing pending request is not a retry.
 
 The owner reader filters by session-owned apartment IDs and optionally by listing/status, with standard bounded pagination. Cards include safe requester projection, apartment context, optional introduction, time/state and an accepted conversation link. No phone, email, full birth date, private preferences or saver identities. Old unavailable/declined requests display honestly; an unavailable listing cannot receive/accept a fresh inquiry.
 
