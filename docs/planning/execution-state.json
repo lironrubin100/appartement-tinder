@@ -173,8 +173,8 @@
       "status": "verification-incomplete",
       "handoff": "docs/workstreams/2026-10-20-sl02-listing-continuation.md",
       "worktree": "C:/Users/User/.codex/worktrees/e175/appartement tinder",
-      "reason": "Phone policy, retry-safe publication, private drafts and discard are deployed; live privacy and publication migrations are applied. Live ordinary-client and HE/EN 390px production-browser publication with synthetic fixtures passed; provider was mocked in publication but real EN provider suggestions passed separately. The early confirmation reset was reproduced under delayed Leaflet CSS and fixed by eager styles, with HE/EN production-build regression 2/2; production verification and remaining packet hardening need review; canonical profile Google acceptance remains separately incomplete.",
-      "revisit_when": "Verify the confirmation fix on production and review remaining packet hardening evidence before marking verified; retain demo fixtures and recheck current master."
+      "reason": "Phone policy, retry-safe publication, private drafts and discard are deployed; live privacy and publication migrations are applied. Live ordinary-client and HE/EN 390px production-browser publication with synthetic fixtures passed; provider was mocked in publication but real EN provider suggestions passed separately. The early confirmation reset was reproduced under delayed Leaflet CSS and fixed by eager styles, with HE/EN regression 2/2 on both the local production build and deployed3880bf9 (READY dpl_8G83vrVXFU2hNWokbgtCTFvF9zy9); remaining packet hardening needs review; canonical profile Google acceptance remains separately incomplete.",
+      "revisit_when": "Review remaining packet hardening evidence before marking verified; the confirmation fix passed production acceptance; retain demo fixtures and recheck current master."
     },
     "SL03.1": {
       "status": "pending"
