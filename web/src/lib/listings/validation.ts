@@ -32,6 +32,7 @@ export function validateListingDraft(draft: ListingDraft): string | null {
   if (!Number.isInteger(draft.bedrooms) || draft.bedrooms < 1 || draft.bedrooms > 20) {
     return 'יש להזין מספר חדרים תקין.';
   }
+  if (typeof draft.billsIncluded !== 'boolean') return 'יש לבחור אם החשבונות כלולים.';
   if (draft.availableRooms.length < 1) return 'יש להוסיף לפחות חדר פנוי אחד.';
   if (draft.availableRooms.length > draft.bedrooms) return 'מספר החדרים הפנויים לא יכול להיות גדול ממספר החדרים בדירה.';
   if (draft.availableRooms.some((room) => !Number.isInteger(room.monthlyPrice) || room.monthlyPrice < 1)) {
