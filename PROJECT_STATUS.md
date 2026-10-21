@@ -2,6 +2,10 @@
 
 Updated: 20 October 2026 (Asia/Jerusalem). Current evidence is dated inline; historical acceptance retains its original date. This is the shared operational register for all local chats and linked worktrees. Product rules remain in DECISIONS.md. Read this file and one relevant handoff before exploring code.
 
+## SL02 continuation update — 21 October 2026
+
+SL02 publication implementation was integrated in `65f3780`, deployed as `dpl_G8uj9A8VkRD7GXZFv1QjQdQ469SS`, and exercised on production in Hebrew and English with synthetic accounts. The older statement below that SL02 is uncommitted and unreleased is superseded. The packet remains verification-incomplete; see `docs/workstreams/2026-10-20-sl02-listing-continuation.md` and the task-level checkboxes in `implementation_plan.md`. A potentially intermittent location-confirmation issue is still open in `docs/KNOWN_ISSUES.md`. The next independent packet selected by `node scripts/next-work.mjs --json` is SL01.2, whose actual Google sign-in roundtrip remains outstanding; reconcile its prerequisite and scope before dispatch.
+
 ## Current published application — 20 October 2026
 
 - **Production:** [appartement-tinder.vercel.app](https://appartement-tinder.vercel.app), release `2877c38a21e2b183805451a265354a19aa64faf2`, deployment `dpl_CmU7JB992cBpTMvRf4DivtAcHZGA` **READY**. Domain-to-deployment mapping rechecked during this documentation audit. The later queued duplicate deployment was canceled and is not the active public alias.
