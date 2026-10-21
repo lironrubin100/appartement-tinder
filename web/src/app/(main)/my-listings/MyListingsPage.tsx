@@ -1,17 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
 import { RentedButton } from './RentedButton';
 import { localePrefix, type Locale } from '@/lib/listings/text';
 import { InquiryActionButtons } from '@/components/listings/InquiryActionButtons';
-
-const STATUS_LABEL: Record<string, string> = {
-  active: 'פעילה',
-  paused: 'מושהית',
-  flagged: 'בבדיקה',
-  taken: 'הושכרה',
-};
+import { OwnerListingCard } from '@/components/listings/OwnerListingCard';
 
 export async function renderMyListings(locale: Locale) {
   const t = (he: string, en: string) => (locale === 'en' ? en : he);
@@ -86,100 +79,30 @@ export async function renderMyListings(locale: Locale) {
         </section>
       ) : (
         <ul className="space-y-3">
-          {listings.map((listing) => {
-            const rooms = listing.apartment_rooms.filter(
-              (room) => room.is_available
-            );
-            const prices = rooms.map((room) => room.monthly_price);
-            const low = Math.min(...prices),
-              high = Math.max(...prices);
-            return (
-              <li
-                key={listing.id}
-                data-testid="owner-listing"
-                data-listing-id={listing.id}
-                className="flex flex-wrap items-start gap-4 rounded-2xl border border-card-border bg-white p-4"
+          {listings.map((listing) => (
+            <li key={listing.id}>
+              <OwnerListingCard
+                listing={listing}
+                locale={locale}
+                viewHref={listing.status === 'active' ? `${localePrefix(locale)}/listings/${listing.id}` : undefined}
               >
-                {listing.photos[0] ? (
-                  <Image
-                    src={listing.photos[0]}
-                    alt=""
-                    width={96}
-                    height={80}
-                    unoptimized
-                    className="h-20 w-24 rounded-xl object-cover"
-                  />
-                ) : (
-                  <div className="h-20 w-24 rounded-xl bg-neutral-bg-soft" />
+                {listing.status === 'active' && (
+                  <RentedButton id={listing.id} locale={locale} />
                 )}
-                <div className="min-w-0 flex-1">
-                  <h2 className="break-words font-semibold text-ink">
-                    {listing.title}
-                  </h2>
-                  <p className="text-sm text-muted-text">
-                    {listing.public_location_label}
-                  </p>
-                  <p className="mt-1 font-semibold text-orange">
-                    {prices.length ? (
-                      <>
-                        <bdi>
-                          ₪{low.toLocaleString('en-US')}
-                          {low !== high
-                            ? `–${high.toLocaleString('en-US')}`
-                            : ''}
-                        </bdi>{' '}
-                        {t('לחדר / חודש', 'per room / month')} · {rooms.length}{' '}
-                        {listing.status === 'taken'
-                          ? t('חדרים', 'rooms')
-                          : t('חדרים פנויים', 'available rooms')}
-                      </>
-                    ) : (
-                      t('אין חדרים פנויים', 'No available rooms')
-                    )}
-                  </p>
-                  {listing.status === 'active' && (
-                    <>
-                      <Link
-                        href={`${localePrefix(locale)}/listings/${listing.id}`}
-                        className="mt-3 inline-block text-teal underline"
-                      >
-                        {t('צפייה במודעה', 'View listing')}
-                      </Link>
-                      <RentedButton id={listing.id} locale={locale} />
-                    </>
-                  )}
-                  {(inquiriesByApartment[listing.id] ?? []).length > 0 && (
-                    <div className="mt-3 rounded-shutaf-md bg-orange-soft p-3">
-                      <p className="text-sm font-semibold text-ink">
-                        {inquiriesByApartment[listing.id].length}{' '}
-                        {t('פניות ממתינות', 'pending inquiries')}
-                      </p>
-                      {inquiriesByApartment[listing.id].map((inquiryId) => (
-                        <InquiryActionButtons
-                          key={inquiryId}
-                          inquiryId={inquiryId}
-                          locale={locale}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <span
-                  data-testid="listing-status"
-                  className="shrink-0 rounded-full bg-neutral-bg-soft px-3 py-1 text-sm"
-                >
-                  {locale === 'en'
-                    ? ({
-                        active: 'Active',
-                        paused: 'Paused',
-                        flagged: 'Under review',
-                        taken: 'Rented',
-                      }[listing.status] ?? listing.status)
-                    : (STATUS_LABEL[listing.status] ?? listing.status)}
-                </span>
-              </li>
-            );
-          })}
+                {(inquiriesByApartment[listing.id] ?? []).length > 0 && (
+                  <div className="mt-3 rounded-shutaf-md bg-orange-soft p-3">
+                    <p className="text-sm font-semibold text-ink">
+                      {inquiriesByApartment[listing.id].length}{' '}
+                      {t('פניות ממתינות', 'pending inquiries')}
+                    </p>
+                    {inquiriesByApartment[listing.id].map((inquiryId) => (
+                      <InquiryActionButtons key={inquiryId} inquiryId={inquiryId} locale={locale} />
+                    ))}
+                  </div>
+                )}
+              </OwnerListingCard>
+            </li>
+          ))}
         </ul>
       )}
     </div>

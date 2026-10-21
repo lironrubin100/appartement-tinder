@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { localePrefix, type Locale } from '@/lib/listings/text';
 
 type Room = Readonly<{ monthly_price: number; is_available: boolean }>;
@@ -17,6 +18,7 @@ type Props = Readonly<{
   locale: Locale;
   viewHref?: string;
   manageHref?: string;
+  children?: ReactNode;
 }>;
 
 const statuses: Record<string, { he: string; en: string }> = {
@@ -27,7 +29,7 @@ const statuses: Record<string, { he: string; en: string }> = {
 };
 
 /** Presentation only: availability changes remain in the owning page/actions. */
-export function OwnerListingCard({ listing, locale, viewHref, manageHref }: Props) {
+export function OwnerListingCard({ listing, locale, viewHref, manageHref, children }: Props) {
   const t = (he: string, en: string) => (locale === 'en' ? en : he);
   const rooms = (listing.apartment_rooms ?? []).filter((room) => room.is_available);
   const prices = rooms.map((room) => room.monthly_price);
@@ -58,6 +60,7 @@ export function OwnerListingCard({ listing, locale, viewHref, manageHref }: Prop
           {viewHref && <Link href={viewHref} className="text-teal underline">{t('צפייה במודעה', 'View listing')}</Link>}
           <Link href={manageHref ?? `${localePrefix(locale)}/my-listings`} className="text-teal underline">{t('ניהול המודעה', 'Manage listing')}</Link>
         </div>
+        {children}
       </div>
       <span data-testid="listing-status" className="shrink-0 rounded-full bg-neutral-bg-soft px-3 py-1 text-sm">
         {statuses[listing.status]?.[locale] ?? listing.status}
