@@ -109,30 +109,35 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 ### LISTING-OWNER-ENTRY-001 — Owner management entry is missing or difficult to reach
 
 - State: Owner-reported 21 October; not freshly browser-reproduced by this planning work. Source has apartments.lister_id authorization and /my-listings; absence of ownership in the database is not established.
+- Task 4.9 reproduction, 21–22 October: production Chrome EN 390px with the dedicated synthetic resident and nonresident poster found no My Listings entry within the profile content for either. The lister has an additional My Listings link in its lister navigation; the resident does not. Direct `/en/my-listings` loaded the two resident-owned and one lister-owned active listings, matching ordinary-client `lister_id` queries. Source: `web/src/app/(main)/profile/page.tsx`, `web/src/app/(main)/layout.tsx`, and `web/src/app/(main)/my-listings/MyListingsPage.tsx`. Reproduced missing profile entry, not missing database ownership. HE and empty-account profile entry were not freshly checked.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 4.9–4.14; reproduce both resident/nonresident posters and preserve existing listing identities.
 
 ### LISTING-SELF-CONTACT-001 — Poster sees a contact-owner action for their own apartment
 
 - State: Owner-reported 21 October; source-confirmed existing ListingContact owner branch, so the precise failing entry/identity requires reproduction. No claim that self-inquiry RPC currently permits a write.
+- Task 4.9, 21–22 October: not reproduced in the tested production EN 390px path: each synthetic owner opened an active own listing from My Listings and saw Manage your listing rather than a self-contact button. `web/src/components/listings/ListingContact.tsx` checks onboarding before ownership, so other states and entry paths remain unverified. Read-only live `create_listing_inquiry(uuid)` definition excludes the listing owner; an ordinary-client self-inquiry write was not attempted here (task 4.12 owns that verification).
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 4.9, 4.11–4.12; check UI and ordinary-client denial separately.
 
 ### LISTING-OWNER-INBOX-001 — No usable per-property and aggregate requester inbox
 
 - State: Owner-reported 21 October; source confirms MyListingsPage currently has pending IDs/action buttons, not the approved safe sender/introduction/filterable inbox.
+- Task 4.9, 21–22 October: both synthetic accounts' production EN 390px My Listings screens had no aggregate inquiry link or filter controls. Reproduced the missing aggregate entry, not the full pending-inquiry interaction: these fixtures had no pending inquiry created for this check. Source `web/src/app/(main)/my-listings/MyListingsPage.tsx` selects pending IDs and renders action buttons, not the specified requester details and filterable inbox.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 6.1–6.5 and 6.22–6.29, then 6.9/6.11 for groups.
 
 ### LISTING-DRAFT-LABELS-001 — Composer buttons do not describe draft/new/edit state
 
 - State: Owner-reported 21 October; exact visible states require task 4.9 / targeted browser reproduction. Saving a local draft exists; this report is not proof of lost data.
+- Task 4.9, 21–22 October: both synthetic owners' production EN 390px new-listing screens showed Publish listing, Close and Discard draft; no Save changes or Continue draft control appeared in that state. Reproduced those new-form labels, not an existing edit flow or data loss. `web/src/app/(main)/compose/ComposeForm.tsx` saves one local draft on close.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 2.25–2.29, 2.32 and 4.3/4.16; distinguish Save changes, Publish listing, Continue draft and save status.
 
 ### LISTING-MULTI-DRAFT-001 — Only one device-local listing draft; no cross-device draft list
 
 - State: Source-confirmed 21 October: draft-store.ts keys IndexedDB by accountId and stores File[]; ComposeForm loads that one account draft. Multiple independent cloud drafts/photos are not implemented by this plan change.
+- Task 4.9, 21–22 October: both synthetic owners' production EN new-listing screens lacked a draft chooser. Source `web/src/lib/listings/draft-store.ts` confirms one IndexedDB record per account; read-only live catalog contained no public draft table or draft-named RPC. No cross-device test was run, so this is source/catalog confirmation rather than a reproduced cross-device loss.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 2.16–2.33; import existing draft explicitly and retain it until verified cloud transfer.
 

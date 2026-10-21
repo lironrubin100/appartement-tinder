@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-21",
+  "updated_at": "2026-10-22",
   "meaning": "Progress only, not product authority. Initially pending means not reconciled by this plan, not missing implementation.",
   "priority": [
     "SL04.2",
@@ -226,9 +226,10 @@
       "status": "pending"
     },
     "SL04.2": {
-      "status": "pending",
+      "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
-      "outcome": "Owner-approved first milestone; planning only. First task 4.9 reproduces and reconciles existing owner/publication artifacts. Existing parent verification gaps unchanged."
+      "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
+      "outcome": "Task 4.9 ownership paths and live signatures reconciled; 4.10 is next. Full milestone and parent verification remain incomplete."
     }
   },
   "micro_task_dispatch": {
