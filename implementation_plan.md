@@ -121,8 +121,8 @@
   - **הוראות טכניות ברורות:** ממש את LISTING_MANAGEMENT: מזהה טיוטה, schemaVersion, revision, updatedAt, שדות חלקיים, photo refs, sourceListingId/sourceRevision אופציונליים ומצב טיוטה. לא שומרים File או URL חתום. הפרד new/edit ונתוני draft ממודל תקין לפרסום.
   - **קריטריון קבלה:** TypeScript עובר; אפשר לייצג שתי טיוטות חסרות בלי לעקוף validation של publish.
 
-- [ ] **משימה 2.17: אחסון פרטי לטיוטות**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261022000002_private_listing_drafts.sql`, `supabase/tests/plan_listing_drafts.sql`, `scripts/test-resident-sql.mjs`.
+- [x] **משימה 2.17: אחסון פרטי לטיוטות**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021225221_private_listing_drafts.sql`, `supabase/tests/plan_listing_drafts.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** הוסף טיוטות בבעלות חשבון עם מזהה נפרד וגרסה, RLS ו־grants באותה מיגרציה. בעלים אינו ניתן להחלפה. sourceListingId רק למודעה בבעלות caller; לכל מודעה לכל היותר טיוטת עריכה פתוחה אחת. הוסף שדה receipt לייבוא ומפתח ניסיון לפרסום לפי החוזה. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** חשבון יוצר וקורא שתי טיוטות; זר ואורח אינם קוראים או משנים; הפניה למודעה זרה נדחית. אין טיוטות ב־public projections.
 

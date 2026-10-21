@@ -30,7 +30,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261017082317_lister_safe_browsing.sql'),
   await read('supabase/migrations/20261017101500_convert_resident_to_lister.sql'),
   await read('supabase/migrations/20261020204057_private_random_listing_location.sql'),
-  await read('supabase/migrations/20261020204548_listing_retry_owned_photos.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261020204548_listing_retry_owned_photos.sql'),
+  await read('supabase/migrations/20261021225221_private_listing_drafts.sql')]) await db.exec(sql);
 
 const ids = Array.from({ length: 25 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
 for (const id of ids) await db.query('insert into auth.users(id) values($1)', [id]);
@@ -50,6 +51,8 @@ for (let i = 0; i < ids.length; i++) {
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
+await db.exec(await read('supabase/tests/plan_listing_drafts.sql'));
+console.log('PASS: private draft owner, outsider, anonymous and edit-source isolation.');
 // D2/B2: a completed resident can publish without a phone; a nonresident cannot.
 await db.exec('reset role');
 await db.query('update public.profile_private set phone=null where profile_id = any($1::uuid[])', [[ids[0], ids[listerIndex]]]);
