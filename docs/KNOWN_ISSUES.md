@@ -2,6 +2,11 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20October2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 
+## MAP-KEYLESS-MAXZOOM-001 — Local map crashes when the provider key is absent
+
+- Reproduced 21 October 2026 in the `6b9e` local production build at `localhost:3201/en/map` with `NEXT_PUBLIC_CARTO_BASEMAPS_KEY` absent. An authenticated synthetic lister reached the route; the public listing request returned HTTP 200, then the browser reported `Map has no maxZoom specified` and showed the generic screen error. A repeated local check gave the same result. This is not a claim of a production failure: the same lister saw a visible map container on configured production.
+- State: reproduced, not fixed. The keyless path omits the tile layer, while marker clustering requires a maximum zoom; the intended explicit missing-key message did not survive the client error. The local test did not verify map imagery. Investigate with the map work around task 3.2; any repair must stay within that task's permitted paths or receive an explicit scope adjustment. Verify keyless fallback and configured real tile rendering separately.
+
 ## LISTING-LOCATION-CONFIRM-001 — Early location confirmation can reset
 
 - Observed once on 20 October 2026 in production Chrome at 390px: immediately after entering manual coordinates, an automated click on the location confirmation checkbox did not leave it checked. The same journey passed after allowing the map to settle; Hebrew and English publication then succeeded.
