@@ -2,6 +2,9 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+// Load map styles with the form: a late React stylesheet commit can restore
+// controlled inputs to stale values while the lazy map is loading.
+import 'leaflet/dist/leaflet.css';
 import { Input } from '@/components/ui/Input';
 import type { AddressSuggestion, LocationCategory, LocationKind } from '@/lib/listings/address-types';
 import { isIsraeliLocation, locationCategories } from '@/lib/listings/address-types';
