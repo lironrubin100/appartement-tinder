@@ -47,6 +47,9 @@ for (let i = 0; i < ids.length; i++) {
     [i === listerIndex ? `Lister ${i}` : `Resident ${i}`]
   );
 }
+await db.exec('reset role');
+await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
+console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
 // D2/B2: a completed resident can publish without a phone; a nonresident cannot.
 await db.exec('reset role');
 await db.query('update public.profile_private set phone=null where profile_id = any($1::uuid[])', [[ids[0], ids[listerIndex]]]);
