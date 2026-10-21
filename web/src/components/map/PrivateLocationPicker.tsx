@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 type Point = { latitude: number; longitude: number };
 const icon = L.divIcon({ className: '', html: '<span style="display:block;width:24px;height:24px;background:#E2883A;border:3px solid white;border-radius:50%;box-shadow:0 1px 5px #444"></span>', iconSize: [24, 24], iconAnchor: [12, 12] });
