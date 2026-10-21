@@ -127,6 +127,16 @@ export default async function ProfilePage() {
             )}
           </div>
 
+          <Link
+            href={localePath('/my-listings', locale)}
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-bg-soft rounded-shutaf-md transition-colors border-b border-card-border"
+          >
+            <span className="font-semibold text-ink">
+              {en ? 'My listings' : 'המודעות שלי'}
+            </span>
+            <span aria-hidden="true" className="text-muted-text">›</span>
+          </Link>
+
           {/* Settings */}
           <Link
             href={localePath('/settings', locale)}
