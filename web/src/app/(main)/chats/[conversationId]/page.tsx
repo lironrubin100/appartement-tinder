@@ -41,13 +41,17 @@ export default async function ConversationPage({
   );
   if (!conversation || messagesError) notFound();
 
-  const { data: exactAddress } = inquiry
-    ? await supabase
-        .from('listing_address_access')
-        .select('address')
-        .eq('apartment_id', inquiry.apartment_id)
-        .maybeSingle()
-    : { data: null };
+  // Accepted renters use the private grant view. The recorded poster already
+  // owns the exact address; read only that poster's own row for the same chat.
+  // Do not broaden the grant view or read another poster's private apartment.
+  const [grantedAddress, ownedAddress] = inquiry
+    ? await Promise.all([
+        supabase.from('listing_address_access').select('address')
+          .eq('apartment_id', inquiry.apartment_id).maybeSingle(),
+        supabase.from('apartments').select('address')
+          .eq('id', inquiry.apartment_id).eq('lister_id', user.id).maybeSingle(),
+      ])
+    : [{ data: null }, { data: null }];
   const [contacts, group, memberships] = conversation.group_id
     ? await Promise.all([
         supabase.rpc('list_group_contacts'),
@@ -93,7 +97,7 @@ export default async function ConversationPage({
       conversationId={conversationId}
       currentUserId={user.id}
       otherUserName={conversation.display_name}
-      exactAddress={exactAddress?.address ?? null}
+      exactAddress={grantedAddress.data?.address ?? ownedAddress.data?.address ?? null}
       initialMessages={(messages ?? []).reverse()}
     />
   );

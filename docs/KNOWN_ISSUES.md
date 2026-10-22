@@ -173,3 +173,10 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 ### LISTER-PROFILE-NAV-001 — Poster navigation has no Profile/Settings/sign-out entry
 
 - Source/browser-confirmed in the bounded continuation. Added localized Profile to the existing lister header, preserving startup My Listings. HE/EN 390px navigation to Profile and back passed. Phone owner cards now give title/actions full row width rather than a narrow column beside photo/status.
+
+
+### LISTING-OWNER-CHAT-ADDRESS-001 — Owner chat promises an exact-address card but does not show it
+
+- Reproduced on production 8bec8e5 during both exact owner-approved HE/EN synthetic lifecycle tests: publication, requester/owner network failure recovery and acceptance succeeded, but owner chat had a system message pointing to a missing address card.
+- Live read-only view definition confirmed `listing_address_access` intentionally serves only accepted requesters. Keep this authorization boundary. The chat page now also reads the session poster's own apartment address using explicit apartment ID plus `lister_id=user.id` and existing RLS. No view, grant or schema change.
+- Verify owner and accepted requester card/reload, outsider denial and retention after rented using the same two recorded fixture IDs; do not create more listings on retry. See the UX continuation handoff for dated results.
