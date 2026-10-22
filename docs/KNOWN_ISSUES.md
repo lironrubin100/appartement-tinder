@@ -180,3 +180,11 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 - Reproduced on production 8bec8e5 during both exact owner-approved HE/EN synthetic lifecycle tests: publication, requester/owner network failure recovery and acceptance succeeded, but owner chat had a system message pointing to a missing address card.
 - Live read-only view definition confirmed `listing_address_access` intentionally serves only accepted requesters. Keep this authorization boundary. The chat page now also reads the session poster's own apartment address using explicit apartment ID plus `lister_id=user.id` and existing RLS. No view, grant or schema change.
 - Verify owner and accepted requester card/reload, outsider denial and retention after rented using the same two recorded fixture IDs; do not create more listings on retry. See the UX continuation handoff for dated results.
+
+
+23 October production verification for the bounded continuation: LISTING-DRAFT-CLOSE-002, the single-device portion of LISTING-DRAFT-LABELS-001, LISTING-OWNER-SELF-LINK-001, LISTING-INQUIRY-RETRY-002, LISTER-PROFILE-NAV-001 and LISTING-OWNER-CHAT-ADDRESS-001 are fixed/verified on application b5f1bb1. Production 20/20 browser plus independent 6/6 owner/requester/outsider checks passed. This does not close LISTING-MULTI-DRAFT-001 or LISTING-OWNER-INBOX-001. See [dated scope/evidence](workstreams/2026-10-22-owner-ux-continuation.md).
+
+### CHAT-SYSTEM-LOCALE-001 — English chat displays the legacy Hebrew inquiry system message
+
+- Reported/reproduced by current production screenshot on 23 October: EN accepted chat has localized address card, header and composer, but its stored acceptance system-message body is Hebrew. No private message body was rewritten. Both authorized actors still get the actual exact-address card; this is a separate translation follow-up, not failed address authorization.
+- Next: localize known system events at the presentation boundary using a stable event contract, preserving ordinary user messages and immutable historical content. Do not bulk rewrite stored chat bodies. Current bounded release does not claim complete older-screen translation.
