@@ -119,7 +119,7 @@ export default function AddressField({ locale, initialDraft, onDraftChange }: { 
         aria-expanded={!manual && open}
         aria-activedescendant={open && active >= 0 ? `${id}-option-${active}` : undefined}
         onFocus={() => setOpen(true)} onKeyDown={(event) => {
-          if (event.key === 'Escape') { setOpen(false); setActive(-1); }
+          if (event.key === 'Escape' && open) { event.preventDefault(); event.stopPropagation(); setOpen(false); setActive(-1); }
           if (!manual && suggestions.length && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
             event.preventDefault(); setOpen(true);
             setActive((index) => index < 0 ? (event.key === 'ArrowDown' ? 0 : ordered.length - 1)

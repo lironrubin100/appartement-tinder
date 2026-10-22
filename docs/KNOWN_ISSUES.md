@@ -124,12 +124,16 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 ### LISTING-OWNER-INBOX-001 — No usable per-property and aggregate requester inbox
 
+- 22–23 October continuation: remains incomplete future inbox work. Existing actions now explain chat/exact-address access and recover from thrown/network failures with localized retry. These bounded fixes do not supply requester identity, introductions, timestamps or filters and do not close this issue.
+
 - State: Owner-reported 21 October; source confirms MyListingsPage currently has pending IDs/action buttons, not the approved safe sender/introduction/filterable inbox.
 - Task 4.9, 21–22 October: both synthetic accounts' production EN 390px My Listings screens had no aggregate inquiry link or filter controls. Reproduced the missing aggregate entry, not the full pending-inquiry interaction: these fixtures had no pending inquiry created for this check. Source `web/src/app/(main)/my-listings/MyListingsPage.tsx` selects pending IDs and renders action buttons, not the specified requester details and filterable inbox.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 6.1–6.5 and 6.22–6.29, then 6.9/6.11 for groups.
 
 ### LISTING-DRAFT-LABELS-001 — Composer buttons do not describe draft/new/edit state
+
+- 22–23 October continuation: fixed and locally verified for the existing single-device new-listing draft. Explicit Save draft and close awaits ordered persistence, Escape uses the same path, failure retains fields/photos, reopened forms autosave again, and confirmed discard is secondary. HE/EN at 390px/1280px passed. This does not implement cloud/multiple/edit drafts; production evidence belongs to the current UX handoff.
 
 - State: Owner-reported 21 October; exact visible states require task 4.9 / targeted browser reproduction. Saving a local draft exists; this report is not proof of lost data.
 - Task 4.9, 21–22 October: both synthetic owners' production EN 390px new-listing screens showed Publish listing, Close and Discard draft; no Save changes or Continue draft control appeared in that state. Reproduced those new-form labels, not an existing edit flow or data loss. `web/src/app/(main)/compose/ComposeForm.tsx` saves one local draft on close.
@@ -148,6 +152,24 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 ### LISTING-OWNER-SELF-LINK-001 — Management link on the management page reloads itself
 
+- 22–23 October continuation: fixed and locally verified for resident/lister/empty HE/EN phone paths. Card Manage link now requires an explicit destination; dashboard retains public View listing and the public-detail owner CTA still opens My Listings. No new edit route.
+
 - State: source-confirmed during the requested UX review, 22 October; no new browser reproduction in this review. `MyListingsPage` renders `OwnerListingCard` without a `manageHref`; the card defaults to the localized My Listings URL. A Manage listing link on that same page therefore opens no new management context.
 - Expected: links describe the action they actually perform; retain the owner-detail CTA into the dashboard. Until scoped editing exists, omit the redundant card link within the dashboard or target an existing meaningful section. Do not invent an edit route.
 - Next: finish the requested UX review before further UI changes; preserve task order and D16. See `docs/handoffs/2026-10-22-next-prompt.md`.
+
+
+### LISTING-DRAFT-CLOSE-002 — Escape bypasses acknowledged save; reopened form suppresses later autosave
+
+- Confirmed in the 22 October continuation: dialog cancel directly hid the form, and successful explicit close left `finished` true in a mounted form. Fixed by routing cancel through the form save handle and unmounting after acknowledged close. Nested address suggestions consume their own Escape first.
+- Local Chrome HE/EN at 390px and 1280px: delayed old write followed by latest close, failed IndexedDB put, preserved photo/input, explicit retry, Escape, reopened autosave/reload and confirmed local discard passed. No claim that abrupt browser termination flushes an unacknowledged debounce.
+- See `workstreams/2026-10-22-owner-ux-continuation.md` for application/deployment and current acceptance evidence.
+
+### LISTING-INQUIRY-RETRY-002 — Rejected server action leaves inquiry action busy
+
+- Source-confirmed 22 October on request and acceptance components. Both now catch rejected actions, reset pending in finally and show localized retry feedback. Acceptance also explains exact-address access and that no room is reserved.
+- Local Chrome HE/EN acceptance request aborted before reaching the server: localized error and enabled retry passed, with no existing inquiry accepted or hosted mutation. Positive new-fixture flow is separately authorized and recorded in the UX handoff.
+
+### LISTER-PROFILE-NAV-001 — Poster navigation has no Profile/Settings/sign-out entry
+
+- Source/browser-confirmed in the bounded continuation. Added localized Profile to the existing lister header, preserving startup My Listings. HE/EN 390px navigation to Profile and back passed. Phone owner cards now give title/actions full row width rather than a narrow column beside photo/status.

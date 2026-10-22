@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { localePrefix, type Locale } from '@/lib/listings/text';
+import { type Locale } from '@/lib/listings/text';
 
 type Room = Readonly<{ monthly_price: number; is_available: boolean }>;
 type Listing = Readonly<{
@@ -44,7 +44,7 @@ export function OwnerListingCard({ listing, locale, viewHref, manageHref, childr
       ) : (
         <div aria-hidden="true" className="h-20 w-24 rounded-xl bg-neutral-bg-soft" />
       )}
-      <div className="min-w-0 flex-1">
+      <div className="order-3 min-w-0 flex-1 basis-full sm:order-none sm:basis-0">
         <h2 className="break-words font-semibold text-ink">{listing.title}</h2>
         {listing.public_location_label && <p className="text-sm text-muted-text">{listing.public_location_label}</p>}
         <p className="mt-1 font-semibold text-orange">
@@ -58,11 +58,11 @@ export function OwnerListingCard({ listing, locale, viewHref, manageHref, childr
         </p>
         <div className="mt-3 flex flex-wrap gap-4">
           {viewHref && <Link href={viewHref} className="text-teal underline">{t('צפייה במודעה', 'View listing')}</Link>}
-          <Link href={manageHref ?? `${localePrefix(locale)}/my-listings`} className="text-teal underline">{t('ניהול המודעה', 'Manage listing')}</Link>
+          {manageHref && <Link href={manageHref} className="text-teal underline">{t('ניהול המודעה', 'Manage listing')}</Link>}
         </div>
         {children}
       </div>
-      <span data-testid="listing-status" className="shrink-0 rounded-full bg-neutral-bg-soft px-3 py-1 text-sm">
+      <span data-testid="listing-status" className="ms-auto shrink-0 rounded-full bg-neutral-bg-soft px-3 py-1 text-sm">
         {statuses[listing.status]?.[locale] ?? listing.status}
       </span>
     </article>

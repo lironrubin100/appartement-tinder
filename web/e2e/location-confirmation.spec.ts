@@ -46,7 +46,7 @@ for (const locale of ['he', 'en'] as const) {
     } finally { releaseStyles(); }
     await expect(dialog.locator('.leaflet-container')).toBeVisible();
     await expect(confirmation).toBeChecked();
-    await dialog.getByRole('button', { name: t('סגירה', 'Close'), exact: true }).click();
+    await dialog.getByRole('button', { name: t('שמירת טיוטה וסגירה', 'Save draft and close'), exact: true }).click();
     await page.reload();
     await add.click();
     await expect(confirmation).toBeChecked();

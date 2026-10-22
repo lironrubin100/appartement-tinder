@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,7 +12,9 @@ import { listingError, localePrefix, type Locale } from '@/lib/listings/text';
 import AddressField from '@/components/map/AddressField';
 import { loadListingDraft, removeListingDraft, saveListingDraft, type SavedAddress, type SavedListingDraft } from '@/lib/listings/draft-store';
 
-export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished }: { accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void }) {
+export type ComposeFormHandle = { saveAndClose: () => Promise<void> };
+
+export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished }: { ref?: Ref<ComposeFormHandle>; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void }) {
   const t = (he: string, en: string) => locale === 'en' ? en : he;
   const router = useRouter();
   const [photos, setPhotos] = useState<File[]>([]);
@@ -57,7 +59,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
   }
 
   useEffect(() => {
-    if (!draftLoaded || !formRef.current || submitting || finished.current) return;
+    if (!draftLoaded || !formRef.current || busy.current || finished.current) return;
     const draft = snapshot(formRef.current);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
@@ -190,7 +192,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
   }
 
   async function saveDraftAndClose() {
-    if (busy.current || !formRef.current) return;
+    if (busy.current || !draftLoaded || !formRef.current) return;
     const draft = snapshot(formRef.current);
     busy.current = true;
     setSavingDraft(true);
@@ -199,7 +201,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
       await saveListingDraft(accountId, draft);
       setStorageError(false);
       finished.current = true;
-      if (onClose) onClose(); else history.back();
+      if (onClose) onClose(); else router.push(`${localePrefix(locale)}/my-listings`);
     } catch {
       setStorageError(true);
     } finally {
@@ -207,6 +209,8 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
       setSavingDraft(false);
     }
   }
+
+  useImperativeHandle(ref, () => ({ saveAndClose: saveDraftAndClose }));
 
   if (!draftLoaded) return <p role="status" className="p-6">{t('טוענים טיוטה…', 'Loading draft…')}</p>;
 
@@ -260,7 +264,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
           <p className="rounded-shutaf-md bg-neutral-bg-soft p-3 text-sm text-muted-text">
             {!requiresPrivatePhone || hasPrivatePhone
               ? t("מספר הטלפון בחשבון נשאר פרטי. כל הפניות מתבצעות בשותף.", "Your account phone stays private. All inquiries happen in Shutaf.")
-              : <>{t("לפני הפרסום יש להוסיף מספר טלפון פרטי.", "Add a private phone number before publishing.")} <Link href="/profile/edit" className="text-teal underline">{t("עריכת פרופיל", "Edit profile")}</Link></>}
+              : <>{t("לפני הפרסום יש להוסיף מספר טלפון פרטי.", "Add a private phone number before publishing.")} <Link href={`${localePrefix(locale)}/profile/edit`} className="text-teal underline">{t("עריכת פרופיל", "Edit profile")}</Link></>}
           </p>
 
           <div>
@@ -288,7 +292,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
 
           {message && <p role="alert" className="rounded-shutaf-md border border-error/30 bg-error/5 p-3 text-sm text-error">{message}</p>}
           {storageError && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לשמור טיוטה במכשיר. בדקו את הגדרות הדפדפן ונסו שוב.', 'Could not save the draft on this device. Check browser storage settings and retry.')}</p>}
-          <p className="text-sm text-muted-text">{t('הטיוטה נשמרת במכשיר הזה בלבד.', 'Your draft is saved on this device only.')}</p>
+          <p className="text-sm text-muted-text">{t('טיוטות נשמרות במכשיר הזה בלבד. לפני היציאה בחרו בשמירת טיוטה וסגירה.', 'Drafts are stored on this device only. Use Save draft and close before leaving.')}</p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>
             <Button type="button" variant="ghost" className="flex-1" onClick={saveDraftAndClose}>{savingDraft ? t('שומרים טיוטה…', 'Saving draft…') : t('שמירת טיוטה וסגירה', 'Save draft and close')}</Button>
@@ -298,6 +302,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
             <Button type="button" variant="ghost" className="mt-2" onClick={discardDraft}>{t('מחיקת טיוטה', 'Discard draft')}</Button>
           </details>
           </fieldset>
+          {savingDraft && <p role="status" className="text-sm text-body-text">{t('שומרים טיוטה…', 'Saving draft…')}</p>}
           {submitting && <p role="status" className="text-sm text-body-text">{t("מכינים את התמונות ומפרסמים את המודעה…", "Preparing photos and publishing…")}</p>}
         </form>
       </div>

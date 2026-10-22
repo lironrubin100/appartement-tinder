@@ -51,6 +51,9 @@ export default async function MainLayout({
               <Link href={en ? '/en/map' : '/map'} className="font-medium text-teal">
                 {en ? 'Map' : 'מפה'}
               </Link>
+              <Link href={en ? '/en/profile' : '/profile'} className="font-medium text-teal">
+                {en ? 'Profile' : 'פרופיל'}
+              </Link>
               <Link href={en ? '/en/chats' : '/chats'} className="font-medium text-teal">
                 {en ? 'Chats' : "צ'אטים"}
               </Link>

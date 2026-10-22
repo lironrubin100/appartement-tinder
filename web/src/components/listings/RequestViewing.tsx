@@ -30,12 +30,18 @@ export function RequestViewing({
         <Button
           disabled={busy}
           onClick={async () => {
+            if (busy) return;
             setBusy(true);
             setError(false);
-            const result = await createListingInquiry(apartmentId);
-            if (result.ok) router.refresh();
-            else setError(true);
-            setBusy(false);
+            try {
+              const result = await createListingInquiry(apartmentId);
+              if (result.ok) router.refresh();
+              else setError(true);
+            } catch {
+              setError(true);
+            } finally {
+              setBusy(false);
+            }
           }}
         >
           {busy
