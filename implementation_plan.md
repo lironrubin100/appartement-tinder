@@ -126,8 +126,8 @@
   - **הוראות טכניות ברורות:** הוסף טיוטות בבעלות חשבון עם מזהה נפרד וגרסה, RLS ו־grants באותה מיגרציה. בעלים אינו ניתן להחלפה. sourceListingId רק למודעה בבעלות caller; לכל מודעה לכל היותר טיוטת עריכה פתוחה אחת. הוסף שדה receipt לייבוא ומפתח ניסיון לפרסום לפי החוזה. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** חשבון יוצר וקורא שתי טיוטות; זר ואורח אינם קוראים או משנים; הפניה למודעה זרה נדחית. אין טיוטות ב־public projections.
 
-- [ ] **משימה 2.18: פעולת שמירת טיוטה עם גרסה**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261022000003_save_listing_draft_revision.sql`, `supabase/tests/plan_listing_draft_revision.sql`, `scripts/test-resident-sql.mjs`.
+- [x] **משימה 2.18: פעולת שמירת טיוטה עם גרסה**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261022075546_save_listing_draft_revision.sql`, `supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql`, `supabase/tests/plan_listing_draft_revision.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** הוסף פעולות RPC ליצירה/שמירה/מחיקה וסיום טיוטה לפי החוזה; שמירה בודקת expected_revision ומחזירה revision חדש. פעולות סיום/מחיקה מכבדות ניסיון פרסום שהחל; אין סימון published ללא receipt אמיתי. שדות חלקיים מותרים. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** שמירה תקינה מתקדמת בגרסה; טאב ישן מקבל conflict ללא דריסה; ייבוא באותו receipt מחזיר אותה טיוטה; לא ניתן לסיים ללא מודעה בבעלות שהתפרסמה.
 

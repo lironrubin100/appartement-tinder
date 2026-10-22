@@ -133,6 +133,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 - State: Owner-reported 21 October; exact visible states require task 4.9 / targeted browser reproduction. Saving a local draft exists; this report is not proof of lost data.
 - Task 4.9, 21–22 October: both synthetic owners' production EN 390px new-listing screens showed Publish listing, Close and Discard draft; no Save changes or Continue draft control appeared in that state. Reproduced those new-form labels, not an existing edit flow or data loss. `web/src/app/(main)/compose/ComposeForm.tsx` saves one local draft on close.
+- Owner follow-up, 22 October: saving needs an explicit action, with discarding a secondary choice. A subagent prepared an uncommitted `ComposeForm.tsx` patch that labels the action Save draft and close, waits for local storage, states that storage is device-local and moves Discard draft into More draft options. The agent stopped before verification. Patch is preserved at `docs/handoffs/2026-10-22-compose-draft-buttons.patch`; it is not verified, committed as application code or deployed. Owner asked to stop after task 2.18; resume through the continuation prompt.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 2.25–2.29, 2.32 and 4.3/4.16; distinguish Save changes, Publish listing, Continue draft and save status.
 
@@ -144,3 +145,9 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 - Next: 2.16–2.33; import existing draft explicitly and retain it until verified cloud transfer.
 
 21 October reconciliation of LISTING-COMPOSER-DRAFT-001: the newer source includes ComposerNavigation overlay and device-local IndexedDB photos; the older transient-state description is historical. This does not certify all overlay acceptance or resolve LISTING-MULTI-DRAFT-001. LISTING-PUBLISH-PHONE-001/RETRY-001 retain their dated original findings; current SL02 workstream/checked tasks describe later deployed fixes.
+
+### LISTING-OWNER-SELF-LINK-001 — Management link on the management page reloads itself
+
+- State: source-confirmed during the requested UX review, 22 October; no new browser reproduction in this review. `MyListingsPage` renders `OwnerListingCard` without a `manageHref`; the card defaults to the localized My Listings URL. A Manage listing link on that same page therefore opens no new management context.
+- Expected: links describe the action they actually perform; retain the owner-detail CTA into the dashboard. Until scoped editing exists, omit the redundant card link within the dashboard or target an existing meaningful section. Do not invent an edit route.
+- Next: finish the requested UX review before further UI changes; preserve task order and D16. See `docs/handoffs/2026-10-22-next-prompt.md`.

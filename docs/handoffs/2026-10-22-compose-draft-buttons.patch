@@ -1,0 +1,47 @@
+diff --git a/web/src/app/(main)/compose/ComposeForm.tsx b/web/src/app/(main)/compose/ComposeForm.tsx
+index 922fb6c..9ceef72 100644
+--- a/web/src/app/(main)/compose/ComposeForm.tsx
++++ b/web/src/app/(main)/compose/ComposeForm.tsx
+@@ -22,0 +23 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
++  const [savingDraft, setSavingDraft] = useState(false);
+@@ -190,0 +192,19 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
++  async function saveDraftAndClose() {
++    if (busy.current || !formRef.current) return;
++    const draft = snapshot(formRef.current);
++    busy.current = true;
++    setSavingDraft(true);
++    if (saveTimer.current) clearTimeout(saveTimer.current);
++    try {
++      await saveListingDraft(accountId, draft);
++      setStorageError(false);
++      finished.current = true;
++      if (onClose) onClose(); else history.back();
++    } catch {
++      setStorageError(true);
++    } finally {
++      busy.current = false;
++      setSavingDraft(false);
++    }
++  }
++
+@@ -200 +220 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
+-          <fieldset disabled={submitting} className="space-y-6">
++          <fieldset disabled={submitting || savingDraft} className="space-y-6">
+@@ -270,0 +291 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
++          <p className="text-sm text-muted-text">{t('הטיוטה נשמרת במכשיר הזה בלבד.', 'Your draft is saved on this device only.')}</p>
+@@ -273,9 +294 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
+-            <Button type="button" variant="ghost" className="flex-1" onClick={async () => {
+-              if (saveTimer.current) clearTimeout(saveTimer.current);
+-              if (formRef.current) {
+-                try { await saveListingDraft(accountId, snapshot(formRef.current)); }
+-                catch { setStorageError(true); return; }
+-              }
+-              if (onClose) onClose(); else history.back();
+-            }}>{t("סגירה", "Close")}</Button>
+-            <Button type="button" variant="ghost" className="flex-1" onClick={discardDraft}>{t("מחיקת טיוטה", "Discard draft")}</Button>
++            <Button type="button" variant="ghost" className="flex-1" onClick={saveDraftAndClose}>{savingDraft ? t('שומרים טיוטה…', 'Saving draft…') : t('שמירת טיוטה וסגירה', 'Save draft and close')}</Button>
+@@ -282,0 +296,4 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
++          <details className="text-sm text-muted-text">
++            <summary className="cursor-pointer">{t('אפשרויות נוספות לטיוטה', 'More draft options')}</summary>
++            <Button type="button" variant="ghost" className="mt-2" onClick={discardDraft}>{t('מחיקת טיוטה', 'Discard draft')}</Button>
++          </details>

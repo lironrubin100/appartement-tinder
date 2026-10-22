@@ -31,7 +31,9 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261017101500_convert_resident_to_lister.sql'),
   await read('supabase/migrations/20261020204057_private_random_listing_location.sql'),
   await read('supabase/migrations/20261020204548_listing_retry_owned_photos.sql'),
-  await read('supabase/migrations/20261021225221_private_listing_drafts.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261021225221_private_listing_drafts.sql'),
+  await read('supabase/migrations/20261022075546_save_listing_draft_revision.sql'),
+  await read('supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql')]) await db.exec(sql);
 
 const ids = Array.from({ length: 25 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
 for (const id of ids) await db.query('insert into auth.users(id) values($1)', [id]);
@@ -58,15 +60,24 @@ await db.exec('reset role');
 await db.query('update public.profile_private set phone=null where profile_id = any($1::uuid[])', [[ids[0], ids[listerIndex]]]);
 const listingId = '10000000-0000-4000-8000-000000000001';
 const basePhotoUrl = 'https://npbduvjnqnbydolmdpsc.supabase.co/storage/v1/object/public/apartment-photos/';
-for (let i = 1; i <= 3; i++) await db.query('insert into storage.objects(id,bucket_id,name,owner_id) values($1,$2,$3,$4)',
-  [`20000000-0000-4000-8000-00000000000${i}`, 'apartment-photos', `${listingId}/${i}.jpg`, ids[0]]);
 const listingDraft = JSON.stringify({ title: 'Test home', address: 'Test address', latitude: 31.2, longitude: 34.8,
   bedrooms: 2, billsIncluded: false, availableFrom: '2026-12-01', description: '',
   photos: [1, 2, 3].map(i => `${basePhotoUrl}${listingId}/${i}.jpg`), photoDigests: ['one', 'two', 'three'], roomPrices: [2000, 2600] });
+const receiptDraftId = '10000000-0000-4000-8000-000000000090';
+await db.query('insert into public.listing_drafts(id,owner_id,publication_request_id) values($1,$2,$3)', [receiptDraftId, ids[0], listingId]);
+await as(0);
+await rpc('select public.begin_listing_draft_publication($1,0,$2::jsonb)', [receiptDraftId, listingDraft]);
+await db.exec('reset role');
+for (let i = 1; i <= 3; i++) await db.query('insert into storage.objects(id,bucket_id,name,owner_id) values($1,$2,$3,$4)',
+  [`20000000-0000-4000-8000-00000000000${i}`, 'apartment-photos', `${listingId}/${i}.jpg`, ids[0]]);
 await as(0);
 assert.equal((await rpc('select public.publish_apartment_once($1,$2::jsonb) id', [listingId, listingDraft])).id, listingId);
 assert.equal((await rpc('select public.publish_apartment_once($1,$2::jsonb) id', [listingId, listingDraft])).id, listingId);
 assert.equal((await rpc('select public.cancel_listing_publication($1) result', [listingId])).result, 'published');
+await db.exec('reset role');
+await db.exec(await read('supabase/tests/plan_listing_draft_revision.sql'));
+console.log('PASS: draft revision, import retry, publication freeze and verified completion.');
+await as(0);
 const position = await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]);
 const metres = Math.hypot((position.public_lat - position.lat) * 111320,
   (position.public_lng - position.lng) * 111320 * Math.cos(position.lat * Math.PI / 180));
