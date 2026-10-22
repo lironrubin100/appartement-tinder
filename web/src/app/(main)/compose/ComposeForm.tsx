@@ -20,6 +20,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
   const [bedrooms, setBedrooms] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const busy = useRef(false);
   const requestKey = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -188,6 +189,25 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
     finally { busy.current = false; setSubmitting(false); }
   }
 
+  async function saveDraftAndClose() {
+    if (busy.current || !formRef.current) return;
+    const draft = snapshot(formRef.current);
+    busy.current = true;
+    setSavingDraft(true);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    try {
+      await saveListingDraft(accountId, draft);
+      setStorageError(false);
+      finished.current = true;
+      if (onClose) onClose(); else history.back();
+    } catch {
+      setStorageError(true);
+    } finally {
+      busy.current = false;
+      setSavingDraft(false);
+    }
+  }
+
   if (!draftLoaded) return <p role="status" className="p-6">{t('טוענים טיוטה…', 'Loading draft…')}</p>;
 
   return (
@@ -197,7 +217,7 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
         <p className="mb-8 text-sm text-muted-text">{t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
 
         <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => setRevision((value) => value + 1)} noValidate>
-          <fieldset disabled={submitting} className="space-y-6">
+          <fieldset disabled={submitting || savingDraft} className="space-y-6">
           <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} defaultValue={initialDraft?.title ?? ''} required maxLength={100} />
           <div className="grid gap-6 sm:grid-cols-2">
             <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type="number" min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
@@ -268,18 +288,15 @@ export default function ComposeForm({ accountId, hasPrivatePhone, requiresPrivat
 
           {message && <p role="alert" className="rounded-shutaf-md border border-error/30 bg-error/5 p-3 text-sm text-error">{message}</p>}
           {storageError && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לשמור טיוטה במכשיר. בדקו את הגדרות הדפדפן ונסו שוב.', 'Could not save the draft on this device. Check browser storage settings and retry.')}</p>}
+          <p className="text-sm text-muted-text">{t('הטיוטה נשמרת במכשיר הזה בלבד.', 'Your draft is saved on this device only.')}</p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>
-            <Button type="button" variant="ghost" className="flex-1" onClick={async () => {
-              if (saveTimer.current) clearTimeout(saveTimer.current);
-              if (formRef.current) {
-                try { await saveListingDraft(accountId, snapshot(formRef.current)); }
-                catch { setStorageError(true); return; }
-              }
-              if (onClose) onClose(); else history.back();
-            }}>{t("סגירה", "Close")}</Button>
-            <Button type="button" variant="ghost" className="flex-1" onClick={discardDraft}>{t("מחיקת טיוטה", "Discard draft")}</Button>
+            <Button type="button" variant="ghost" className="flex-1" onClick={saveDraftAndClose}>{savingDraft ? t('שומרים טיוטה…', 'Saving draft…') : t('שמירת טיוטה וסגירה', 'Save draft and close')}</Button>
           </div>
+          <details className="text-sm text-muted-text">
+            <summary className="cursor-pointer">{t('אפשרויות נוספות לטיוטה', 'More draft options')}</summary>
+            <Button type="button" variant="ghost" className="mt-2" onClick={discardDraft}>{t('מחיקת טיוטה', 'Discard draft')}</Button>
+          </details>
           </fieldset>
           {submitting && <p role="status" className="text-sm text-body-text">{t("מכינים את התמונות ומפרסמים את המודעה…", "Preparing photos and publishing…")}</p>}
         </form>
