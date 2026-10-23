@@ -1465,6 +1465,7 @@ export type Database = {
     };
     Functions: {
       update_owned_listing: { Args: { p_listing_id: string; p_expected_revision: number; p_request_key: string; p_model: Json }; Returns: Json };
+      open_listing_edit_draft: { Args: { p_listing_id: string; p_request_key: string }; Returns: Database["public"]["Tables"]["listing_drafts"]["Row"] };
       get_owned_listing_editor: { Args: { p_listing_id: string }; Returns: Json };
       cancel_listing_draft_publication: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
       verify_listing_draft_publication_snapshot: { Args: { p_draft_id: string; p_expected_revision: number; p_payload: Json }; Returns: boolean };

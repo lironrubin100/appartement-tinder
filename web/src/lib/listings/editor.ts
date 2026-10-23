@@ -2,7 +2,7 @@ import 'server-only';
 
 import { randomUUID } from 'node:crypto';
 import { createServerClient } from '@/utils/supabase/server';
-import { isId, isRevision, type DraftResult } from './draft-service-contract';
+import { decodeDraft, isId, isRevision, type DraftDocument, type DraftErrorCode, type DraftResult } from './draft-service-contract';
 import { parsePhotoReferences } from './draft-media-contract';
 import type { DraftPhotoReference } from './draft-types';
 
@@ -68,5 +68,39 @@ export async function getOwnedListingEditModel(id: string, expectedAccountId?: s
     if (result.data === null) return failure('NOT_FOUND');
     const model = decodeOwnedListingEditor(result.data, actor, id);
     return model ? { ok: true, data: model } : failure('STATE_UNAVAILABLE');
+  } catch { return failure('INTERNAL', true); }
+}
+
+
+export type OpenListingEditDraftInput = Readonly<{ listingId: string; requestKey: string; expectedAccountId?: string }>;
+
+/** The database uses the owner reader and existing create/media services in one
+ * transaction. Do not split initialization into client read/create/photo calls. */
+export async function openOwnedListingEditDraft(input: OpenListingEditDraftInput): Promise<DraftResult<DraftDocument>> {
+  const failure = (code: DraftErrorCode, retryable = false): DraftResult<DraftDocument> =>
+    ({ ok: false, error: { code, retryable, ...(code === 'INTERNAL' ? { correlationId: randomUUID() } : {}) } });
+  try {
+    const client = await createServerClient({ noStore: true });
+    const auth = await client.auth.getUser(), actor = auth.data.user?.id;
+    if (auth.error || !actor) return failure('AUTH_REQUIRED');
+    if (!object(input) || Object.keys(input).some(key => !['listingId', 'requestKey', 'expectedAccountId'].includes(key))
+      || !isId(input.listingId) || !isId(input.requestKey)) return failure('VALIDATION_FAILED');
+    if (input.expectedAccountId !== undefined && (!isId(input.expectedAccountId) || input.expectedAccountId !== actor)) return failure('AUTH_REQUIRED');
+    const listingId = input.listingId.toLowerCase();
+    const result = await client.rpc('open_listing_edit_draft', { p_listing_id: listingId, p_request_key: input.requestKey.toLowerCase() });
+    const current = await client.auth.getUser();
+    if (current.error || current.data.user?.id !== actor) return failure('AUTH_REQUIRED');
+    if (result.error) {
+      if (result.error.message === 'AUTH_REQUIRED') return failure('AUTH_REQUIRED');
+      if (result.error.message === 'SOURCE_UNAVAILABLE') return failure('NOT_FOUND');
+      if (result.error.message === 'IMPORT_CONFLICT') return failure('VERSION_CONFLICT');
+      if (result.error.message === 'INVALID_INPUT') return failure('VALIDATION_FAILED');
+      if (['DRAFT_UNAVAILABLE', 'DRAFT_CLOSED', 'PHOTO_UNAVAILABLE', 'INVALID_PHOTOS'].includes(result.error.message)) return failure('STATE_UNAVAILABLE');
+      return failure('INTERNAL', true);
+    }
+    if (!result.data) return failure('STATE_UNAVAILABLE');
+    const draft = decodeDraft(result.data, actor);
+    return draft.kind === 'edit' && draft.sourceListingId === listingId && draft.state === 'open'
+      ? { ok: true, data: draft } : failure('STATE_UNAVAILABLE');
   } catch { return failure('INTERNAL', true); }
 }

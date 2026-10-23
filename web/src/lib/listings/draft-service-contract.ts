@@ -26,9 +26,23 @@ export function parseDraftFields(value: unknown): ListingDraftFields | null {
     if (Object.hasOwn(lengths, key)) {
       if (typeof item !== 'string' || item.length > lengths[key]) return null;
       result[key] = item;
-    } else if (key === 'billsIncluded') {
+    } else if (key === 'billsIncluded' || key === 'isSublet') {
       if (typeof item !== 'boolean') return null;
       result[key] = item;
+    } else if (key === 'rooms') {
+      if (!Array.isArray(item) || item.length > 20) return null;
+      const seen = new Set<string>();
+      const rooms: Json[] = [];
+      for (const room of item) {
+        if (!object(room) || Object.keys(room).length !== 5 || !isId(room.id)
+          || seen.has(room.id.toLowerCase()) || room.label !== null && (typeof room.label !== 'string' || room.label.length > 80)
+          || typeof room.monthlyPrice !== 'string' || room.monthlyPrice.length > 32
+          || typeof room.availableFrom !== 'string' || room.availableFrom.length > 32 || typeof room.isAvailable !== 'boolean') return null;
+        seen.add(room.id.toLowerCase());
+        rooms.push({ id: room.id.toLowerCase(), label: room.label, monthlyPrice: room.monthlyPrice,
+          availableFrom: room.availableFrom, isAvailable: room.isAvailable });
+      }
+      result[key] = rooms;
     } else if (key === 'roomPrices') {
       if (!Array.isArray(item) || item.length > 20 || item.some(price => typeof price !== 'string' || price.length > 32)) return null;
       result[key] = [...item];

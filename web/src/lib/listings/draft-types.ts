@@ -15,6 +15,9 @@ export type ListingDraftFields = Readonly<{
   bedrooms?: string;
   availableFrom?: string;
   billsIncluded?: boolean;
+  isSublet?: boolean;
+  // Edit drafts retain room identity and occupancy; incomplete prices/dates are private input.
+  rooms?: readonly Readonly<{ id: string; label: string | null; monthlyPrice: string; availableFrom: string; isAvailable: boolean }>[];
   description?: string;
   roomPrices?: readonly string[];
   address?: Readonly<{

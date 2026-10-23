@@ -2,6 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { createServerClient } from '@/utils/supabase/server';
+import { openOwnedListingEditDraft, type OpenListingEditDraftInput } from './editor';
 import type { Json } from '@/types/database';
 import { decodeDraft, draftColumns, draftQueryHash, isId, isRevision, parseDraftFields, readDraftCursor, signDraftCursor,
   type CreateDraftInput, type DraftDocument, type DraftErrorCode, type DraftListInput, type DraftPage, type DraftResult } from './draft-service-contract';
@@ -94,4 +95,10 @@ export async function listListingCloudDrafts(input: DraftListInput = {}): Promis
     const nextCursor = hasMore && last ? signDraftCursor({ updatedAt: last.updatedAt, id: last.id }, user.id, queryHash, key) : null;
     return { ok: true, data: { items, next_cursor: nextCursor, has_more: hasMore, projection_version: 1 } };
   } catch { return failure('INTERNAL', true); }
+}
+
+
+/** Owner-only initialization; callers never supply a source revision or model. */
+export async function openListingEditCloudDraft(input: OpenListingEditDraftInput): Promise<DraftResult<DraftDocument>> {
+  return openOwnedListingEditDraft(input);
 }

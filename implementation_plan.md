@@ -216,8 +216,8 @@
   - **הוראות טכניות ברורות:** RPC בעלים בודק expected_revision ומאמת את המודל הסופי; update של facts/rooms/photo refs יחד ומעלה revision פעם אחת. מיקום מפורסם אינו משתנה בעריכה רגילה. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** שינוי מחיר/תאריך נשמר; stale revision מקבל conflict; rollback משאיר מודל ותמונות ישנים.
 
-- [ ] **משימה 4.15: יצירת טיוטת עריכה ממודעה**
-  - **קבצים לעריכה/יצירה:** `web/src/lib/listings/editor.ts`, `web/src/lib/listings/draft-actions.ts`.
+- [x] **משימה 4.15: יצירת טיוטת עריכה ממודעה**
+  - **קבצים לעריכה/יצירה:** `web/src/lib/listings/editor.ts`, `web/src/lib/listings/draft-actions.ts`, `supabase/migrations/20261023202753_open_listing_edit_draft.sql`, `supabase/tests/plan_listing_edit_draft.sql`.
   - **הוראות טכניות ברורות:** השתמש ב־4.1 וב־2.18 ליצור/להמשיך טיוטת edit אחת למודעה, עם sourceRevision ו־published refs. כל העריכה פרטית; אין שינוי כתובת מפורסמת או בעלים.
   - **קריטריון קבלה:** יצירה אינה משנה מודעה ציבורית; פתיחה חוזרת ממשיכה אותה טיוטה.
 
