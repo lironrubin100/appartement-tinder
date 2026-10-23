@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,14 +12,50 @@ import { listingError, localePrefix, type Locale } from '@/lib/listings/text';
 import AddressField from '@/components/map/AddressField';
 import { loadListingDraft, removeListingDraft, saveListingDraft, type SavedAddress, type SavedListingDraft } from '@/lib/listings/draft-store';
 
+import type { DraftDocument, DraftResult } from '@/lib/listings/draft-service-contract';
+import type { ListingDraftFields } from '@/lib/listings/draft-types';
+import { saveListingCloudDraft, loadListingCloudDraft } from '@/lib/listings/draft-actions';
+import { createDraftSaveQueue, type DraftSaveState } from '@/lib/listings/draft-save-queue';
+import { createClient } from '@/utils/supabase/client';
+import { SavedDraftPhotos } from '@/components/listings/SavedDraftPhotos';
+
+function draftInput(draft: DraftDocument): SavedListingDraft {
+  const fields = draft.fields, address = fields.address;
+  return { version: 1, title: fields.title ?? '', bedrooms: fields.bedrooms ?? '', availableFrom: fields.availableFrom ?? '',
+    billsIncluded: fields.billsIncluded ?? false, description: fields.description ?? '', roomPrices: [...(fields.roomPrices ?? [])], photos: [], requestKey: null,
+    address: address ? { address: address.address ?? '', latitude: address.latitude ?? '', longitude: address.longitude ?? '', city: address.city ?? '', manual: address.manual ?? false, confirmed: address.confirmed ?? false, selected: null } : null };
+}
+function addressKey(address: SavedAddress | null): string {
+  return JSON.stringify([address?.address ?? '', address?.latitude ?? '', address?.longitude ?? '', address?.city ?? '', address?.manual ?? false, address?.confirmed ?? false]);
+}
+function draftFields(input: SavedListingDraft): ListingDraftFields {
+  const { title, bedrooms, availableFrom, billsIncluded, description, roomPrices, address } = input;
+  return { title, bedrooms, availableFrom, billsIncluded, description, roomPrices,
+    ...(address ? { address: { address: address.address, latitude: address.latitude, longitude: address.longitude, city: address.city, manual: address.manual, confirmed: address.confirmed } } : {}) };
+}
+
+function formatFields(fields: ListingDraftFields, locale: Locale): string {
+  const en = locale === 'en';
+  return [
+    [en ? 'Title' : 'כותרת', fields.title], [en ? 'Bedrooms' : 'חדרים בדירה', fields.bedrooms],
+    [en ? 'Available from' : 'תאריך כניסה', fields.availableFrom], [en ? 'Bills included' : 'חשבונות כלולים', fields.billsIncluded === undefined ? '' : fields.billsIncluded ? (en ? 'Yes' : 'כן') : (en ? 'No' : 'לא')],
+    [en ? 'Room prices' : 'מחירי חדרים', fields.roomPrices?.join(', ')], [en ? 'Description' : 'תיאור', fields.description],
+    [en ? 'Address' : 'כתובת', fields.address?.address], [en ? 'City' : 'עיר', fields.address?.city],
+    [en ? 'Latitude' : 'קו רוחב', fields.address?.latitude], [en ? 'Longitude' : 'קו אורך', fields.address?.longitude],
+    [en ? 'Location confirmed' : 'המיקום אושר', fields.address?.confirmed ? (en ? 'Yes' : 'כן') : (en ? 'No' : 'לא')],
+  ].map(([label, value]) => label + ': ' + (value ?? '')).join('\n');
+}
 export type ComposeFormHandle = { saveAndClose: () => Promise<void> };
 
-export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished }: { ref?: Ref<ComposeFormHandle>; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void }) {
+export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void }) {
+  // Keep the selected editing session anchored through server-action/RSC refreshes.
+  // Loading another draft uses the caller's id key; reload is an explicit choice.
+  const [cloudDraft] = useState(receivedCloudDraft);
   const t = (he: string, en: string) => locale === 'en' ? en : he;
   const router = useRouter();
   const [photos, setPhotos] = useState<File[]>([]);
-  const [roomPrices, setRoomPrices] = useState<string[]>(['']);
-  const [bedrooms, setBedrooms] = useState('');
+  const [roomPrices, setRoomPrices] = useState<string[]>(cloudDraft?.fields.roomPrices?.length ? [...cloudDraft.fields.roomPrices] : ['']);
+  const [bedrooms, setBedrooms] = useState(cloudDraft?.fields.bedrooms ?? '');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
@@ -28,16 +64,53 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
   const formRef = useRef<HTMLFormElement>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finished = useRef(false);
-  const [draftLoaded, setDraftLoaded] = useState(false);
-  const [initialDraft, setInitialDraft] = useState<SavedListingDraft | null>(null);
-  const [addressDraft, setAddressDraft] = useState<SavedAddress | null>(null);
+  const [draftLoaded, setDraftLoaded] = useState(Boolean(cloudDraft));
+  const [initialDraft, setInitialDraft] = useState<SavedListingDraft | null>(cloudDraft ? draftInput(cloudDraft) : null);
+  const [addressDraft, setAddressDraft] = useState<SavedAddress | null>(cloudDraft ? draftInput(cloudDraft).address : null);
   const [revision, setRevision] = useState(0);
   const [storageError, setStorageError] = useState(false);
+  const [cloudState, setCloudState] = useState<DraftSaveState>({ phase: 'saved' });
+  const [localComparison, setLocalComparison] = useState<ListingDraftFields | null>(null);
+  const [comparison, setComparison] = useState<DraftDocument | null>(null);
+  const cloudQueue = useRef<ReturnType<typeof createDraftSaveQueue> | null>(null);
+  const pendingInput = useRef(false);
+  const lastAddress = useRef(addressKey(cloudDraft ? draftInput(cloudDraft).address : null));
+  const onAddressChange = useCallback((address: SavedAddress) => {
+    const encoded = addressKey(address);
+    if (encoded !== lastAddress.current) { lastAddress.current = encoded; pendingInput.current = true; setRevision(value => value + 1); }
+    setAddressDraft(address);
+  }, []);
+  useEffect(() => {
+    if (!cloudDraft) return;
+    let active = true, comparisonRequested = false;
+    const queue = createDraftSaveQueue(cloudDraft, async (id, expectedRevision, fields): Promise<DraftResult<DraftDocument>> => {
+      const client = createClient();
+      if ((await client.auth.getUser()).data.user?.id !== accountId) return { ok: false, error: { code: 'AUTH_REQUIRED', retryable: false } };
+      const result = await saveListingCloudDraft(id, expectedRevision, fields);
+      return (await client.auth.getUser()).data.user?.id === accountId ? result : { ok: false, error: { code: 'AUTH_REQUIRED', retryable: false } };
+    }, state => {
+      if (!active) return;
+      setCloudState(state.phase === 'saved' && pendingInput.current ? { phase: 'dirty' } : state);
+      if (state.phase === 'conflict' && !comparisonRequested) {
+        comparisonRequested = true;
+        void loadListingCloudDraft(cloudDraft.id).then(result => { if (active && result.ok) setComparison(result.data); }).catch(() => {});
+      }
+    });
+    cloudQueue.current = queue;
+    return () => { active = false; queue.stop(); if (cloudQueue.current === queue) cloudQueue.current = null; };
+  }, [cloudDraft, accountId]);
+  useEffect(() => {
+    if (!cloudDraft || cloudState.phase === 'saved') return;
+    const warn = (event: BeforeUnloadEvent) => { if (finished.current) return; event.preventDefault(); event.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [cloudDraft, cloudState.phase]);
   const photoUrls = useMemo(() => photos.map((photo) => URL.createObjectURL(photo)), [photos]);
 
   useEffect(() => () => photoUrls.forEach(URL.revokeObjectURL), [photoUrls]);
 
   useEffect(() => {
+    if (cloudDraft) return;
     let current = true;
     loadListingDraft(accountId).then((draft) => {
       if (!current) return;
@@ -49,7 +122,7 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
       setDraftLoaded(true);
     }).catch(() => { if (current) { setStorageError(true); setDraftLoaded(true); } });
     return () => { current = false; };
-  }, [accountId]);
+  }, [accountId, cloudDraft]);
 
   function snapshot(form: HTMLFormElement): SavedListingDraft {
     const data = new FormData(form);
@@ -61,6 +134,15 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
   useEffect(() => {
     if (!draftLoaded || !formRef.current || busy.current || finished.current) return;
     const draft = snapshot(formRef.current);
+    if (cloudDraft) {
+      if (revision === 0) return;
+      pendingInput.current = false;
+      setLocalComparison(draftFields(draft));
+      cloudQueue.current?.offer(draftFields(draft));
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => { void cloudQueue.current?.flush(); }, 400);
+      return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+    }
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       void saveListingDraft(accountId, draft).then(() => setStorageError(false)).catch(() => setStorageError(true));
@@ -68,7 +150,7 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
     // The snapshot is taken after the corresponding form and state updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountId, draftLoaded, revision, bedrooms, roomPrices, photos, addressDraft, submitting]);
+  }, [accountId, cloudDraft, draftLoaded, revision, bedrooms, roomPrices, photos, addressDraft, submitting]);
 
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
@@ -98,7 +180,7 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy.current) return;
+    if (busy.current || cloudDraft) return;
     if (requiresPrivatePhone && !hasPrivatePhone) {
       setMessage(t("לפני הפרסום יש להוסיף מספר טלפון פרטי בהגדרות הפרופיל.", "Add a private phone number to your profile before publishing."));
       return;
@@ -198,6 +280,17 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
     setSavingDraft(true);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     try {
+      if (cloudDraft) {
+        pendingInput.current = false;
+        setLocalComparison(draftFields(draft));
+        cloudQueue.current?.offer(draftFields(draft));
+        const saved = await cloudQueue.current?.flush();
+        if (!saved) return;
+        finished.current = true;
+        if (onClose) { onClose(); router.refresh(); }
+        else window.location.assign(localePrefix(locale) + '/my-listings');
+        return;
+      }
       await saveListingDraft(accountId, draft);
       setStorageError(false);
       finished.current = true;
@@ -217,17 +310,17 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
   return (
     <div className="min-h-[calc(100vh-80px)] w-full bg-page-bg p-4 md:p-8">
       <div className="mx-auto max-w-2xl rounded-shutaf-lg border border-card-border bg-white p-6 shadow-sm md:p-8">
-        <h1 className="mb-2 text-3xl font-bold text-ink">{t("פרסום דירה חדשה", "Publish an apartment")}</h1>
+        <h1 className="mb-2 text-3xl font-bold text-ink">{cloudDraft ? t("עריכת טיוטה", "Edit draft") : t("פרסום דירה חדשה", "Publish an apartment")}</h1>
         <p className="mb-8 text-sm text-muted-text">{t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
 
-        <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => setRevision((value) => value + 1)} noValidate>
+        <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => { pendingInput.current = true; setRevision(value => value + 1); if (cloudDraft) setCloudState(current => current.phase === 'error' || current.phase === 'conflict' ? current : { phase: 'dirty' }); }} noValidate>
           <fieldset disabled={submitting || savingDraft} className="space-y-6">
           <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} defaultValue={initialDraft?.title ?? ''} required maxLength={100} />
           <div className="grid gap-6 sm:grid-cols-2">
-            <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type="number" min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
-            <Input name="availableFrom" label={t("תאריך כניסה", "Available from")} type="date" defaultValue={initialDraft?.availableFrom ?? ''} required />
+            <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type={cloudDraft ? "text" : "number"} inputMode="numeric" maxLength={32} min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
+            <Input name="availableFrom" label={t("תאריך כניסה", "Available from")} type={cloudDraft ? "text" : "date"} placeholder={cloudDraft ? "YYYY-MM-DD" : undefined} maxLength={32} defaultValue={initialDraft?.availableFrom ?? ''} required />
           </div>
-          <AddressField locale={locale} initialDraft={initialDraft?.address} onDraftChange={setAddressDraft} />
+          <fieldset disabled={cloudDraft?.kind === 'edit'} inert={cloudDraft?.kind === 'edit'}><AddressField locale={locale} initialDraft={initialDraft?.address} onDraftChange={onAddressChange} /></fieldset>
 
           <fieldset className="space-y-3 rounded-shutaf-md border border-card-border p-4">
             <legend className="text-sm font-medium text-ink">{t("חדרים פנויים ומחיר", "Available rooms and prices")}</legend>
@@ -240,7 +333,7 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
                       name="roomPrice"
                       label={`${t("מחיר חודשי לחדר פנוי", "Monthly price for available room")} ${index + 1} (₪)`}
                       placeholder="1800"
-                      type="number"
+                      type={cloudDraft ? "text" : "number"} inputMode="numeric" maxLength={32}
                       min="1"
                       step="1"
                       required
@@ -261,18 +354,18 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
             <input name="billsIncluded" type="checkbox" defaultChecked={initialDraft?.billsIncluded ?? false} className="mt-0.5 size-4 accent-orange" />
             <span><strong className="font-semibold">{t("החשבונות כלולים במחיר", "Bills included")}</strong><span className="mt-1 block text-muted-text">{t("סמנו רק אם המחיר של כל חדר כולל חשבונות שוטפים.", "Select only if every room price includes bills.")}</span></span>
           </label>
-          <p className="rounded-shutaf-md bg-neutral-bg-soft p-3 text-sm text-muted-text">
+          {!cloudDraft && <p className="rounded-shutaf-md bg-neutral-bg-soft p-3 text-sm text-muted-text">
             {!requiresPrivatePhone || hasPrivatePhone
               ? t("מספר הטלפון בחשבון נשאר פרטי. כל הפניות מתבצעות בשותף.", "Your account phone stays private. All inquiries happen in Shutaf.")
               : <>{t("לפני הפרסום יש להוסיף מספר טלפון פרטי.", "Add a private phone number before publishing.")} <Link href={`${localePrefix(locale)}/profile/edit`} className="text-teal underline">{t("עריכת פרופיל", "Edit profile")}</Link></>}
-          </p>
+          </p>}
 
           <div>
             <label htmlFor="description" className="mb-2 block text-sm font-medium text-ink">{t("תיאור הדירה", "Apartment description")}</label>
             <textarea id="description" name="description" defaultValue={initialDraft?.description ?? ''} maxLength={2000} rows={4} placeholder={t("ספרו על הדירה, האזור ומה חשוב לדעת...", "Tell renters about the apartment and the area...")} className="w-full rounded-shutaf-md border border-card-border bg-white px-4 py-2.5 text-ink placeholder:text-muted-text focus:border-transparent focus:outline-none focus:ring-2 focus:ring-orange" />
           </div>
 
-          <fieldset>
+          {cloudDraft ? <SavedDraftPhotos draft={cloudDraft} locale={locale} /> : <fieldset>
             <legend className="mb-1 text-sm font-medium text-ink">{t("תמונות הדירה", "Apartment photos")}</legend>
             <p className="mb-3 text-sm text-muted-text">{t("צריך", "Add")} {LISTING_PHOTO_MIN}–{LISTING_PHOTO_MAX} {t("תמונות. אפשר להסיר תמונה לפני הפרסום.", "photos. You can remove photos before publishing.")}</p>
             <label htmlFor="photos" className="flex cursor-pointer flex-col items-center rounded-shutaf-md border-2 border-dashed border-card-border p-6 text-center hover:bg-neutral-bg-soft">
@@ -288,19 +381,35 @@ export default function ComposeForm({ ref, accountId, hasPrivatePhone, requiresP
               </figure>)}
             </div>}
             <p className="mt-2 text-sm text-muted-text" aria-live="polite">{photos.length} / {LISTING_PHOTO_MAX} {t("תמונות נבחרו", "photos selected")}</p>
-          </fieldset>
+          </fieldset>}
 
           {message && <p role="alert" className="rounded-shutaf-md border border-error/30 bg-error/5 p-3 text-sm text-error">{message}</p>}
           {storageError && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לשמור טיוטה במכשיר. בדקו את הגדרות הדפדפן ונסו שוב.', 'Could not save the draft on this device. Check browser storage settings and retry.')}</p>}
-          <p className="text-sm text-muted-text">{t('טיוטות נשמרות במכשיר הזה בלבד. לפני היציאה בחרו בשמירת טיוטה וסגירה.', 'Drafts are stored on this device only. Use Save draft and close before leaving.')}</p>
+          {!cloudDraft && <p className="text-sm text-muted-text">{t('טיוטות נשמרות במכשיר הזה בלבד. לפני היציאה בחרו בשמירת טיוטה וסגירה.', 'Drafts are stored on this device only. Use Save draft and close before leaving.')}</p>}
+          {cloudDraft && <div className="space-y-3">
+            <p role="status" aria-live="polite" className="text-sm text-muted-text">{cloudState.phase === 'saved' ? t('נשמר בחשבון', 'Saved to your account')
+              : cloudState.phase === 'saving' ? t('שומרים…', 'Saving…') : cloudState.phase === 'dirty' ? t('יש שינויים שלא נשמרו', 'Unsaved changes')
+              : cloudState.phase === 'conflict' ? t('הטיוטה השתנתה במקום אחר. השינויים שלך נשארו כאן.', 'This draft changed elsewhere. Your edits are still here.')
+              : t('לא הצלחנו לשמור. השינויים שלך נשארו כאן.', 'Could not save. Your edits are still here.')}</p>
+            {cloudState.phase === 'error' && !['NOT_FOUND', 'STATE_UNAVAILABLE'].includes(cloudState.error ?? '') && <Button type="button" variant="ghost" onClick={() => { void cloudQueue.current?.retry(); }}>{t('ניסיון שמירה נוסף', 'Retry save')}</Button>}
+            {cloudState.phase === 'error' && ['NOT_FOUND', 'STATE_UNAVAILABLE'].includes(cloudState.error ?? '') && <p role="alert" className="text-sm text-error">{t('הטיוטה אינה זמינה לשמירה. השינויים שלך נשארו במסך הזה.', 'This draft is unavailable for saving. Your edits remain on this screen.')}</p>}
+            {cloudState.phase === 'conflict' && <div role="alert" className="rounded-xl border border-card-border p-4">
+              <p className="font-semibold">{t('השוואת שינויים', 'Compare changes')}</p>
+              <label className="mt-3 block text-sm">{t('השינויים שלך', 'Your edits')}<textarea readOnly rows={6} className="mt-1 w-full rounded border border-card-border p-2" value={localComparison ? formatFields(localComparison, locale) : ''} /></label>
+              {!comparison && <Button type="button" variant="ghost" onClick={() => { void loadListingCloudDraft(cloudDraft.id).then(result => { if (result.ok) setComparison(result.data); }).catch(() => {}); }}>{t('טעינת גרסה להשוואה', 'Load version to compare')}</Button>}
+              {comparison && <label className="mt-3 block text-sm">{t('הגרסה השמורה בחשבון', 'Saved version')}<textarea readOnly rows={6} className="mt-1 w-full rounded border border-card-border p-2" value={formatFields(comparison.fields, locale)} /></label>}
+              <Button type="button" variant="ghost" onClick={() => { if (window.confirm(t('לטעון את הגרסה השמורה ולהחליף את השינויים המקומיים?', 'Load the saved version and replace your local edits?'))) { finished.current = true; window.location.reload(); } }}>{t('טעינת הגרסה השמורה', 'Load saved version')}</Button>
+            </div>}
+            <p className="text-sm text-muted-text">{t('השינויים בטיוטה פרטיים. פרסום מטיוטות שמורות עדיין אינו זמין.', 'Draft changes stay private. Publishing saved drafts is not available yet.')}</p>
+          </div>}
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>
+            {!cloudDraft && <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>}
             <Button type="button" variant="ghost" className="flex-1" onClick={saveDraftAndClose}>{savingDraft ? t('שומרים טיוטה…', 'Saving draft…') : t('שמירת טיוטה וסגירה', 'Save draft and close')}</Button>
           </div>
-          <details className="text-sm text-muted-text">
+          {!cloudDraft && <details className="text-sm text-muted-text">
             <summary className="cursor-pointer">{t('אפשרויות נוספות לטיוטה', 'More draft options')}</summary>
             <Button type="button" variant="ghost" className="mt-2" onClick={discardDraft}>{t('מחיקת טיוטה', 'Discard draft')}</Button>
-          </details>
+          </details>}
           </fieldset>
           {savingDraft && <p role="status" className="text-sm text-body-text">{t('שומרים טיוטה…', 'Saving draft…')}</p>}
           {submitting && <p role="status" className="text-sm text-body-text">{t("מכינים את התמונות ומפרסמים את המודעה…", "Preparing photos and publishing…")}</p>}

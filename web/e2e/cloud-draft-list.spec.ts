@@ -19,7 +19,7 @@ async function signIn(context: BrowserContext, baseURL: string, name: string) {
   return api;
 }
 const draftIds = async (api: Awaited<ReturnType<typeof signIn>>) => {
-  const { data, error } = await api.from('listing_drafts').select('id, fields, photos').eq('state', 'open').order('updated_at', { ascending: false }).order('id', { ascending: false }).limit(20);
+  const { data, error } = await api.from('listing_drafts').select('id, fields, photos, publication_started_at').eq('state', 'open').order('updated_at', { ascending: false }).order('id', { ascending: false }).limit(20);
   if (error) throw Error('Ordinary draft read failed');
   return data!;
 };
@@ -42,7 +42,8 @@ for (const locale of ['he', 'en']) for (const width of [390, 1280]) {
       expect(publicIds.sort()).toEqual(published.data!.map(row => row.id).sort());
       expect(publicIds.some(id => rows.some(row => row.id === id))).toBe(false);
       await expect(section.getByText(en ? 'Listing edit' : 'עריכת מודעה', { exact: true })).toBeVisible();
-      await expect(section.getByRole('link')).toHaveCount(0); // No unimplemented editor/delete action.
+      await expect(section.getByRole('link')).toHaveCount(rows.filter(row => !row.publication_started_at).length);
+      for (const row of rows.filter(row => !row.publication_started_at)) await expect(section.locator('[data-draft-id="' + row.id + '"] a')).toHaveAttribute('href', prefix + '/compose?draft=' + row.id);
       await expect(page.locator('html')).toHaveAttribute('dir', en ? 'ltr' : 'rtl');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       const html = await response!.text();

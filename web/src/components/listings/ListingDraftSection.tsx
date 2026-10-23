@@ -27,7 +27,7 @@ export async function ListingDraftSection({ result, locale, paged }: {
   return <>
     <ListingDraftList locale={locale} items={drafts.data.items.map(draft => ({
       id: draft.id, title: draft.fields.title, updatedAt: draft.updatedAt, kind: draft.kind,
-      // Continue is enabled after selected-draft editor loading (2.25).
+      continueHref: !draft.publicationStartedAt ? localePrefix(locale) + '/compose?draft=' + draft.id : undefined,
     }))} />
     {(paged || drafts.data.next_cursor) && <nav aria-label={en ? 'Draft pages' : 'עמודי טיוטות'} className="mt-4 flex flex-wrap gap-4">
       {paged && <a href={first} className="rounded-xl border border-card-border px-4 py-3 font-semibold text-teal">

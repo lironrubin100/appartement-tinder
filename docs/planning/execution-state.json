@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks 4.9–4.14 and 2.16–2.24 verified within recorded scope. Cloud drafts appear separately on My Listings with minimal private projection, signed bounded paging, independent loading/error/empty/retry and account-change clearing. HE/EN phone/desktop and ordinary-client isolation passed. Next physical task 2.25 selected draft editor loading; Continue remains absent until then. Full milestone incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.26 verified within owning handoff scope. Explicit selected-draft editor loading, distinct new intent, read-only private media and revision-aware ordered autosave now have real browser HTTP acceptance, second-device/conflict/failure/account-switch coverage. Next2.27 cloud photo editing. Cloud publication remains later2.31; full milestone incomplete."
     }
   },
   "micro_task_dispatch": {

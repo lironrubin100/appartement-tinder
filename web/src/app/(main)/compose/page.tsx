@@ -1,2 +1,2 @@
-import { renderCompose } from './ComposePage';
-export default async function Page() { return renderCompose('he'); }
+import { renderCompose, type ComposeSearchParams } from './ComposePage';
+export default async function Page({ searchParams }: { searchParams: Promise<ComposeSearchParams> }) { return renderCompose('he', searchParams); }

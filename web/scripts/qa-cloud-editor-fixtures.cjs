@@ -1,0 +1,15 @@
+const fs=require('fs'),assert=require('node:assert/strict'),{randomUUID}=require('crypto'),{createClient}=require('@supabase/supabase-js');
+if(!process.argv.includes('--allow-private-fixtures'))throw Error('Explicit private fixture intent required');
+const env=Object.fromEntries(fs.readFileSync('.env.local','utf8').split(/\r?\n/).filter(l=>/^[A-Z_]+=/.test(l)).map(l=>{const i=l.indexOf('=');return[l.slice(0,i),l.slice(i+1).replace(/^['"]|['"]$/g,'')]}));
+assert.equal(new URL(env.NEXT_PUBLIC_SUPABASE_URL).hostname,'npbduvjnqnbydolmdpsc.supabase.co');
+(async()=>{
+ fs.mkdirSync('.qa/task225',{recursive:true});const path='.qa/task225/manifest.json';const manifest=fs.existsSync(path)?JSON.parse(fs.readFileSync(path,'utf8')):{target:env.NEXT_PUBLIC_SUPABASE_URL,receipts:[randomUUID(),randomUUID()],ids:[],objectId:randomUUID(),newIds:[],retained:true,purpose:'Tasks2.25/2.26 private editor HTTP acceptance'};
+ const persist=()=>fs.writeFileSync(path,JSON.stringify(manifest,null,2));persist();
+ const u=JSON.parse(fs.readFileSync('.env.qa-sl01-lister.local','utf8'))[0];const api=createClient(env.NEXT_PUBLIC_SUPABASE_URL,env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+ try{const auth=await api.auth.signInWithPassword({email:u.email,password:u.password});assert(!auth.error);manifest.ownerId=auth.data.user.id;persist();
+ for(let i=0;i<2;i++){const r=await api.rpc('create_listing_draft',{p_import_receipt_id:manifest.receipts[i],p_source_listing_id:null,p_source_revision:null,p_fields:{title:'Synthetic editor '+(i?'B':'A'),description:'Private editor fields '+i,bedrooms:String(i+2),roomPrices:[String(1800+i*200)],address:i?{city:'Synthetic B'}:{address:'Synthetic editor address',city:'Synthetic QA',manual:true,confirmed:false,latitude:'31.26',longitude:'34.80'}}});assert(!r.error,r.error?.message);manifest.ids[i]=r.data.id;persist();}
+ const row=await api.from('listing_drafts').select('revision,photos').eq('id',manifest.ids[0]).single();assert(!row.error);const objectPath=manifest.ownerId+'/'+manifest.ids[0]+'/'+manifest.objectId+'.png';manifest.objectPath=objectPath;persist();
+ if(!row.data.photos.length){const bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64');const upload=await api.storage.from('listing-draft-media').upload(objectPath,bytes,{contentType:'image/png',upsert:false,cacheControl:'0'});if(upload.error){const existing=await api.storage.from('listing-draft-media').download(objectPath);assert(!existing.error);assert(Buffer.from(await existing.data.arrayBuffer()).equals(bytes));}const associate=await api.rpc('set_listing_draft_photos',{p_draft_id:manifest.ids[0],p_expected_revision:row.data.revision,p_photos:[{kind:'draft',objectPath}]});assert(!associate.error,associate.error?.message);}
+ console.log('PASS two exact new private editor drafts and one private PNG prepared/retained; no public rows or previous demos changed');
+ }finally{await api.auth.signOut({scope:'local'});}
+})().catch(error=>{console.error(error);process.exitCode=1});

@@ -32,8 +32,8 @@ const {ListingDraftSection,loadDashboardDrafts}=load('src/components/listings/Li
   const fullDraft={id:'a',kind:'new',updatedAt:'2026-10-23T00:00:00Z',fields:{title:'Visible',address:{address:'DO NOT SERIALIZE'}},photos:[{objectPath:'PRIVATE-PATH'}],ownerId:'PRIVATE-OWNER'};
   const view=await ListingDraftSection({locale,paged:true,result:Promise.resolve({ok:true,data:{items:[fullDraft],next_cursor:'signed+cursor',has_more:true}})});
   const html=renderToStaticMarkup(view);
-  assert.match(html,/draftCursor=signed%2Bcursor/);assert.match(html,/saved-drafts/);assert.doesNotMatch(html,/DO NOT SERIALIZE|PRIVATE-PATH|PRIVATE-OWNER|compose\?draft/);
-  assert.deepEqual(Object.keys(view.props.children[0].props.items[0]).sort(),['id','kind','title','updatedAt']);
+  assert.match(html,/draftCursor=signed%2Bcursor/);assert.match(html,/saved-drafts/);assert.doesNotMatch(html,/DO NOT SERIALIZE|PRIVATE-PATH|PRIVATE-OWNER/);
+  assert.deepEqual(Object.keys(view.props.children[0].props.items[0]).sort(),['continueHref','id','kind','title','updatedAt']);
  }
  console.log('PASS HE/EN separate identities/actions, empty/no-action, escaped titles, deterministic dates, minimal private projection, errors and bounded paging');
 })().catch(error=>{console.error(error);process.exitCode=1;});
