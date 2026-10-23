@@ -9,6 +9,8 @@ function loadDraftServices(client) {
     const code = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
     const requireLocal = id => {
       if (id === 'server-only') return {};
+      if (id === '@/utils/supabase/client') return { createClient: () => client };
+      if (id === '@/utils/photos') return load(path.resolve('src/utils/photos.ts'));
       if (id === '@/utils/supabase/server') return { createServerClient: async options => {
         if (!options?.noStore) throw new Error('Draft service must request no-store reads');
         return client;
@@ -19,6 +21,6 @@ function loadDraftServices(client) {
     new Function('require', 'module', 'exports', code)(requireLocal, module, module.exports);
     return module.exports;
   }
-  return { actions: load(path.resolve('src/lib/listings/draft-actions.ts')), contract: load(path.resolve('src/lib/listings/draft-service-contract.ts')) };
+  return { actions: load(path.resolve('src/lib/listings/draft-actions.ts')), contract: load(path.resolve('src/lib/listings/draft-service-contract.ts')), media: load(path.resolve('src/lib/listings/draft-media.ts')), mediaActions: load(path.resolve('src/lib/listings/draft-media-actions.ts')), mediaContract: load(path.resolve('src/lib/listings/draft-media-contract.ts')) };
 }
 module.exports = { loadDraftServices };

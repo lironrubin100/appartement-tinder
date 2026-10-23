@@ -1452,6 +1452,10 @@ export type Database = {
       };
     };
     Functions: {
+      set_listing_draft_photos: {
+        Args: { p_draft_id: string; p_expected_revision: number; p_photos: Json };
+        Returns: Database['public']['Tables']['listing_drafts']['Row'];
+      };
       create_listing_draft: {
         Args: { p_import_receipt_id?: string | null; p_source_listing_id?: string | null; p_source_revision?: number | null; p_fields?: Json };
         Returns: Database['public']['Tables']['listing_drafts']['Row'];
