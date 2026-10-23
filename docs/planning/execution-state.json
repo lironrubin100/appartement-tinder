@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.26 verified within owning handoff scope. Explicit selected-draft editor loading, distinct new intent, read-only private media and revision-aware ordered autosave now have real browser HTTP acceptance, second-device/conflict/failure/account-switch coverage. Next2.27 cloud photo editing. Cloud publication remains later2.31; full milestone incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.27 verified within owning handoff scope. Cloud photo compression/add/remove/order share the field revision queue; real browser second-device, upload retry, lost response/conflict, account-switch and published-source retention passed. Next2.28 explicit new/continue chooser. Cloud publication remains later2.31; full milestone incomplete."
     }
   },
   "micro_task_dispatch": {

@@ -26,7 +26,7 @@ for(const locale of ['he','en'])for(const width of [390,1280])test(`${locale} ${
   await expect(page).toHaveURL(new RegExp('/compose\\?draft='+a+'$'));
   await expect(page.getByRole('textbox',{name:en?'Listing title':'כותרת המודעה',exact:true})).toHaveValue(fields.title);
   await expect(page.getByRole('textbox',{name:en?'Apartment description':'תיאור הדירה',exact:true})).toHaveValue(fields.description);
-  const image=page.getByRole('img',{name:en?'Saved photo 1':'תמונה שמורה 1',exact:true});await expect(image).toBeVisible();
+  const image=page.getByRole('img',{name:en?'Saved photo 1':'תמונה שמורה 1',exact:true});await expect(image).toBeVisible();await image.scrollIntoViewIfNeeded();
   await expect.poll(()=>image.evaluate(node=>(node as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await expect(page.getByRole('button',{name:en?'Publish listing':'פרסום המודעה',exact:true})).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

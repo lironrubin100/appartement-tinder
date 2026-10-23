@@ -17,6 +17,8 @@ import type { ListingDraftFields } from '@/lib/listings/draft-types';
 import { saveListingCloudDraft, loadListingCloudDraft } from '@/lib/listings/draft-actions';
 import { createDraftSaveQueue, type DraftSaveState } from '@/lib/listings/draft-save-queue';
 import { createClient } from '@/utils/supabase/client';
+import { CloudDraftPhotos, type CloudPhotoSelection } from '@/components/listings/CloudDraftPhotos';
+import { saveDraftMedia } from '@/lib/listings/draft-media';
 import { SavedDraftPhotos } from '@/components/listings/SavedDraftPhotos';
 
 function draftInput(draft: DraftDocument): SavedListingDraft {
@@ -69,11 +71,20 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   const [addressDraft, setAddressDraft] = useState<SavedAddress | null>(cloudDraft ? draftInput(cloudDraft).address : null);
   const [revision, setRevision] = useState(0);
   const [storageError, setStorageError] = useState(false);
+  const [acknowledgedDraft, setAcknowledgedDraft] = useState(cloudDraft);
+  const [photoState, setPhotoState] = useState({ preparing: 0, errors: 0 });
+  const mediaState = useRef<CloudPhotoSelection>({ items: cloudDraft?.photos ?? [], preparing: 0, errors: 0 });
   const [cloudState, setCloudState] = useState<DraftSaveState>({ phase: 'saved' });
   const [localComparison, setLocalComparison] = useState<ListingDraftFields | null>(null);
   const [comparison, setComparison] = useState<DraftDocument | null>(null);
   const cloudQueue = useRef<ReturnType<typeof createDraftSaveQueue> | null>(null);
   const pendingInput = useRef(false);
+  const onCloudPhotosChange = useCallback((selection: CloudPhotoSelection) => {
+    mediaState.current = selection; pendingInput.current = true;
+    setPhotoState({ preparing: selection.preparing, errors: selection.errors });
+    setRevision(value => value + 1);
+    setCloudState(current => current.phase === 'error' || current.phase === 'conflict' ? current : { phase: 'dirty' });
+  }, []);
   const lastAddress = useRef(addressKey(cloudDraft ? draftInput(cloudDraft).address : null));
   const onAddressChange = useCallback((address: SavedAddress) => {
     const encoded = addressKey(address);
@@ -90,12 +101,12 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
       return (await client.auth.getUser()).data.user?.id === accountId ? result : { ok: false, error: { code: 'AUTH_REQUIRED', retryable: false } };
     }, state => {
       if (!active) return;
-      setCloudState(state.phase === 'saved' && pendingInput.current ? { phase: 'dirty' } : state);
+      setCloudState(state.phase === 'saved' && (pendingInput.current || mediaState.current.preparing > 0 || mediaState.current.errors > 0) ? { phase: 'dirty' } : state);
       if (state.phase === 'conflict' && !comparisonRequested) {
         comparisonRequested = true;
         void loadListingCloudDraft(cloudDraft.id).then(result => { if (active && result.ok) setComparison(result.data); }).catch(() => {});
       }
-    });
+    }, { writeMedia: saveDraftMedia, acknowledged: document => { if (active) setAcknowledgedDraft(document); } });
     cloudQueue.current = queue;
     return () => { active = false; queue.stop(); if (cloudQueue.current === queue) cloudQueue.current = null; };
   }, [cloudDraft, accountId]);
@@ -135,10 +146,10 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     if (!draftLoaded || !formRef.current || busy.current || finished.current) return;
     const draft = snapshot(formRef.current);
     if (cloudDraft) {
-      if (revision === 0) return;
+      if (revision === 0 || mediaState.current.preparing || mediaState.current.errors) return;
       pendingInput.current = false;
       setLocalComparison(draftFields(draft));
-      cloudQueue.current?.offer(draftFields(draft));
+      cloudQueue.current?.offer(draftFields(draft), mediaState.current.items);
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => { void cloudQueue.current?.flush(); }, 400);
       return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
@@ -275,6 +286,9 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
 
   async function saveDraftAndClose() {
     if (busy.current || !draftLoaded || !formRef.current) return;
+    if (cloudDraft && (mediaState.current.preparing || mediaState.current.errors)) {
+      setMessage(t('המתינו להכנת התמונות או הסירו תמונה שנכשלה לפני הסגירה.', 'Wait for photos to finish preparing or remove a failed photo before closing.')); return;
+    }
     const draft = snapshot(formRef.current);
     busy.current = true;
     setSavingDraft(true);
@@ -283,7 +297,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
       if (cloudDraft) {
         pendingInput.current = false;
         setLocalComparison(draftFields(draft));
-        cloudQueue.current?.offer(draftFields(draft));
+        cloudQueue.current?.offer(draftFields(draft), mediaState.current.items);
         const saved = await cloudQueue.current?.flush();
         if (!saved) return;
         finished.current = true;
@@ -365,7 +379,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
             <textarea id="description" name="description" defaultValue={initialDraft?.description ?? ''} maxLength={2000} rows={4} placeholder={t("ספרו על הדירה, האזור ומה חשוב לדעת...", "Tell renters about the apartment and the area...")} className="w-full rounded-shutaf-md border border-card-border bg-white px-4 py-2.5 text-ink placeholder:text-muted-text focus:border-transparent focus:outline-none focus:ring-2 focus:ring-orange" />
           </div>
 
-          {cloudDraft ? <SavedDraftPhotos draft={cloudDraft} locale={locale} /> : <fieldset>
+          {cloudDraft ? <CloudDraftPhotos draft={acknowledgedDraft ?? cloudDraft} locale={locale} onChange={onCloudPhotosChange} /> : <fieldset>
             <legend className="mb-1 text-sm font-medium text-ink">{t("תמונות הדירה", "Apartment photos")}</legend>
             <p className="mb-3 text-sm text-muted-text">{t("צריך", "Add")} {LISTING_PHOTO_MIN}–{LISTING_PHOTO_MAX} {t("תמונות. אפשר להסיר תמונה לפני הפרסום.", "photos. You can remove photos before publishing.")}</p>
             <label htmlFor="photos" className="flex cursor-pointer flex-col items-center rounded-shutaf-md border-2 border-dashed border-card-border p-6 text-center hover:bg-neutral-bg-soft">
@@ -387,17 +401,18 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
           {storageError && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לשמור טיוטה במכשיר. בדקו את הגדרות הדפדפן ונסו שוב.', 'Could not save the draft on this device. Check browser storage settings and retry.')}</p>}
           {!cloudDraft && <p className="text-sm text-muted-text">{t('טיוטות נשמרות במכשיר הזה בלבד. לפני היציאה בחרו בשמירת טיוטה וסגירה.', 'Drafts are stored on this device only. Use Save draft and close before leaving.')}</p>}
           {cloudDraft && <div className="space-y-3">
-            <p role="status" aria-live="polite" className="text-sm text-muted-text">{cloudState.phase === 'saved' ? t('נשמר בחשבון', 'Saved to your account')
+            <p role="status" aria-live="polite" className="text-sm text-muted-text">{photoState.preparing ? t('מכינים תמונות…', 'Preparing photos…') : photoState.errors ? t('יש תמונה שלא הוכנה. אפשר לנסות שוב או להסיר אותה.', 'A photo could not be prepared. Retry it or remove it.') : cloudState.phase === 'saved' ? t('נשמר בחשבון', 'Saved to your account')
               : cloudState.phase === 'saving' ? t('שומרים…', 'Saving…') : cloudState.phase === 'dirty' ? t('יש שינויים שלא נשמרו', 'Unsaved changes')
               : cloudState.phase === 'conflict' ? t('הטיוטה השתנתה במקום אחר. השינויים שלך נשארו כאן.', 'This draft changed elsewhere. Your edits are still here.')
               : t('לא הצלחנו לשמור. השינויים שלך נשארו כאן.', 'Could not save. Your edits are still here.')}</p>
-            {cloudState.phase === 'error' && !['NOT_FOUND', 'STATE_UNAVAILABLE'].includes(cloudState.error ?? '') && <Button type="button" variant="ghost" onClick={() => { void cloudQueue.current?.retry(); }}>{t('ניסיון שמירה נוסף', 'Retry save')}</Button>}
-            {cloudState.phase === 'error' && ['NOT_FOUND', 'STATE_UNAVAILABLE'].includes(cloudState.error ?? '') && <p role="alert" className="text-sm text-error">{t('הטיוטה אינה זמינה לשמירה. השינויים שלך נשארו במסך הזה.', 'This draft is unavailable for saving. Your edits remain on this screen.')}</p>}
+            {cloudState.phase === 'error' && !['NOT_FOUND', 'STATE_UNAVAILABLE', 'PHOTO_CONFLICT'].includes(cloudState.error ?? '') && <Button type="button" variant="ghost" onClick={() => { void cloudQueue.current?.retry(); }}>{t('ניסיון שמירה נוסף', 'Retry save')}</Button>}
+            {cloudState.phase === 'error' && ['NOT_FOUND', 'STATE_UNAVAILABLE', 'PHOTO_CONFLICT'].includes(cloudState.error ?? '') && <p role="alert" className="text-sm text-error">{t('הטיוטה אינה זמינה לשמירה. השינויים שלך נשארו במסך הזה.', 'This draft is unavailable for saving. Your edits remain on this screen.')}</p>}
             {cloudState.phase === 'conflict' && <div role="alert" className="rounded-xl border border-card-border p-4">
               <p className="font-semibold">{t('השוואת שינויים', 'Compare changes')}</p>
               <label className="mt-3 block text-sm">{t('השינויים שלך', 'Your edits')}<textarea readOnly rows={6} className="mt-1 w-full rounded border border-card-border p-2" value={localComparison ? formatFields(localComparison, locale) : ''} /></label>
               {!comparison && <Button type="button" variant="ghost" onClick={() => { void loadListingCloudDraft(cloudDraft.id).then(result => { if (result.ok) setComparison(result.data); }).catch(() => {}); }}>{t('טעינת גרסה להשוואה', 'Load version to compare')}</Button>}
               {comparison && <label className="mt-3 block text-sm">{t('הגרסה השמורה בחשבון', 'Saved version')}<textarea readOnly rows={6} className="mt-1 w-full rounded border border-card-border p-2" value={formatFields(comparison.fields, locale)} /></label>}
+              {comparison && <div className="mt-4"><p className="mb-2 text-sm font-semibold">{t('התמונות השמורות להשוואה; הבחירה שלך נשארה למעלה.', 'Saved photos for comparison; your selection remains above.')}</p><SavedDraftPhotos draft={comparison} locale={locale} /></div>}
               <Button type="button" variant="ghost" onClick={() => { if (window.confirm(t('לטעון את הגרסה השמורה ולהחליף את השינויים המקומיים?', 'Load the saved version and replace your local edits?'))) { finished.current = true; window.location.reload(); } }}>{t('טעינת הגרסה השמורה', 'Load saved version')}</Button>
             </div>}
             <p className="text-sm text-muted-text">{t('השינויים בטיוטה פרטיים. פרסום מטיוטות שמורות עדיין אינו זמין.', 'Draft changes stay private. Publishing saved drafts is not available yet.')}</p>

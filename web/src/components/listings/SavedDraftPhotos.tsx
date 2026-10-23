@@ -7,7 +7,7 @@ import type { DraftPhotoReference } from '@/lib/listings/draft-types';
 import { previewDraftPhoto } from '@/lib/listings/draft-media';
 import type { Locale } from '@/lib/listings/text';
 
-function SavedPhoto({ draft, photo, index, locale }: { draft: DraftDocument; photo: DraftPhotoReference; index: number; locale: Locale }) {
+export function SavedPhoto({ draft, photo, index, locale }: { draft: DraftDocument; photo: DraftPhotoReference; index: number; locale: Locale }) {
   const [preview, setPreview] = useState<{url: string; expiresAt: number} | null>(null);
   const [failed, setFailed] = useState(false), [retry, setRetry] = useState(0);
   useEffect(() => {
