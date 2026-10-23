@@ -35,10 +35,11 @@ export function validateListingDraft(draft: ListingDraft): string | null {
   if (typeof draft.billsIncluded !== 'boolean') return 'יש לבחור אם החשבונות כלולים.';
   if (draft.availableRooms.length < 1) return 'יש להוסיף לפחות חדר פנוי אחד.';
   if (draft.availableRooms.length > draft.bedrooms) return 'מספר החדרים הפנויים לא יכול להיות גדול ממספר החדרים בדירה.';
-  if (draft.availableRooms.some((room) => !Number.isInteger(room.monthlyPrice) || room.monthlyPrice < 1)) {
+  if (draft.availableRooms.some((room) => !Number.isInteger(room.monthlyPrice) || room.monthlyPrice < 1 || room.monthlyPrice > 2147483647)) {
     return 'יש להזין מחיר חודשי תקין לכל חדר פנוי.';
   }
-  if (!draft.availableFrom || Number.isNaN(Date.parse(draft.availableFrom))) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(draft.availableFrom) && !draft.availableFrom.startsWith('0000-') ? new Date(draft.availableFrom + 'T00:00:00Z') : null;
+  if (!date || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== draft.availableFrom) {
     return 'יש לבחור תאריך כניסה.';
   }
   if (draft.photos.length < LISTING_PHOTO_MIN) return `יש להוסיף לפחות ${LISTING_PHOTO_MIN} תמונות.`;

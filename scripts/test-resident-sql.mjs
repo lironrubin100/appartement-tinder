@@ -35,7 +35,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261022075546_save_listing_draft_revision.sql'),
   await read('supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql'),
   await read('supabase/migrations/20261023014407_private_listing_draft_media.sql'),
-  await read('supabase/migrations/20261023113543_private_listing_draft_deletion.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261023113543_private_listing_draft_deletion.sql'),
+  await read('supabase/migrations/20261023154219_verify_draft_publication_snapshot.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -86,7 +87,12 @@ console.log('PASS: private media upload/read, immutable objects, owner/revision 
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_listing_draft_deletion.sql'));
 console.log('PASS: durable private draft deletion, exact media cleanup, idempotency and isolation.');
+await db.exec('reset role');
+await db.exec(await read('supabase/tests/plan_listing_draft_publication_snapshot.sql'));
 await as(0);
+assert.equal((await rpc('select public.verify_listing_draft_publication_snapshot($1,0,$2::jsonb) result',[receiptDraftId,listingDraft])).result,true);
+assert.equal((await rpc('select public.verify_listing_draft_publication_snapshot($1,0,$2::jsonb) result',[receiptDraftId,JSON.stringify({...JSON.parse(listingDraft),title:'wrong source'})])).result,false);
+console.log('PASS: owner-only Postgres snapshot proof for frozen and completed drafts, stale/foreign/mismatched denial.');
 const position = await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]);
 const metres = Math.hypot((position.public_lat - position.lat) * 111320,
   (position.public_lng - position.lng) * 111320 * Math.cos(position.lat * Math.PI / 180));

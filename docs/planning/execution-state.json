@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.30 verified within owning handoff scope. Explicit private draft deletion now freezes owner/revision, persists exact bounded media cleanup and retries, protects public/source photos and blocks old receipt/UUID resurrection. Shared migration20261023113543 and ordinary-client fault/isolation/bytes checks passed; all28 distinct local browser scenarios pass across targeted rerun, plus SQL/unit/type/lint/build. Task2.30 release/live acceptance pending. Next2.31 publication adapter then2.32 UI; full milestone incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.31 verified within owning handoff scope. Standalone cloud snapshot adapter reuses existing publisher/key/bytes, checks source hash before completion and reconciles uncertain replies. Live invoker migration20261023154219; ordinary-client concurrent/staging/receipt/foreign/legacy acceptance, SQL,17 units, types/lint/build and local15/15 browser regression passed. Task2.31 release/canonical acceptance pending. Cloud Publish UI remains next2.32; full milestone incomplete."
     }
   },
   "micro_task_dispatch": {
