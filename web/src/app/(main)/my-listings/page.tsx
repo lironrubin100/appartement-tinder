@@ -1,2 +1,5 @@
 import { renderMyListings } from './MyListingsPage';
-export default async function Page() { return renderMyListings('he'); }
+import type { DraftSearchParams } from '@/components/listings/ListingDraftSection';
+export default async function Page({ searchParams }: { searchParams: Promise<DraftSearchParams> }) {
+  return renderMyListings('he', searchParams);
+}

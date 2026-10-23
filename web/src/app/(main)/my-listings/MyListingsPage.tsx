@@ -1,3 +1,6 @@
+import { Suspense } from 'react';
+import { ListingDraftSection, loadDashboardDrafts, type DraftSearchParams } from '@/components/listings/ListingDraftSection';
+import { PrivateDraftContent } from '@/components/listings/PrivateDraftContent';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
@@ -6,9 +9,9 @@ import { localePrefix, type Locale } from '@/lib/listings/text';
 import { InquiryActionButtons } from '@/components/listings/InquiryActionButtons';
 import { OwnerListingCard } from '@/components/listings/OwnerListingCard';
 
-export async function renderMyListings(locale: Locale) {
+export async function renderMyListings(locale: Locale, searchParams: Promise<DraftSearchParams> = Promise.resolve({})) {
   const t = (he: string, en: string) => (locale === 'en' ? en : he);
-  const supabase = await createServerClient();
+  const supabase = await createServerClient({ noStore: true });
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -20,6 +23,9 @@ export async function renderMyListings(locale: Locale) {
     .eq('id', user.id)
     .maybeSingle();
   if (!profile) redirect('/onboarding');
+
+  const params = await searchParams;
+  const draftResult = loadDashboardDrafts(params);
 
   const { data: listings, error } = await supabase
     .from('apartments')
@@ -48,13 +54,13 @@ export async function renderMyListings(locale: Locale) {
 
   return (
     <div className="mx-auto min-h-[calc(100vh-80px)] max-w-5xl bg-page-bg p-4 md:p-8">
-      <header className="mb-6 flex items-center justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ink">
             {t('המודעות שלי', 'My listings')}
           </h1>
           <p className="mt-1 text-sm text-muted-text">
-            {t('ניהול הדירות שפרסמת', 'Manage your published apartments')}
+            {t('ניהול המודעות והטיוטות שלך', 'Manage your listings and saved drafts')}
           </p>
         </div>
         <Link
@@ -65,11 +71,15 @@ export async function renderMyListings(locale: Locale) {
         </Link>
       </header>
 
+      <section aria-labelledby="published-listings-heading">
+        <h2 id="published-listings-heading" className="mb-3 text-lg font-semibold text-ink">
+          {t('מודעות שפורסמו', 'Published listings')}
+        </h2>
       {!listings?.length ? (
         <section className="rounded-2xl border border-card-border bg-white p-8 text-center">
-          <h2 className="font-semibold text-ink">
-            {t('עדיין אין לך מודעות', 'No listings yet')}
-          </h2>
+          <h3 className="font-semibold text-ink">
+            {t('עדיין אין מודעות שפורסמו', 'No published listings yet')}
+          </h3>
           <p className="mt-2 text-sm text-muted-text">
             {t(
               'כשתהיה מוכנה לפרסום, המודעות יופיעו כאן.',
@@ -105,6 +115,18 @@ export async function renderMyListings(locale: Locale) {
           ))}
         </ul>
       )}
+      </section>
+      <section id="saved-drafts" aria-labelledby="saved-drafts-heading" className="mt-8">
+        <h2 id="saved-drafts-heading" className="text-lg font-semibold text-ink">{t('טיוטות שמורות', 'Saved drafts')}</h2>
+        <p className="mb-3 mt-1 text-sm text-muted-text">{t('הטיוטות פרטיות וגלויות רק לך.', 'Drafts are private and visible only to you.')}</p>
+        <PrivateDraftContent accountId={user.id} locale={locale}>
+          <Suspense key={JSON.stringify(params.draftCursor)} fallback={<p role="status" className="text-sm text-muted-text">
+            {t('טוענים טיוטות…', 'Loading drafts…')}
+          </p>}>
+            <ListingDraftSection result={draftResult} locale={locale} paged={params.draftCursor !== undefined} />
+          </Suspense>
+        </PrivateDraftContent>
+      </section>
     </div>
   );
 }

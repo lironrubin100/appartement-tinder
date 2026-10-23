@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks 4.9–4.14 and 2.16–2.22 verified within recorded scope. Explicit legacy import has real IndexedDB upgrade/tab/reload and ordinary-client interruption/cleanup/verification/account-switch acceptance; unchanged-source deletion only after cloud byte verification. Next physical task 2.23 draft list, then 2.24/2.25 UI integration. Full milestone remains incomplete."
+      "outcome": "Tasks 4.9–4.14 and 2.16–2.24 verified within recorded scope. Cloud drafts appear separately on My Listings with minimal private projection, signed bounded paging, independent loading/error/empty/retry and account-change clearing. HE/EN phone/desktop and ordinary-client isolation passed. Next physical task 2.25 selected draft editor loading; Continue remains absent until then. Full milestone incomplete."
     }
   },
   "micro_task_dispatch": {

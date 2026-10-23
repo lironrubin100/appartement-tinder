@@ -191,7 +191,7 @@ for (const locale of ['he', 'en'] as const) {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(en ? 'My listings' : 'המודעות שלי');
       expect((await page.getByTestId('owner-listing').evaluateAll(cards => cards.map(card => card.getAttribute('data-listing-id')))).sort()).toEqual(rows.map(row => row.id).sort());
       await expect(page.getByRole('link', { name: en ? 'Manage listing' : 'ניהול המודעה', exact: true })).toHaveCount(0);
-      if (kind === 'sl04-empty') { expect(rows).toHaveLength(0); await expect(page.getByText(en ? 'No listings yet' : 'עדיין אין לך מודעות', { exact: true })).toBeVisible(); }
+      if (kind === 'sl04-empty') { expect(rows).toHaveLength(0); await expect(page.getByText(en ? 'No published listings yet' : 'עדיין אין מודעות שפורסמו', { exact: true })).toBeVisible(); }
       for (const row of rows.filter(row => row.status === 'active')) {
         const card = page.locator(`[data-listing-id="${row.id}"]`);
         await card.getByRole('button', { name: en ? 'Mark rented' : 'סימון כהושכרה', exact: true }).click();
