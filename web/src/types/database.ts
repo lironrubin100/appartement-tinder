@@ -15,6 +15,12 @@ export type Database = {
   };
   public: {
     Tables: {
+      listing_drafts: {
+        Row: { id: string; owner_id: string; schema_version: number; revision: number; created_at: string; updated_at: string; state: string; source_listing_id: string | null; source_revision: number | null; fields: Json; photos: Json; publication_request_id: string; import_receipt_id: string | null; publication_started_at: string | null; publication_payload_hash: string | null };
+        Insert: { id?: string; fields?: Json; source_listing_id?: string | null; source_revision?: number | null };
+        Update: never;
+        Relationships: [];
+      };
       profile_lifestyle: {
         Row: { profile_id: string; taxonomy_version: number; facts: Json; disclosed_fields: string[]; revision: number; updated_at: string };
         Insert: { profile_id: string; taxonomy_version?: number; facts?: Json; disclosed_fields?: string[]; revision?: number; updated_at?: string };
@@ -1446,6 +1452,14 @@ export type Database = {
       };
     };
     Functions: {
+      create_listing_draft: {
+        Args: { p_import_receipt_id?: string | null; p_source_listing_id?: string | null; p_source_revision?: number | null; p_fields?: Json };
+        Returns: Database['public']['Tables']['listing_drafts']['Row'];
+      };
+      save_listing_draft: {
+        Args: { p_draft_id: string; p_expected_revision: number; p_fields: Json };
+        Returns: Database['public']['Tables']['listing_drafts']['Row'];
+      };
       save_lister_profile: {
         Args: { p_name: string; p_phone: string; p_agency: string; p_expected_revision: number; p_request_key: string };
         Returns: Json;
