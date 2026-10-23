@@ -24,7 +24,7 @@ export async function renderCompose(locale: Locale, searchParams: Promise<Compos
     <NewListingCloudDraft accountId={user.id} locale={locale} />
   </PrivateDraftContent>;
   const result = typeof params.draft === 'string' ? await loadListingCloudDraft(params.draft) : null;
-  if (!result?.ok || result.data.state !== 'open' || result.data.publicationStartedAt) {
+  if (!result?.ok || result.data.state === 'deleting' || (result.data.kind !== 'new' && result.data.state !== 'open')) {
     const unavailable = !result || !result.ok && ['NOT_FOUND', 'VALIDATION_FAILED'].includes(result.error.code) || result.ok;
     return <section className="mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-bold text-ink">{locale === 'en' ? 'Saved draft' : 'טיוטה שמורה'}</h1>

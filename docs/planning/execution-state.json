@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.31 verified within owning handoff scope. Standalone cloud snapshot adapter reuses existing publisher/key/bytes, checks source hash before completion and reconciles uncertain replies. Live invoker migration20261023154219; ordinary-client concurrent/staging/receipt/foreign/legacy acceptance, SQL,17 units, types/lint/build and local15/15 browser regression passed. Task2.31 release/canonical acceptance pending. Cloud Publish UI remains next2.32; full milestone incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.32 verified within owning handoff scope. Selected new cloud draft Publish flushes acknowledged fields/media and completes only verified receipt; frozen reopening checks without publication, explicit exact retry/cancellation and conflict/account guards pass. Local14 publication/recovery plus33 regressions,23 units, types/lint/build pass; canonical release and two real provider cases pending. No new migration/config. Next4.1 owner edit reader; full milestone active/incomplete."
     }
   },
   "micro_task_dispatch": {

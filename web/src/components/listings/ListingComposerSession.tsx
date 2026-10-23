@@ -55,7 +55,7 @@ export function ListingComposerSession({ ref, accountId, locale, hasPrivatePhone
       if (draft.revision !== choice.expectedRevision) throw Error('VERSION_CONFLICT');
     }
     if (!await actor() || !current(operation)) return;
-    if (draft.ownerId !== accountId || draft.state !== 'open' || draft.publicationStartedAt !== null) throw Error('UNAVAILABLE');
+    if (draft.ownerId !== accountId || draft.state === 'deleting' || (draft.kind !== 'new' && (draft.state !== 'open' || draft.publicationStartedAt !== null))) throw Error('UNAVAILABLE');
     if (newReceiptKey) { try { sessionStorage.removeItem(newReceiptKey); } catch { /* Exact receipt can remain for reconciliation. */ } }
     setSelected(draft); setScreen('editor'); setMessage('');
   }, [accountId, actor, current]);
@@ -69,7 +69,7 @@ export function ListingComposerSession({ ref, accountId, locale, hasPrivatePhone
         loadListingDraft(accountId).then(local => ({ local, unavailable: false })).catch(() => ({ local: undefined, unavailable: true }))]);
       if (!await actor() || !current(operation)) return;
       if (!result.ok || result.data.items.some(draft => draft.ownerId !== accountId)) throw Error('UNAVAILABLE');
-      setItems(result.data.items.map(draft => ({ id: draft.id, revision: draft.revision, title: draft.fields.title, kind: draft.kind, updatedAt: draft.updatedAt, deleting: draft.state === 'deleting', unavailable: draft.state !== 'open' || draft.publicationStartedAt !== null })));
+      setItems(result.data.items.map(draft => ({ id: draft.id, revision: draft.revision, title: draft.fields.title, kind: draft.kind, updatedAt: draft.updatedAt, deleting: draft.state === 'deleting', publicationPending: Boolean(draft.publicationStartedAt), unavailable: draft.state === 'deleting' || (draft.kind !== 'new' && draft.state !== 'open') })));
       setHasLocalDraft(Boolean(legacy.local)); setLegacyUnavailable(legacy.unavailable); setNextCursor(result.data.next_cursor); setPaged(Boolean(cursor));
       if (!cursor && result.data.items.length === 0 && !legacy.local && !legacy.unavailable) {
         retryChoice.current = { kind: 'new' }; await openChoice({ kind: 'new' }, operation);
@@ -107,7 +107,7 @@ export function ListingComposerSession({ ref, accountId, locale, hasPrivatePhone
       if (!await actor() || !current(operation)) return false;
       const result = await loadListingCloudDraft(selected.id);
       if (!await actor() || !current(operation) || !result.ok) return false;
-      if (result.data.ownerId !== accountId || result.data.state !== 'open' || result.data.publicationStartedAt !== null) return false;
+      if (result.data.ownerId !== accountId || result.data.state === 'deleting' || (result.data.kind !== 'new' && result.data.state !== 'open')) return false;
       setSelected(result.data); return true;
     } catch { return false; }
     finally { if (current(operation)) busy.current = false; }

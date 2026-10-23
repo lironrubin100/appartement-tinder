@@ -9,7 +9,7 @@ import { validateListingDraft } from './validation';
 import { readListingPublicationForm, listingPublicationPayload, listingPublicationLocationValid } from './publication-contract';
 
 export type DraftPublishInput = { id: string; expectedRevision: number; expectedAccountId: string; providerToken?: string };
-export type DraftPublishErrorCode = DraftErrorCode | 'LOCATION_REQUIRED' | 'PHOTO_UNAVAILABLE' | 'PUBLICATION_UNCERTAIN' | 'PUBLISH_FAILED';
+export type DraftPublishErrorCode = DraftErrorCode | 'LOCATION_REQUIRED' | 'PHOTO_UNAVAILABLE' | 'PUBLICATION_UNCERTAIN' | 'PUBLISH_FAILED' | 'PUBLICATION_PENDING' | 'PUBLICATION_NOT_STARTED';
 export type DraftPublishResult = { ok: true; data: { draftId: string; listingId: string; requestKey: string; revision: number; completed: true } }
   | { ok: false; error: { code: DraftPublishErrorCode; retryable: boolean; message?: string } };
 const failure = (code: DraftPublishErrorCode, retryable = false, message?: string): DraftPublishResult => ({ ok: false, error: { code, retryable, ...(message ? { message } : {}) } });
@@ -24,7 +24,7 @@ function rpcFailure(error: { message: string }): DraftPublishResult {
 
 // IDs/preconditions only. Fields, paths, bytes and the request key come from the
 // authenticated snapshot. No cleanup or cancellation follows an uncertain reply.
-export async function publishListingCloudDraft(input: DraftPublishInput): Promise<DraftPublishResult> {
+async function runPublication(input: DraftPublishInput, reconcileOnly: boolean): Promise<DraftPublishResult> {
   try {
     if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).some(key => !['id', 'expectedRevision', 'expectedAccountId', 'providerToken'].includes(key))
       || !isId(input.id) || !isId(input.expectedAccountId) || !isRevision(input.expectedRevision)
@@ -40,6 +40,7 @@ export async function publishListingCloudDraft(input: DraftPublishInput): Promis
     if (draft.revision !== input.expectedRevision) return failure('VERSION_CONFLICT');
     if (draft.kind !== 'new' || draft.state === 'deleting' || !isId(draft.publicationRequestId)) return failure('STATE_UNAVAILABLE');
     if (draft.state === 'completed' && !draft.publicationStartedAt) return failure('STATE_UNAVAILABLE');
+    if (reconcileOnly && !draft.publicationStartedAt) return failure('PUBLICATION_NOT_STARTED', true);
     const fields = draft.fields, address = fields.address, form = new FormData();
     if (typeof fields.billsIncluded !== 'boolean') return failure('VALIDATION_FAILED');
     for (const name of ['title', 'bedrooms', 'availableFrom', 'description'] as const) form.set(name, fields[name] ?? '');
@@ -84,6 +85,7 @@ export async function publishListingCloudDraft(input: DraftPublishInput): Promis
       const previous = await reconcile();
       if (!await actor()) return failure('AUTH_REQUIRED');
       if (previous) return previous;
+      if (reconcileOnly) return failure('PUBLICATION_PENDING', true);
     }
     // Already verified receipts above need no new address token. A pending/new
     // attempt retains the legacy exact-token or explicit manual-location gate.
@@ -109,4 +111,41 @@ export async function publishListingCloudDraft(input: DraftPublishInput): Promis
     if (completed) return completed;
     return published.error ? failure('PUBLISH_FAILED', true, published.error) : failure('PUBLICATION_UNCERTAIN', true);
   } catch { return failure('PUBLICATION_UNCERTAIN', true); }
+}
+
+export async function publishListingCloudDraft(input: DraftPublishInput): Promise<DraftPublishResult> {
+  return runPublication(input, false);
+}
+export async function reconcileListingCloudDraftPublication(input: DraftPublishInput): Promise<DraftPublishResult> {
+  return runPublication(input, true);
+}
+export type DraftPublicationCancellation = { ok: true; data: { kind: 'editable'; draft: DraftDocument } | { kind: 'published'; publication: Extract<DraftPublishResult, { ok: true }>['data'] } } | Extract<DraftPublishResult, { ok: false }>;
+export async function cancelListingCloudDraftPublication(input: Omit<DraftPublishInput, 'providerToken'>): Promise<DraftPublicationCancellation> {
+  try {
+    if (!input || typeof input !== 'object' || Object.keys(input).some(key => !['id', 'expectedRevision', 'expectedAccountId'].includes(key))
+      || !isId(input.id) || !isRevision(input.expectedRevision) || !isId(input.expectedAccountId)) return failure('VALIDATION_FAILED') as Extract<DraftPublishResult, { ok: false }>;
+    const client = await createServerClient({ noStore: true });
+    const auth = await client.auth.getUser();
+    if (auth.error || auth.data.user?.id !== input.expectedAccountId) return { ok: false, error: { code: 'AUTH_REQUIRED', retryable: false } };
+    const loaded = await client.from('listing_drafts').select(draftColumns).eq('id', input.id).eq('owner_id', input.expectedAccountId).maybeSingle();
+    if (loaded.error) return { ok: false, error: { code: 'PUBLICATION_UNCERTAIN', retryable: true } };
+    if (!loaded.data) return { ok: false, error: { code: 'NOT_FOUND', retryable: false } };
+    const before = decodeDraft(loaded.data, input.expectedAccountId);
+    if (before.kind !== 'new' || before.state === 'deleting') return { ok: false, error: { code: 'STATE_UNAVAILABLE', retryable: false } };
+    const result = await client.rpc('cancel_listing_draft_publication', { p_draft_id: input.id, p_expected_revision: input.expectedRevision });
+    if (result.error) {
+      // The publication can commit while the user confirms cancellation. Only
+      // a verified matching receipt can then route to the published listing.
+      if (['PUBLICATION_ALREADY_COMMITTED', 'DRAFT_CLOSED'].includes(result.error.message)) {
+        const publication = await runPublication(input, true);
+        if (publication.ok) return { ok: true, data: { kind: 'published', publication: publication.data } };
+        return publication;
+      }
+      return rpcFailure(result.error) as Extract<DraftPublishResult, { ok: false }>;
+    }
+    const draft = decodeDraft(result.data, input.expectedAccountId);
+    if (draft.id !== input.id || draft.kind !== 'new' || draft.state !== 'open' || draft.publicationStartedAt !== null
+      || draft.revision !== input.expectedRevision + 1 || draft.publicationRequestId === before.publicationRequestId) return { ok: false, error: { code: 'PUBLICATION_UNCERTAIN', retryable: true } };
+    return { ok: true, data: { kind: 'editable', draft } };
+  } catch { return { ok: false, error: { code: 'PUBLICATION_UNCERTAIN', retryable: true } }; }
 }

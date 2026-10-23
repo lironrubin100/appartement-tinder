@@ -9,12 +9,19 @@ function fixture(options={}){
   const q={select:()=>q,eq:()=>q,maybeSingle:async()=>({data:table==='listing_drafts'?{...row}:table==='profiles'?{mode:'resident'}:{phone:null},error:null})};return q;},
  storage:{from:bucket=>({getPublicUrl:path=>({data:{publicUrl:`https://npbduvjnqnbydolmdpsc.supabase.co/storage/v1/object/public/${bucket}/${path}`}}),
  download:async(path,_options,parameters)=>{calls.push(['download',bucket,path]);if(bucket==='listing-draft-media'){assert.equal(parameters.cache,'no-store');return {data:new Blob([bytes],{type:'image/jpeg'}),error:null};}return uploads.has(path)?{data:uploads.get(path),error:null}:{data:null,error:{message:'absent'}};},
- upload:async(path,blob)=>{calls.push(['upload',bucket,path]);assert.equal(bucket,'apartment-photos');if(uploads.has(path))return {error:{message:'exists'}};uploads.set(path,blob);return {error:null};},
+ upload:async(path,blob)=>{calls.push(['upload',bucket,path]);assert.equal(bucket,'apartment-photos');if(options.uploadOutage)return {error:{message:'Synthetic upload outage'}};if(uploads.has(path))return {error:{message:'exists'}};uploads.set(path,blob);return {error:null};},
  remove:()=>{throw Error('Cleanup is forbidden');}})},
  rpc:async(name,args)=>{calls.push([name,args]);
   if(name==='begin_listing_draft_publication'){if(options.beginOutage)return {error:{message:'synthetic transient begin outage'}};if(canonical&&JSON.stringify(canonical)!==JSON.stringify(args.p_payload))return {error:{message:'PUBLICATION_SNAPSHOT_CONFLICT'}};canonical=args.p_payload;if(options.completedAtBegin){receipt=true;row.publication_started_at='2026-10-23T01:00:00Z';row.state='completed';return {error:{message:'DRAFT_UNAVAILABLE'}};}row.publication_started_at='2026-10-23T01:00:00Z';if(options.switchAfterFreeze)who=randomUUID();return {data:{...row},error:null};}
   if(name==='verify_listing_draft_publication_snapshot')return {data:!!canonical&&JSON.stringify(canonical)===JSON.stringify(args.p_payload)&&!options.badProof,error:null};
   if(name==='complete_listing_draft'){if(!receipt)return {error:{message:'PUBLICATION_RECEIPT_REQUIRED'}};if(failComplete-->0)return {error:{message:'network failed'}};row.state='completed';return {data:{...row},error:null};}
+  if(name==='cancel_listing_draft_publication'){
+   if(args.p_expected_revision!==row.revision)return {error:{message:'DRAFT_CONFLICT'}};
+   if(receipt)return {error:{message:row.state==='completed'?'DRAFT_CLOSED':'PUBLICATION_ALREADY_COMMITTED'}};
+   row.publication_started_at=null;row.publication_request_id=randomUUID();row.revision++;canonical=null;
+   if(options.lostCancel)return {error:{message:'Synthetic hidden successful cancellation'}};
+   return {data:{...row},error:null};
+  }
   if(name==='publish_apartment_once'){assert.deepEqual(args.p_draft,canonical);receipt=true;if(options.lostPublish)return {error:{message:'network failed'}};return {data:key,error:null};}
   throw Error('Unexpected RPC');
  }};
@@ -52,3 +59,22 @@ test('account change after freezing prevents forwarding private bytes to publish
 test('concurrent completion between load and begin is reconciled without another upload',async()=>{const f=fixture({completedAtBegin:true});const result=await f.services.publishing.publishListingCloudDraft(f.input());assert.equal(result.ok,true);assert.equal(result.data.listingId,f.key);assert.equal(f.uploads.size,0);});
 
 test('begin outage before commit remains retryable and leaves the draft unfrozen',async()=>{const f=fixture({beginOutage:true});const result=await f.services.publishing.publishListingCloudDraft(f.input());assert.equal(result.error.code,'PUBLICATION_UNCERTAIN');assert.equal(result.error.retryable,true);assert.equal(f.row.publication_started_at,null);assert.equal(f.uploads.size,0);});
+
+
+test('reopening checks never begin or stage publication; pending snapshot stays frozen',async()=>{
+ const untouched=fixture();assert.equal((await untouched.services.publishing.reconcileListingCloudDraftPublication(untouched.input())).error.code,'PUBLICATION_NOT_STARTED');assert.equal(untouched.calls.length,0);
+ const f=fixture({uploadOutage:true});assert.equal((await f.services.publishing.publishListingCloudDraft(f.input())).ok,false);assert(f.row.publication_started_at);const before=f.calls.length;
+ assert.equal((await f.services.publishing.reconcileListingCloudDraftPublication(f.input())).error.code,'PUBLICATION_PENDING');assert(!f.calls.slice(before).some(c=>['upload','begin_listing_draft_publication','publish_apartment_once'].includes(c[0])));
+});
+test('reopening completes a committed receipt without new upload, and cancellation preserves committed publication',async()=>{
+ const f=fixture({failComplete:1});assert.equal((await f.services.publishing.publishListingCloudDraft(f.input())).ok,false);const before=f.calls.length;
+ const result=await f.services.publishing.reconcileListingCloudDraftPublication(f.input());assert.equal(result.ok,true);assert.equal(result.data.listingId,f.key);
+ const cancelled=await f.services.publishing.cancelListingCloudDraftPublication(f.input());assert.equal(cancelled.ok,true);assert.equal(cancelled.data.kind,'published');assert.equal(cancelled.data.publication.listingId,f.key);
+ assert(!f.calls.slice(before).some(c=>['upload','begin_listing_draft_publication','publish_apartment_once'].includes(c[0])));
+});
+test('only verified unpublished cancellation returns new editable revision/key; lost reply stays uncertain',async()=>{
+ for(const lostCancel of [false,true]){const f=fixture({uploadOutage:true,lostCancel});await f.services.publishing.publishListingCloudDraft(f.input());const result=await f.services.publishing.cancelListingCloudDraftPublication(f.input());
+ if(lostCancel){assert.equal(result.ok,false);assert.equal(result.error.code,'PUBLICATION_UNCERTAIN');assert.equal((await f.services.publishing.reconcileListingCloudDraftPublication(f.input())).error.code,'VERSION_CONFLICT');}
+ else{assert.equal(result.ok,true);assert.equal(result.data.kind,'editable');assert.equal(result.data.draft.revision,5);assert.notEqual(result.data.draft.publicationRequestId,f.key);}
+ assert.equal(f.row.publication_started_at,null);assert.equal(f.row.revision,5);assert.equal(f.row.photos.length,3);}
+});

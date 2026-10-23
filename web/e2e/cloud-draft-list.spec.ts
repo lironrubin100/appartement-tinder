@@ -42,8 +42,8 @@ for (const locale of ['he', 'en']) for (const width of [390, 1280]) {
       expect(publicIds.sort()).toEqual(published.data!.map(row => row.id).sort());
       expect(publicIds.some(id => rows.some(row => row.id === id))).toBe(false);
       for (const row of rows) await expect(section.locator('[data-draft-id="' + row.id + '"]').getByText(row.source_listing_id ? (en ? 'Listing edit' : 'עריכת מודעה') : (en ? 'New listing' : 'מודעה חדשה'), {exact:true})).toBeVisible();
-      await expect(section.getByTestId('listing-draft').getByRole('link')).toHaveCount(rows.filter(row => row.state === 'open' && !row.publication_started_at).length);
-      for (const row of rows.filter(row => row.state === 'open' && !row.publication_started_at)) await expect(section.locator('[data-draft-id="' + row.id + '"] a')).toHaveAttribute('href', prefix + '/compose?draft=' + row.id);
+      await expect(section.getByTestId('listing-draft').getByRole('link')).toHaveCount(rows.filter(row => row.state === 'open').length);
+      for (const row of rows.filter(row => row.state === 'open')) await expect(section.locator('[data-draft-id="' + row.id + '"] a')).toHaveAttribute('href', prefix + '/compose?draft=' + row.id);
       await expect(page.locator('html')).toHaveAttribute('dir', en ? 'ltr' : 'rtl');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       const html = await response!.text();

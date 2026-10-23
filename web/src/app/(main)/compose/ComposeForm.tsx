@@ -20,6 +20,9 @@ import { createClient } from '@/utils/supabase/client';
 import { CloudDraftPhotos, type CloudPhotoSelection } from '@/components/listings/CloudDraftPhotos';
 import { saveDraftMedia } from '@/lib/listings/draft-media';
 import { SavedDraftPhotos } from '@/components/listings/SavedDraftPhotos';
+import { CloudDraftPublication } from '@/components/listings/CloudDraftPublication';
+import { publishListingCloudDraft, type DraftPublishResult } from '@/lib/listings/draft-publish';
+import { draftPublicationError } from '@/lib/listings/draft-publish-text';
 
 function draftInput(draft: DraftDocument): SavedListingDraft {
   const fields = draft.fields, address = fields.address;
@@ -62,7 +65,15 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [reloading, setReloading] = useState(false), [reloadFailed, setReloadFailed] = useState(false);
-  const busy = useRef(false);
+  const busy = useRef(false), active = useRef(false);
+  const recovery = useRef<ComposeFormHandle>(null);
+  const [publicationSnapshot, setPublicationSnapshot] = useState<DraftDocument | null>(cloudDraft && (cloudDraft.publicationStartedAt || cloudDraft.state === 'completed') ? cloudDraft : null);
+  const acknowledged = useRef(cloudDraft);
+  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
+  async function isCurrentActor() {
+    try { const result = await createClient().auth.getUser(); return active.current && !result.error && result.data.user?.id === accountId; }
+    catch { return false; }
+  }
   const requestKey = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -93,7 +104,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     setAddressDraft(address);
   }, []);
   useEffect(() => {
-    if (!cloudDraft) return;
+    if (!cloudDraft || publicationSnapshot) return;
     let active = true, comparisonRequested = false;
     const queue = createDraftSaveQueue(cloudDraft, async (id, expectedRevision, fields): Promise<DraftResult<DraftDocument>> => {
       const client = createClient();
@@ -107,10 +118,10 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
         comparisonRequested = true;
         void loadListingCloudDraft(cloudDraft.id).then(result => { if (active && result.ok) setComparison(result.data); }).catch(() => {});
       }
-    }, { writeMedia: saveDraftMedia, acknowledged: document => { if (active) setAcknowledgedDraft(document); } });
+    }, { writeMedia: saveDraftMedia, acknowledged: document => { if (active) { acknowledged.current = document; setAcknowledgedDraft(document); } } });
     cloudQueue.current = queue;
     return () => { active = false; queue.stop(); if (cloudQueue.current === queue) cloudQueue.current = null; };
-  }, [cloudDraft, accountId]);
+  }, [cloudDraft, accountId, publicationSnapshot]);
   useEffect(() => {
     if (!cloudDraft || cloudState.phase === 'saved') return;
     const warn = (event: BeforeUnloadEvent) => { if (finished.current) return; event.preventDefault(); event.returnValue = ''; };
@@ -144,7 +155,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   }
 
   useEffect(() => {
-    if (!draftLoaded || !formRef.current || busy.current || finished.current) return;
+    if (!draftLoaded || !formRef.current || busy.current || finished.current || publicationSnapshot) return;
     const draft = snapshot(formRef.current);
     if (cloudDraft) {
       if (revision === 0 || mediaState.current.preparing || mediaState.current.errors) return;
@@ -162,7 +173,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
     // The snapshot is taken after the corresponding form and state updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountId, cloudDraft, draftLoaded, revision, bedrooms, roomPrices, photos, addressDraft, submitting]);
+  }, [accountId, cloudDraft, draftLoaded, revision, bedrooms, roomPrices, photos, addressDraft, submitting, publicationSnapshot]);
 
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
@@ -190,9 +201,64 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     setMessage('');
   }
 
+  async function finishCloudPublication(data: Extract<DraftPublishResult, { ok: true }>['data']) {
+    const expected = publicationSnapshot ?? acknowledged.current;
+    if (!expected || data.draftId !== expected.id || data.revision !== expected.revision || data.requestKey !== expected.publicationRequestId
+      || data.listingId !== data.requestKey || !data.completed || !await isCurrentActor()) return;
+    finished.current = true;
+    cloudQueue.current?.stop();
+    onPublished?.();
+    router.push(`${localePrefix(locale)}/compose/published/${data.listingId}`);
+  }
+
+  async function publishCloudDraft(form: HTMLFormElement) {
+    if (!cloudDraft || cloudDraft.kind !== 'new' || busy.current || finished.current) return;
+    if (mediaState.current.preparing || mediaState.current.errors) {
+      setMessage(t('המתינו להכנת התמונות או הסירו תמונה שנכשלה לפני הפרסום.', 'Wait for photos to finish preparing or remove a failed photo before publishing.')); return;
+    }
+    // Capture enabled controls before disabling the fieldset, then flush that
+    // exact input and media selection before using the acknowledged revision.
+    const input = snapshot(form), providerToken = addressDraft?.selected?.token;
+    busy.current = true; setSubmitting(true); setMessage('');
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    let saved: DraftDocument | undefined;
+    try {
+      if (!await isCurrentActor()) return;
+      const queue = cloudQueue.current;
+      pendingInput.current = false; setLocalComparison(draftFields(input));
+      queue?.offer(draftFields(input), mediaState.current.items);
+      if (!await queue?.flush() || !await isCurrentActor()) return;
+      saved = acknowledged.current;
+      if (!saved || saved.id !== cloudDraft.id || saved.ownerId !== accountId) return;
+      const result = await publishListingCloudDraft({ id: saved.id, expectedRevision: saved.revision, expectedAccountId: accountId, ...(providerToken ? { providerToken } : {}) });
+      if (!await isCurrentActor()) return;
+      if (result.ok) { await finishCloudPublication(result.data); return; }
+      setMessage(draftPublicationError(result.error, locale));
+      const latest = await loadListingCloudDraft(saved.id);
+      if (!await isCurrentActor()) return;
+      if (latest.ok && latest.data.ownerId === accountId) {
+        if (result.error.code === 'VERSION_CONFLICT' || latest.data.revision !== saved.revision) {
+          queue?.stop(); setCloudState({ phase: 'conflict', error: 'VERSION_CONFLICT' }); setComparison(latest.data);
+        } else if (latest.data.publicationStartedAt || latest.data.state === 'completed') {
+          setPublicationSnapshot(latest.data);
+        } else if (latest.data.state !== 'open') {
+          queue?.stop(); setCloudState({ phase: 'error', error: 'STATE_UNAVAILABLE' });
+        }
+      } else setPublicationSnapshot(saved);
+    } catch {
+      if (await isCurrentActor()) {
+        setMessage(draftPublicationError({ code: 'PUBLICATION_UNCERTAIN' }, locale));
+        if (saved) setPublicationSnapshot(saved);
+      }
+    } finally {
+      if (active.current) { busy.current = false; setSubmitting(false); }
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy.current || cloudDraft) return;
+    if (busy.current) return;
+    if (cloudDraft) { await publishCloudDraft(event.currentTarget); return; }
     if (requiresPrivatePhone && !hasPrivatePhone) {
       setMessage(t("לפני הפרסום יש להוסיף מספר טלפון פרטי בהגדרות הפרופיל.", "Add a private phone number to your profile before publishing."));
       return;
@@ -286,6 +352,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   }
 
   async function saveDraftAndClose() {
+    if (publicationSnapshot) { await recovery.current?.saveAndClose(); return; }
     if (busy.current || !draftLoaded || !formRef.current) return;
     if (cloudDraft && (mediaState.current.preparing || mediaState.current.errors)) {
       setMessage(t('המתינו להכנת התמונות או הסירו תמונה שנכשלה לפני הסגירה.', 'Wait for photos to finish preparing or remove a failed photo before closing.')); return;
@@ -327,6 +394,15 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     finally { setReloading(false); }
   }
   useImperativeHandle(ref, () => ({ saveAndClose: saveDraftAndClose }));
+
+  if (publicationSnapshot) return <CloudDraftPublication ref={recovery} snapshot={publicationSnapshot} accountId={accountId} locale={locale}
+    providerToken={addressDraft?.selected?.token} onPublished={finishCloudPublication}
+    onClose={() => { finished.current = true; if (onClose) onClose(); else window.location.assign(localePrefix(locale) + '/my-listings'); }}
+    onEdit={async () => {
+      if (!await isCurrentActor()) return false;
+      if (onReloadSaved) return onReloadSaved();
+      finished.current = true; window.location.reload(); return true;
+    }} />;
 
   if (!draftLoaded) return <p role="status" className="p-6">{t('טוענים טיוטה…', 'Loading draft…')}</p>;
 
@@ -377,7 +453,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
             <input name="billsIncluded" type="checkbox" defaultChecked={initialDraft?.billsIncluded ?? false} className="mt-0.5 size-4 accent-orange" />
             <span><strong className="font-semibold">{t("החשבונות כלולים במחיר", "Bills included")}</strong><span className="mt-1 block text-muted-text">{t("סמנו רק אם המחיר של כל חדר כולל חשבונות שוטפים.", "Select only if every room price includes bills.")}</span></span>
           </label>
-          {!cloudDraft && <p className="rounded-shutaf-md bg-neutral-bg-soft p-3 text-sm text-muted-text">
+          {(!cloudDraft || cloudDraft.kind === 'new') && <p className="rounded-shutaf-md bg-neutral-bg-soft p-3 text-sm text-muted-text">
             {!requiresPrivatePhone || hasPrivatePhone
               ? t("מספר הטלפון בחשבון נשאר פרטי. כל הפניות מתבצעות בשותף.", "Your account phone stays private. All inquiries happen in Shutaf.")
               : <>{t("לפני הפרסום יש להוסיף מספר טלפון פרטי.", "Add a private phone number before publishing.")} <Link href={`${localePrefix(locale)}/profile/edit`} className="text-teal underline">{t("עריכת פרופיל", "Edit profile")}</Link></>}
@@ -425,10 +501,10 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
               <Button type="button" variant="ghost" disabled={reloading} onClick={() => { void reloadSavedVersion(); }}>{t('טעינת הגרסה השמורה', 'Load saved version')}</Button>
               {reloadFailed && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לטעון את הגרסה השמורה. השינויים שלך נשארו כאן.', 'Could not load the saved version. Your edits are still here.')}</p>}
             </div>}
-            <p className="text-sm text-muted-text">{t('השינויים בטיוטה פרטיים. פרסום מטיוטות שמורות עדיין אינו זמין.', 'Draft changes stay private. Publishing saved drafts is not available yet.')}</p>
+            <p className="text-sm text-muted-text">{cloudDraft.kind === 'new' ? t('השינויים נשמרים כטיוטה פרטית. רק לחיצה על פרסום תיצור מודעה.', 'Changes are saved privately. Choose Publish listing to make the listing public.') : t('השינויים נשמרים בטיוטה פרטית בלבד.', 'Changes are saved in a private draft only.')}</p>
           </div>}
           <div className="flex flex-col gap-3 sm:flex-row">
-            {!cloudDraft && <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>}
+            {(!cloudDraft || cloudDraft.kind === 'new') && <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>}
             <Button type="button" variant="ghost" className="flex-1" onClick={saveDraftAndClose}>{savingDraft ? t('שומרים טיוטה…', 'Saving draft…') : t('שמירת טיוטה וסגירה', 'Save draft and close')}</Button>
           </div>
           {!cloudDraft && <details className="text-sm text-muted-text">

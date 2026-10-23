@@ -1452,6 +1452,7 @@ export type Database = {
       };
     };
     Functions: {
+      cancel_listing_draft_publication: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
       verify_listing_draft_publication_snapshot: { Args: { p_draft_id: string; p_expected_revision: number; p_payload: Json }; Returns: boolean };
       begin_listing_draft_publication: { Args: { p_draft_id: string; p_expected_revision: number; p_payload: Json }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
       complete_listing_draft: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };

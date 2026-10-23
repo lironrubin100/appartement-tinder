@@ -33,7 +33,7 @@ const {ListingDraftSection,loadDashboardDrafts}=load('src/components/listings/Li
   const view=await ListingDraftSection({locale,paged:true,result:Promise.resolve({ok:true,data:{items:[fullDraft],next_cursor:'signed+cursor',has_more:true}})});
   const html=renderToStaticMarkup(view);
   assert.match(html,/draftCursor=signed%2Bcursor/);assert.match(html,/saved-drafts/);assert.doesNotMatch(html,/DO NOT SERIALIZE|PRIVATE-PATH|PRIVATE-OWNER/);
-  assert.deepEqual(Object.keys(view.props.children[0].props.items[0]).sort(),['continueHref','deleting','id','kind','revision','title','updatedAt']);
+  assert.deepEqual(Object.keys(view.props.children[0].props.items[0]).sort(),['continueHref','deleting','id','kind','publicationPending','revision','title','updatedAt']);
  }
  console.log('PASS HE/EN separate identities/actions, empty/no-action, escaped titles, deterministic dates, minimal private projection, errors and bounded paging');
 })().catch(error=>{console.error(error);process.exitCode=1;});
