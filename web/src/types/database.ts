@@ -856,6 +856,7 @@ export type Database = {
           created_at: string;
           id: string;
           kind: string;
+          listing_id: string | null;
           message_seq: number;
           request_key: string | null;
           sender_id: string | null;
@@ -866,6 +867,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           kind?: string;
+          listing_id?: never;
           message_seq?: never;
           request_key?: never;
           sender_id?: string | null;
@@ -876,6 +878,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           kind?: string;
+          listing_id?: never;
           message_seq?: number;
           request_key?: never;
           sender_id?: string | null;
@@ -1485,9 +1488,14 @@ export type Database = {
         Returns: Json;
       };
 
+      list_public_listings: { Args: { p_page?: number }; Returns: (Omit<Database['public']['Functions']['get_public_listing']['Returns'][number], 'description' | 'available_from'> & { available_from: string | null })[] };
+      send_listing_card: {
+        Args: { p_conversation_id: string; p_listing_id: string; p_request_key: string };
+        Returns: Database['public']['Tables']['messages']['Row'][];
+      };
       send_chat_message: {
         Args: { p_conversation_id: string; p_body: string; p_request_key: string };
-        Returns: { id: string; conversation_id: string; sender_id: string | null; kind: string; body: string; created_at: string; message_seq: number; request_key: string | null }[];
+        Returns: { id: string; conversation_id: string; sender_id: string | null; kind: string; body: string; created_at: string; message_seq: number; listing_id: string | null; request_key: string | null }[];
       };
       mark_conversation_read: {
         Args: { p_conversation_id: string; p_through_seq: number };

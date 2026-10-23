@@ -26,7 +26,7 @@ export default async function ConversationPage({
     supabase.rpc('list_chat_inbox'),
     supabase
       .from('messages')
-      .select('id, sender_id, kind, body, created_at, message_seq')
+      .select('id, sender_id, kind, body, created_at, message_seq, listing_id')
       .eq('conversation_id', conversationId)
       .order('message_seq', { ascending: false })
       .limit(100),

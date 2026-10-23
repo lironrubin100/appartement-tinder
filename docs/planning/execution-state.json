@@ -199,7 +199,10 @@
       "status": "pending"
     },
     "SL10.1": {
-      "status": "pending"
+      "status": "verification-incomplete",
+      "handoff": "docs/workstreams/2026-10-23-listing-sharing.md",
+      "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
+      "outcome": "Owner23October bounded sharing tasks10.1–10.5 implemented and locally verified: guest catalog/native public links; accepted personal/group public-reference cards; independent saves;18 final Chrome cases, SQL/RLS/two privacy units/types/lint/build pass. Live migration20261023192226. Production release pending. Full predecessor/SL10 packet hardening labels not reconciled; no group-unanimous inquiry or continuous listing-change push claimed."
     },
     "SL06.3": {
       "status": "pending"
@@ -229,7 +232,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14,2.16–2.32 and4.1 verified within handoff scope.4.1 owner snapshot initial persisted revision migration20261023185301 live;24 units/SQL/types/lint/build and15 local browser regressions pass. Release pending. Full owner milestone incomplete; owner23October prioritizes public/native apartment sharing before4.2."
+      "outcome": "Tasks4.9–4.14,2.16–2.32 and4.1 verified within handoff scope.4.1 released1e23192, READY canonical and15 production Chrome cases pass. Owner23October sharing priority implemented in separate handoff; after its release resume4.2 versioned atomic writer. Full owner-management milestone/goal remain incomplete."
     }
   },
   "micro_task_dispatch": {
@@ -296,6 +299,7 @@
     "packet": "SL10.1",
     "after_task": "4.1",
     "handoff": "docs/workstreams/2026-10-23-listing-sharing.md",
-    "scope": "Guest apartment viewing/browsing and links; accepted personal/group chat public-reference cards with modular preview. Complete release of4.1 first;4.2 remains pending."
+    "scope": "Guest apartment viewing/browsing and links; accepted personal/group chat public-reference cards with modular preview. Complete release of4.1 first;4.2 remains pending.",
+    "status": "bounded-implementation-verified-release-pending"
   }
 }

@@ -1,5 +1,8 @@
 'use client';
 
+import { ChatListingCard } from '@/components/chat/ChatListingCard';
+import { sharedListingId, messageFields } from '@/lib/chat/message-types';
+import { useFavorites } from '@/hooks/useFavorites';
 import Link from 'next/link';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Send } from 'lucide-react';
@@ -9,6 +12,7 @@ import { Button } from '@/components/ui';
 
 type Message = {
   message_seq: number;
+  listing_id: string | null;
   id: string;
   sender_id: string | null;
   kind: string;
@@ -36,6 +40,7 @@ export default function ChatThread({
   initialMessages: Message[];
 }) {
   const en = locale === 'en';
+  const favorites = useFavorites();
   const [older, setOlder] = useState(initialMessages.length === 100);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [messages, setMessages] = useState(initialMessages);
@@ -97,7 +102,7 @@ export default function ChatThread({
         while (active && joined && replicationReady) {
           const { data, error: loadError } = await supabase
             .from('messages')
-            .select('id,sender_id,kind,body,created_at,message_seq')
+            .select(messageFields)
             .eq('conversation_id', conversationId)
             .gt('message_seq', catchUpCursor.current)
             .order('message_seq', { ascending: true })
@@ -282,7 +287,7 @@ export default function ChatThread({
               setLoadingOlder(true);
               const { data, error: e } = await createClient()
                 .from('messages')
-                .select('id,sender_id,kind,body,created_at,message_seq')
+                .select(messageFields)
                 .eq('conversation_id', conversationId)
                 .lt('message_seq', messages[0]?.message_seq ?? 0)
                 .order('message_seq', { ascending: false })
@@ -307,6 +312,8 @@ export default function ChatThread({
           </Button>
         )}
         {messages.map((message) => {
+          const listingId = sharedListingId(message);
+          if (listingId) return <div key={message.id} className={`flex ${message.sender_id === currentUserId ? 'justify-start' : 'justify-end'}`}><div className="w-full max-w-sm">{message.sender_id && memberNames[message.sender_id] && <p className="mb-1 text-xs text-muted-text">{memberNames[message.sender_id]}</p>}<ChatListingCard id={listingId} locale={locale} favorites={favorites}/></div></div>;
           const isOwn = message.sender_id === currentUserId;
           if (message.kind === 'system')
             return (

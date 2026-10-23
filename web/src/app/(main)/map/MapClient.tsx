@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
+import { ShareListing } from '@/components/listings/ShareListing';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, MapPin, MessageCircle } from 'lucide-react';
@@ -33,6 +35,7 @@ function isNewListing(createdAt: string) {
 }
 
 export default function MapPage() {
+  const locale = usePathname().startsWith('/en') ? 'en' : 'he';
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -133,6 +136,7 @@ export default function MapPage() {
             >
               {filtered.map((apt) => (
                 <ListingCard
+                  locale={locale}
                   key={apt.id}
                   id={apt.id}
                   title={apt.title}
@@ -209,7 +213,8 @@ export default function MapPage() {
               המיקום במפה מוצג כאזור כללי בלבד. הכתובת המדויקת תהיה זמינה בצ׳אט רק לאחר שבעל/ת הנכס יאשרו את הפנייה.
             </p>
             {selected.description && <p className="text-body-text mb-4">{selected.description}</p>}
-            <Link href={`/listings/${selected.id}`} className="mb-4 inline-block rounded-xl border border-card-border px-4 py-3 text-teal">צפייה במודעה המלאה</Link>
+            <Link href={`${locale === 'en' ? '/en' : ''}/listings/${selected.id}`}  className="mb-4 inline-block rounded-xl border border-card-border px-4 py-3 text-teal">צפייה במודעה המלאה</Link>
+            <ShareListing id={selected.id} locale={locale}/>
             <Button
               variant="primary"
               className="w-full"

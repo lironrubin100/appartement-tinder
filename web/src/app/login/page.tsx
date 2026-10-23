@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
 import GoogleSignInButton from './GoogleSignInButton';
@@ -40,6 +41,7 @@ export default async function LoginPage({
           <span className="h-px flex-1 bg-card-border" />
         </div>
         <GoogleSignInButton returnTo={returnTo} locale={locale} />
+        <Link href={localePath('/listings', locale)} className="inline-block text-teal underline">{en ? 'Browse apartments without an account' : 'צפייה בדירות ללא הרשמה'}</Link>
       </div>
     </div>
   );

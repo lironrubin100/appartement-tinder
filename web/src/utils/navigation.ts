@@ -17,7 +17,7 @@ export function safeReturnTo(value: unknown, fallback = '/') {
     if (url.origin !== 'https://shutaf.invalid') return fallback;
     const path = url.pathname.replace(/^\/en(?=\/|$)/, '') || '/';
     if (
-      !/^\/(?:discover|map|profile(?:\/edit)?|settings|my-listings|compose|chats(?:\/[a-f0-9-]{36})?|listings\/[a-f0-9-]{36})?$/i.test(
+      !/^\/(?:discover|map|profile(?:\/edit)?|settings|my-listings|compose|chats(?:\/[a-f0-9-]{36})?|listings(?:\/[a-f0-9-]{36})?)?$/i.test(
         path
       )
     )

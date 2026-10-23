@@ -101,6 +101,7 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
       <MapContainer
         center={BEER_SHEVA_CENTER}
         zoom={13}
+        maxZoom={18}
         scrollWheelZoom
         className="w-full h-full rounded-shutaf-lg"
       >

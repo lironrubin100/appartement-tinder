@@ -5,6 +5,7 @@ import {
   listingPath,
   type ListingLocale,
 } from '@/lib/listings/public';
+import { ShareListing } from './ShareListing';
 import { ListingContact } from './ListingContact';
 
 export async function PublicListing({
@@ -27,7 +28,7 @@ export async function PublicListing({
       className="mx-auto w-full max-w-4xl px-5 py-8 text-ink"
     >
       <header className="mb-6 flex items-center justify-between gap-4">
-        <Link href="/" className="text-xl font-bold text-orange-dark">
+        <Link href={en ? '/en/listings' : '/listings'} className="text-xl font-bold text-orange-dark">
           Shutaf
         </Link>
         <a
@@ -38,7 +39,7 @@ export async function PublicListing({
           {en ? 'עברית' : 'English'}
         </a>
       </header>
-      <h1 className="mb-3 text-3xl font-bold">{listing.title}</h1>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h1 className="text-3xl font-bold">{listing.title}</h1><ShareListing id={id} locale={locale}/></div>
       <p className="mb-5 text-muted-text">
         {en ? 'Approximate area' : 'אזור משוער'} ·{' '}
         {listing.bedrooms} {en ? 'bedrooms' : 'חדרים בדירה'}
@@ -105,7 +106,7 @@ export async function PublicListing({
       </p>
       <ListingContact id={id} locale={locale} />
       <Link
-        href="/map"
+        href={locale === 'en' ? '/en/listings' : '/listings'}
         className="mt-6 inline-flex rounded-xl bg-orange px-5 py-3 font-semibold text-white"
       >
         {en ? 'Browse apartments in Shutaf' : 'לצפייה בדירות ב־Shutaf'}

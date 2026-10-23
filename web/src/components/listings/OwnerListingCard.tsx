@@ -1,3 +1,4 @@
+import { ShareListing } from './ShareListing';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
@@ -60,6 +61,7 @@ export function OwnerListingCard({ listing, locale, viewHref, manageHref, childr
           {viewHref && <Link href={viewHref} className="text-teal underline">{t('צפייה במודעה', 'View listing')}</Link>}
           {manageHref && <Link href={manageHref} className="text-teal underline">{t('ניהול המודעה', 'Manage listing')}</Link>}
         </div>
+        {listing.status === 'active' && rooms.length > 0 && <div className="mt-3"><ShareListing id={listing.id} locale={locale}/></div>}
         {children}
       </div>
       <span data-testid="listing-status" className="ms-auto shrink-0 rounded-full bg-neutral-bg-soft px-3 py-1 text-sm">

@@ -27,6 +27,7 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261015084833_resident_journeys.sql'),
   await read('supabase/migrations/20261015084841_group_conversations.sql'),
   await read('supabase/migrations/20261015084850_inquiry_acceptance_guards.sql'),
+  await read('supabase/migrations/20261019210659_monotonic_chat_read_markers.sql'),
   await read('supabase/migrations/20261017082317_lister_safe_browsing.sql'),
   await read('supabase/migrations/20261017101500_convert_resident_to_lister.sql'),
   await read('supabase/migrations/20261020204057_private_random_listing_location.sql'),
@@ -37,7 +38,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023014407_private_listing_draft_media.sql'),
   await read('supabase/migrations/20261023113543_private_listing_draft_deletion.sql'),
   await read('supabase/migrations/20261023154219_verify_draft_publication_snapshot.sql'),
-  await read('supabase/migrations/20261023185301_owned_listing_editor_snapshot.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261023185301_owned_listing_editor_snapshot.sql'),
+  await read('supabase/migrations/20261023192226_core_listing_card.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -59,6 +61,8 @@ for (let i = 0; i < ids.length; i++) {
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
+await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
+console.log('PASS: reference-only card authority, retry collision, private history and no side effects.');
 await db.exec(await read('supabase/tests/plan_listing_editor.sql'));
 console.log('PASS: one-snapshot owner-only editor model, rooms/media ownership and private location boundary.');
 await db.exec(await read('supabase/tests/plan_listing_drafts.sql'));
@@ -284,7 +288,7 @@ console.log('PASS: migrations, private drafts/atomic completion, resident-to-lis
 
 // SL08.1 regression: run the forward migration over existing fixtures/history.
 await db.exec('reset role');
-await db.exec(await read('supabase/migrations/20261019210659_monotonic_chat_read_markers.sql'));
+// Monotonic messaging migration is loaded before card validation above.
 await as(0);
 const marker = async (seq) => Number((await rpc('select public.mark_conversation_read($1,$2) n',[personal.id,seq])).n);
 const unread = async () => Number((await rpc('select * from public.list_chat_inbox() where conversation_id=$1',[personal.id])).unread_count);

@@ -1,9 +1,11 @@
 import React from 'react';
 import Image from 'next/image';
 import { MapPin, Heart, MessageCircle } from 'lucide-react';
+import { ShareListing } from '@/components/listings/ShareListing';
 import { Badge } from '../ui/Badge';
 
 interface ListingCardProps {
+  locale?: 'he' | 'en';
   id: string;
   title: string;
   price: number;
@@ -26,6 +28,7 @@ interface ListingCardProps {
 }
 
 export function ListingCard({
+  locale = 'he',
   id,
   title,
   price,
@@ -147,7 +150,8 @@ export function ListingCard({
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-card-border">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-card-border">
+          <ShareListing id={id} locale={locale} />
           <div className="flex items-center gap-1 text-sm">
             <span className="text-muted-text">מעוניינים:</span>
             <span className="font-semibold text-ink">{interestedCount}</span>

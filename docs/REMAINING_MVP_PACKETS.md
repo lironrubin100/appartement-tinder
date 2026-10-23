@@ -125,7 +125,7 @@ Default disposable identities: ownerA,ownerB,residentA,residentB,outsider, later
 - Module anchors: listing share chooser/message-card renderer, send-message card validation.
 - Ordered work: Reference public listing ID, safe dynamic public projection and personal save state; allow personal/group conversations only with current history/member rights; inaccessible/removed card has honest fallback.
 - Required fixtures/assertions: Share to A/B and group ->one message not auto-save; A/B independently save/unsave count exact; repeated card save idempotent; outsider/prejoin cannot read card/history; no exact address snapshot; listing unavailable updates rendering; HE/EN deep link correct.
-- Scope/stop: No group wishlist entity or outside-app handoff.
+- Scope/stop: No group wishlist entity or external chat integration. Owner23October E8 amendment permits copying the native public apartment URL and guest apartment browsing; chat communication remains native.
 - Deliverable: narrow missing implementation or evidence-only no-change result; local compatibility migration if needed; affected checks and visible outcome; limitations and next packet in workstream handoff. Unmet provider/legal gate prevents release, not unrelated approved local work.
 
 ## SL11.1 — Keep group search and property lifecycle independent

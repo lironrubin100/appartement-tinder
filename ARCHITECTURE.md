@@ -208,3 +208,11 @@ These are bounded implementation results. Full interactive Google account/provid
 ## Listing management extension — approved 21 October 2026
 
 [LISTING_MANAGEMENT](docs/specs/LISTING_MANAGEMENT.md) defines owner-only versioned cloud drafts, private draft media, retry-safe legacy import, frozen publication snapshot/receipt reconciliation and explicit atomic published edits. Reuse current owner identity, validators, publication receipts and conversations. Store object references rather than File/temporary signed URLs; never expose draft addresses/photos via public projections or shared cache. Owner inbox projections and a separate seen marker do not change chat unread semantics. These components/migrations are planned by task; none was implemented by this documentation change.
+
+## Apartment preview module (E8/F3, 23 October 2026)
+
+`lib/listings/preview.ts` defines the explicit public preview projection and localized native path. `ListingPreviewCard` owns presentation only, with an actions slot; guest catalog and chat cards reuse it. `ShareListing` owns link copy, accepted-conversation chooser and same-request retry. `ChatListingCard` loads current public data, handles unavailable/retry states and wires the viewer's personal favorites. Existing tokens/components remain (I3); changing card layout does not change message persistence or send authorization.
+
+Messages persist `kind=listing` plus one `listing_id`, with a generic inbox body and shared request-key namespace. No private snapshot, image bytes or exact location are stored in the message. Validated `send_listing_card` uses current membership/block rules and existing sequence/history mechanisms; direct listing-reference INSERT remains denied. The bounded anonymous `list_public_listings` RPC returns only preview fields (13-row lookahead/12 visible); direct anonymous view/table reads remain denied. Public card data refreshes on mounting/focus/online, with honest unavailable and network-error states. Continuous listing-change push is a later hardening item, not implied by chat message Realtime delivery.
+
+Group unanimous owner contact remains the separate GROUP_LISTING_INQUIRIES contract. Sharing/saving never creates that consent, inquiry or address grant.
