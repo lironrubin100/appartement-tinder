@@ -23,7 +23,8 @@ export async function createListingCloudDraft(input: CreateDraftInput): Promise<
     const client = await createServerClient({ noStore: true });
     const { data: { user }, error: authError } = await client.auth.getUser();
     if (authError || !user) return failure('AUTH_REQUIRED');
-    if (!input || typeof input !== 'object' || Object.keys(input).some(key => !['requestKey', 'fields', 'source'].includes(key)) || !isId(input.requestKey)) return failure('VALIDATION_FAILED');
+    if (!input || typeof input !== 'object' || Object.keys(input).some(key => !['requestKey', 'fields', 'source', 'expectedAccountId'].includes(key)) || !isId(input.requestKey)) return failure('VALIDATION_FAILED');
+    if (input.expectedAccountId !== undefined && (!isId(input.expectedAccountId) || input.expectedAccountId !== user.id)) return failure('AUTH_REQUIRED');
     const fields = parseDraftFields(input.fields === undefined ? {} : input.fields);
     if (!fields || input.source !== undefined && (!input.source || typeof input.source !== 'object'
       || Object.keys(input.source).some(key => !['listingId', 'revision'].includes(key))

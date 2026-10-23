@@ -6,7 +6,7 @@ import type { DraftPhotoReference, ListingCloudDraft, ListingDraftFields, Storag
 export type DraftErrorCode = 'AUTH_REQUIRED' | 'NOT_FOUND' | 'VALIDATION_FAILED' | 'VERSION_CONFLICT' | 'STATE_UNAVAILABLE' | 'CURSOR_STALE' | 'INTERNAL';
 export type DraftResult<T> = { ok: true; data: T } | { ok: false; error: { code: DraftErrorCode; retryable: boolean; correlationId?: string } };
 export type DraftDocument = ListingCloudDraft & { publicationStartedAt: string | null };
-export type CreateDraftInput = { requestKey: string; fields?: ListingDraftFields; source?: { listingId: string; revision: number } };
+export type CreateDraftInput = { requestKey: string; expectedAccountId?: string; fields?: ListingDraftFields; source?: { listingId: string; revision: number } };
 export type DraftListInput = { limit?: number; cursor?: string; state?: 'open' | 'completed' | 'all'; kind?: 'new' | 'edit' | 'all' };
 export type DraftPage = { items: DraftDocument[]; next_cursor: string | null; has_more: boolean; projection_version: 1 };
 export type DraftRow = Database['public']['Tables']['listing_drafts']['Row'];

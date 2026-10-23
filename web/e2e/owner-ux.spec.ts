@@ -86,7 +86,7 @@ for (const locale of ['he', 'en'] as const) {
       // Reopening after a successful close must permit later saves.
       await title.fill('UX reopened draft');
       await expect.poll(() => page.evaluate(() => new Promise<string>((resolve, reject) => {
-        const request = indexedDB.open('shutaf-listing-drafts', 1);
+        const request = indexedDB.open('shutaf-listing-drafts');
         request.onerror = () => reject(request.error);
         request.onsuccess = () => {
           const db = request.result;

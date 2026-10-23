@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks 4.9–4.14 and 2.16–2.21 verified within recorded scope; media adapter has actual browser compression/fresh-session rendered preview and ordinary-client recovery/account-switch acceptance. Private media migration 20261023014407 remains live. Next physical task 2.22 legacy local draft import; cloud composer/full inbox and milestone remain incomplete."
+      "outcome": "Tasks 4.9–4.14 and 2.16–2.22 verified within recorded scope. Explicit legacy import has real IndexedDB upgrade/tab/reload and ordinary-client interruption/cleanup/verification/account-switch acceptance; unchanged-source deletion only after cloud byte verification. Next physical task 2.23 draft list, then 2.24/2.25 UI integration. Full milestone remains incomplete."
     }
   },
   "micro_task_dispatch": {

@@ -9,11 +9,11 @@ import { createHash } from 'node:crypto';
 
 export type PublishListingResult = { error: string } | { error: null; listingId: string };
 
-export async function discardListingAttempt(requestKey: string): Promise<{ status: 'cancelled' | 'published' } | { error: true }> {
+export async function discardListingAttempt(requestKey: string, expectedAccountId?: string): Promise<{ status: 'cancelled' | 'published' } | { error: true }> {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey)) return { error: true };
-  const supabase = await createServerClient();
+  const supabase = await createServerClient({ noStore: true });
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: true };
+  if (!user || expectedAccountId !== undefined && expectedAccountId !== user.id) return { error: true };
   const { data, error } = await supabase.rpc('cancel_listing_publication', { p_request_key: requestKey });
   if (error || (data !== 'cancelled' && data !== 'published')) return { error: true };
   if (data === 'published') return { status: 'published' };
