@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.32 verified within owning handoff scope. Selected new cloud draft Publish flushes acknowledged fields/media and completes only verified receipt; frozen reopening checks without publication, explicit exact retry/cancellation and conflict/account guards pass. Local14 publication/recovery plus33 regressions,23 units, types/lint/build pass; canonical release and two real provider cases pending. No new migration/config. Next4.1 owner edit reader; full milestone active/incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.32 verified within owning handoff scope. Selected cloud Publish/recovery released in applicationb008784, productiondpl_A621g1FuQpZu32PY8fUtmFJFHBEF READY: canonical16 publication/recovery/real-provider plus4 guest/auth cases passed in phases. Local47 browser,23 units, types/lint/build/planning pass. No new schema/config; retained exact fixtures byte-audited. Next4.1 is new owner-only edit reader; full milestone and goal active/incomplete."
     }
   },
   "micro_task_dispatch": {
