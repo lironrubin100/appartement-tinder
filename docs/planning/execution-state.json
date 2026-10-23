@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.28 verified within owning handoff scope. Cloud photos released69e1e3f with canonical11/11 acceptance. Pure explicit chooser has HE/EN React browser callback/state/layout acceptance, type/lint/build pass; Plus wiring remains2.29. Cloud publication remains later2.31; full milestone incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.29 verified within owning handoff scope. Plus now offers explicit New/selected cloud draft/legacy import inside the origin overlay, with stable per-intent retries, owner/revision guards, local-storage degradation and confirmed conflict reload without navigation. Optimized-build39/39 browser acceptance and type/lint/build/unit checks passed. Release/live acceptance pending; next2.30 explicit draft deletion. Cloud publication remains2.31–2.32; full milestone incomplete."
     }
   },
   "micro_task_dispatch": {

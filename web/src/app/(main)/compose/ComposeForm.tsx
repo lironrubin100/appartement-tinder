@@ -49,7 +49,7 @@ function formatFields(fields: ListingDraftFields, locale: Locale): string {
 }
 export type ComposeFormHandle = { saveAndClose: () => Promise<void> };
 
-export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void }) {
+export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished, onReloadSaved }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void; onReloadSaved?: () => Promise<boolean> }) {
   // Keep the selected editing session anchored through server-action/RSC refreshes.
   // Loading another draft uses the caller's id key; reload is an explicit choice.
   const [cloudDraft] = useState(receivedCloudDraft);
@@ -61,6 +61,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [reloading, setReloading] = useState(false), [reloadFailed, setReloadFailed] = useState(false);
   const busy = useRef(false);
   const requestKey = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -317,6 +318,14 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     }
   }
 
+  async function reloadSavedVersion() {
+    if (reloading || !window.confirm(t('לטעון את הגרסה השמורה ולהחליף את השינויים המקומיים?', 'Load the saved version and replace your local edits?'))) return;
+    if (!onReloadSaved) { finished.current = true; window.location.reload(); return; }
+    setReloading(true); setReloadFailed(false);
+    try { if (await onReloadSaved()) finished.current = true; else setReloadFailed(true); }
+    catch { setReloadFailed(true); }
+    finally { setReloading(false); }
+  }
   useImperativeHandle(ref, () => ({ saveAndClose: saveDraftAndClose }));
 
   if (!draftLoaded) return <p role="status" className="p-6">{t('טוענים טיוטה…', 'Loading draft…')}</p>;
@@ -328,7 +337,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
         <p className="mb-8 text-sm text-muted-text">{t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
 
         <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => { pendingInput.current = true; setRevision(value => value + 1); if (cloudDraft) setCloudState(current => current.phase === 'error' || current.phase === 'conflict' ? current : { phase: 'dirty' }); }} noValidate>
-          <fieldset disabled={submitting || savingDraft} className="space-y-6">
+          <fieldset disabled={submitting || savingDraft || reloading} className="space-y-6">
           <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} defaultValue={initialDraft?.title ?? ''} required maxLength={100} />
           <div className="grid gap-6 sm:grid-cols-2">
             <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type={cloudDraft ? "text" : "number"} inputMode="numeric" maxLength={32} min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
@@ -413,7 +422,8 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
               {!comparison && <Button type="button" variant="ghost" onClick={() => { void loadListingCloudDraft(cloudDraft.id).then(result => { if (result.ok) setComparison(result.data); }).catch(() => {}); }}>{t('טעינת גרסה להשוואה', 'Load version to compare')}</Button>}
               {comparison && <label className="mt-3 block text-sm">{t('הגרסה השמורה בחשבון', 'Saved version')}<textarea readOnly rows={6} className="mt-1 w-full rounded border border-card-border p-2" value={formatFields(comparison.fields, locale)} /></label>}
               {comparison && <div className="mt-4"><p className="mb-2 text-sm font-semibold">{t('התמונות השמורות להשוואה; הבחירה שלך נשארה למעלה.', 'Saved photos for comparison; your selection remains above.')}</p><SavedDraftPhotos draft={comparison} locale={locale} /></div>}
-              <Button type="button" variant="ghost" onClick={() => { if (window.confirm(t('לטעון את הגרסה השמורה ולהחליף את השינויים המקומיים?', 'Load the saved version and replace your local edits?'))) { finished.current = true; window.location.reload(); } }}>{t('טעינת הגרסה השמורה', 'Load saved version')}</Button>
+              <Button type="button" variant="ghost" disabled={reloading} onClick={() => { void reloadSavedVersion(); }}>{t('טעינת הגרסה השמורה', 'Load saved version')}</Button>
+              {reloadFailed && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לטעון את הגרסה השמורה. השינויים שלך נשארו כאן.', 'Could not load the saved version. Your edits are still here.')}</p>}
             </div>}
             <p className="text-sm text-muted-text">{t('השינויים בטיוטה פרטיים. פרסום מטיוטות שמורות עדיין אינו זמין.', 'Draft changes stay private. Publishing saved drafts is not available yet.')}</p>
           </div>}

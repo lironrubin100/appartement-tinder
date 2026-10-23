@@ -4,7 +4,7 @@ import type { Locale } from '@/lib/listings/text';
 import type { ListingDraftListItem } from './ListingDraftList';
 
 export type ListingDraftChoice = { kind: 'new' } | { kind: 'continue'; draftId: string; expectedRevision: number } | { kind: 'import' };
-export type ListingDraftChoiceItem = Readonly<Pick<ListingDraftListItem, 'id' | 'title' | 'updatedAt' | 'kind'> & { revision: number }>;
+export type ListingDraftChoiceItem = Readonly<Pick<ListingDraftListItem, 'id' | 'title' | 'updatedAt' | 'kind'> & { revision: number; unavailable?: boolean }>;
 
 type Props = {
   items: readonly ListingDraftChoiceItem[];
@@ -49,10 +49,11 @@ export function ListingDraftChooser({ items, locale, hasLocalDraft, onChoose, on
                 return <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-card-border p-4">
                   <div className="min-w-0 flex-1 basis-44">
                     <h4 className="break-words font-semibold text-ink">{title}</h4>
+                    {item.unavailable && <p className="mt-1 text-sm text-muted-text">{en ? 'Publication in progress' : 'הפרסום בתהליך'}</p>}
                     <p className="mt-1 text-sm text-muted-text">{item.kind === 'edit' ? (en ? 'Listing edit' : 'עריכת מודעה') : (en ? 'New listing' : 'מודעה חדשה')}</p>
                     <p className="mt-1 text-xs text-muted-text">{en ? 'Updated ' : 'עודכן ב־'}<time dateTime={item.updatedAt}>{date.format(new Date(item.updatedAt))}</time></p>
                   </div>
-                  <button type="button" aria-label={(en ? 'Continue: ' : 'המשך: ') + title} onClick={() => onChoose({ kind: 'continue', draftId: item.id, expectedRevision: item.revision })}
+                  <button type="button" disabled={item.unavailable} aria-label={(en ? 'Continue: ' : 'המשך: ') + title} onClick={() => onChoose({ kind: 'continue', draftId: item.id, expectedRevision: item.revision })}
                     className="min-h-11 rounded-xl border border-card-border px-4 py-3 font-semibold text-teal disabled:opacity-50">{en ? 'Continue' : 'המשך'}</button>
                 </li>;
               })}
