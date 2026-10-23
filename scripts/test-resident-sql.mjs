@@ -39,7 +39,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023113543_private_listing_draft_deletion.sql'),
   await read('supabase/migrations/20261023154219_verify_draft_publication_snapshot.sql'),
   await read('supabase/migrations/20261023185301_owned_listing_editor_snapshot.sql'),
-  await read('supabase/migrations/20261023192226_core_listing_card.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261023192226_core_listing_card.sql'),
+  await read('supabase/migrations/20261023200459_versioned_listing_edit.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -63,6 +64,8 @@ await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
 await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
 console.log('PASS: reference-only card authority, retry collision, private history and no side effects.');
+await db.exec(await read('supabase/tests/plan_listing_edit.sql'));
+console.log('PASS: owner atomic edit, one revision, durable retry receipts, preserved inventory/location, rollback and direct-write denial.');
 await db.exec(await read('supabase/tests/plan_listing_editor.sql'));
 console.log('PASS: one-snapshot owner-only editor model, rooms/media ownership and private location boundary.');
 await db.exec(await read('supabase/tests/plan_listing_drafts.sql'));
@@ -134,6 +137,9 @@ await db.exec('rollback');
 await as(0);
 await rejected('select public.publish_apartment_once($1,$2::jsonb)', [listingId, listingDraft.replace('Test home', 'Different home')]);
 assert.equal((await rpc('select count(*)::int count from public.apartment_rooms where apartment_id=$1', [listingId])).count, 2);
+await rejected('update public.apartment_rooms set monthly_price=2700 where apartment_id=$1', [listingId]);
+await db.exec('reset role');
+// Privileged fixture setup retains the derived-price trigger check; ordinary edits use the guarded RPC.
 await db.query('update public.apartment_rooms set monthly_price=2700 where apartment_id=$1 and monthly_price=2000', [listingId]);
 assert.equal((await rpc('select price from public.apartments where id=$1', [listingId])).price, 2600);
 await as(listerIndex);

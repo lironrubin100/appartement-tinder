@@ -211,8 +211,8 @@
   - **הוראות טכניות ברורות:** טען את הדירה, החדרים, photo refs ו־revision לעריכה רק לבעלים; מיקום מדויק אינו הופך לשדה עריכה ציבורי.
   - **קריטריון קבלה:** בעלים טוען מודל מלא; בעלים אחר מקבל NOT_FOUND ואינו מקבל address.
 
-- [ ] **משימה 4.2: עדכון מודל אטומי**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021000015_versioned_listing_edit.sql`, `supabase/tests/plan_listing_edit.sql`, `scripts/test-resident-sql.mjs`.
+- [x] **משימה 4.2: עדכון מודל אטומי**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261023200459_versioned_listing_edit.sql`, `supabase/tests/plan_listing_edit.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** RPC בעלים בודק expected_revision ומאמת את המודל הסופי; update של facts/rooms/photo refs יחד ומעלה revision פעם אחת. מיקום מפורסם אינו משתנה בעריכה רגילה. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** שינוי מחיר/תאריך נשמר; stale revision מקבל conflict; rollback משאיר מודל ותמונות ישנים.
 
