@@ -16,12 +16,13 @@ function loadDraftServices(client) {
         if (!options?.noStore) throw new Error('Draft service must request no-store reads');
         return client;
       } };
+      if (id.startsWith('@/lib/listings/')) return load(path.resolve('src/lib/listings', id.slice('@/lib/listings/'.length) + '.ts'));
       if (id.startsWith('.')) return load(path.resolve(path.dirname(filename), id + '.ts'));
       return require(id);
     };
     new Function('require', 'module', 'exports', code)(requireLocal, module, module.exports);
     return module.exports;
   }
-  return { publishing: load(path.resolve('src/lib/listings/draft-publish.ts')), publication: load(path.resolve('src/lib/listings/publication-contract.ts')), deletionActions: load(path.resolve('src/lib/listings/draft-delete-actions.ts')), deletion: load(path.resolve('src/lib/listings/draft-delete.ts')), actions: load(path.resolve('src/lib/listings/draft-actions.ts')), contract: load(path.resolve('src/lib/listings/draft-service-contract.ts')), media: load(path.resolve('src/lib/listings/draft-media.ts')), mediaActions: load(path.resolve('src/lib/listings/draft-media-actions.ts')), mediaContract: load(path.resolve('src/lib/listings/draft-media-contract.ts')), listingActions: load(path.resolve('src/lib/listings/actions.ts')), imports: load(path.resolve('src/lib/listings/draft-import.ts')), store: load(path.resolve('src/lib/listings/draft-store.ts')) };
+  return { editor: load(path.resolve('src/lib/listings/editor.ts')), ownerActions: load(path.resolve('src/app/(main)/my-listings/actions.ts')), publishing: load(path.resolve('src/lib/listings/draft-publish.ts')), publication: load(path.resolve('src/lib/listings/publication-contract.ts')), deletionActions: load(path.resolve('src/lib/listings/draft-delete-actions.ts')), deletion: load(path.resolve('src/lib/listings/draft-delete.ts')), actions: load(path.resolve('src/lib/listings/draft-actions.ts')), contract: load(path.resolve('src/lib/listings/draft-service-contract.ts')), media: load(path.resolve('src/lib/listings/draft-media.ts')), mediaActions: load(path.resolve('src/lib/listings/draft-media-actions.ts')), mediaContract: load(path.resolve('src/lib/listings/draft-media-contract.ts')), listingActions: load(path.resolve('src/lib/listings/actions.ts')), imports: load(path.resolve('src/lib/listings/draft-import.ts')), store: load(path.resolve('src/lib/listings/draft-store.ts')) };
 }
 module.exports = { loadDraftServices };

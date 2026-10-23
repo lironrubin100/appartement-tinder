@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.32 verified within owning handoff scope. Selected cloud Publish/recovery released in applicationb008784, productiondpl_A621g1FuQpZu32PY8fUtmFJFHBEF READY: canonical16 publication/recovery/real-provider plus4 guest/auth cases passed in phases. Local47 browser,23 units, types/lint/build/planning pass. No new schema/config; retained exact fixtures byte-audited. Next4.1 is new owner-only edit reader; full milestone and goal active/incomplete."
+      "outcome": "Tasks4.9–4.14,2.16–2.32 and4.1 verified within handoff scope.4.1 owner snapshot initial persisted revision migration20261023185301 live;24 units/SQL/types/lint/build and15 local browser regressions pass. Release pending. Full owner milestone incomplete; owner23October prioritizes public/native apartment sharing before4.2."
     }
   },
   "micro_task_dispatch": {
@@ -290,5 +290,12 @@
       "4.19"
     ],
     "reason": "Direct owner priority 21 October: complete owner management/cloud drafts/individual inquiry inbox next, after the current micro-task; follow physical checklist one task at a time."
+  },
+  "owner_priority_override": {
+    "date": "2026-10-23",
+    "packet": "SL10.1",
+    "after_task": "4.1",
+    "handoff": "docs/workstreams/2026-10-23-listing-sharing.md",
+    "scope": "Guest apartment viewing/browsing and links; accepted personal/group chat public-reference cards with modular preview. Complete release of4.1 first;4.2 remains pending."
   }
 }

@@ -2,6 +2,7 @@
 import { createServerClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { validListingId } from '@/lib/listings/public';
+import { getOwnedListingEditModel, type ListingEditorResult } from '@/lib/listings/editor';
 
 export async function markListingRented(id: string): Promise<{ error: string | null }> {
   if (!validListingId(id)) return { error: 'מודעה לא תקינה.' };
@@ -16,4 +17,9 @@ export async function markListingRented(id: string): Promise<{ error: string | n
   revalidatePath(`/listings/${id}`);
   revalidatePath(`/en/listings/${id}`);
   return { error: null };
+}
+
+// Shared owner reader for the later private edit-draft and form callers.
+export async function loadOwnedListingForEdit(id: string, expectedAccountId?: string): Promise<ListingEditorResult> {
+  return getOwnedListingEditModel(id, expectedAccountId);
 }

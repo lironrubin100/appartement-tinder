@@ -36,7 +36,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql'),
   await read('supabase/migrations/20261023014407_private_listing_draft_media.sql'),
   await read('supabase/migrations/20261023113543_private_listing_draft_deletion.sql'),
-  await read('supabase/migrations/20261023154219_verify_draft_publication_snapshot.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261023154219_verify_draft_publication_snapshot.sql'),
+  await read('supabase/migrations/20261023185301_owned_listing_editor_snapshot.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -58,6 +59,8 @@ for (let i = 0; i < ids.length; i++) {
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
+await db.exec(await read('supabase/tests/plan_listing_editor.sql'));
+console.log('PASS: one-snapshot owner-only editor model, rooms/media ownership and private location boundary.');
 await db.exec(await read('supabase/tests/plan_listing_drafts.sql'));
 console.log('PASS: private draft owner, outsider, anonymous and edit-source isolation.');
 // D2/B2: a completed resident can publish without a phone; a nonresident cannot.

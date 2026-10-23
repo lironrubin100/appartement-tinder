@@ -236,6 +236,7 @@ export type Database = {
           source: string;
           status: string;
           title: string;
+          revision: number;
         };
         Insert: {
           address?: string | null;
@@ -258,6 +259,7 @@ export type Database = {
           source?: string;
           status?: string;
           title: string;
+          revision?: number;
         };
         Update: {
           address?: string | null;
@@ -280,6 +282,7 @@ export type Database = {
           source?: string;
           status?: string;
           title?: string;
+          revision?: number;
         };
         Relationships: [
           {
@@ -1452,6 +1455,7 @@ export type Database = {
       };
     };
     Functions: {
+      get_owned_listing_editor: { Args: { p_listing_id: string }; Returns: Json };
       cancel_listing_draft_publication: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
       verify_listing_draft_publication_snapshot: { Args: { p_draft_id: string; p_expected_revision: number; p_payload: Json }; Returns: boolean };
       begin_listing_draft_publication: { Args: { p_draft_id: string; p_expected_revision: number; p_payload: Json }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
