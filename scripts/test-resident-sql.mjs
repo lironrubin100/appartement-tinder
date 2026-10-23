@@ -12,7 +12,7 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 await db.exec(`create role anon; create role authenticated; create schema auth; create schema storage;
 create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
-create table storage.buckets(id text primary key,name text,public boolean);
+create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
 create table storage.objects(id uuid primary key,bucket_id text,name text,owner_id text);
 create function storage.foldername(text) returns text[] language sql as $$ select string_to_array($1,'/') $$;`);
 await db.exec(await read('supabase/schema.sql'));
@@ -33,7 +33,10 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261020204548_listing_retry_owned_photos.sql'),
   await read('supabase/migrations/20261021225221_private_listing_drafts.sql'),
   await read('supabase/migrations/20261022075546_save_listing_draft_revision.sql'),
-  await read('supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql'),
+  await read('supabase/migrations/20261023014407_private_listing_draft_media.sql')]) await db.exec(sql);
+
+await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
 const ids = Array.from({ length: 25 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
 for (const id of ids) await db.query('insert into auth.users(id) values($1)', [id]);
@@ -77,6 +80,8 @@ assert.equal((await rpc('select public.cancel_listing_publication($1) result', [
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_listing_draft_revision.sql'));
 console.log('PASS: draft revision, import retry, publication freeze and verified completion.');
+await db.exec(await read('supabase/tests/plan_listing_draft_media.sql'));
+console.log('PASS: private media upload/read, immutable objects, owner/revision association, freeze and source preservation.');
 await as(0);
 const position = await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]);
 const metres = Math.hypot((position.public_lat - position.lat) * 111320,
