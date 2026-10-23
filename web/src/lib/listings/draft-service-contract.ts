@@ -3,7 +3,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { Database, Json } from '@/types/database';
 import type { DraftPhotoReference, ListingCloudDraft, ListingDraftFields, StorageObjectPath } from './draft-types';
 
-export type DraftErrorCode = 'AUTH_REQUIRED' | 'NOT_FOUND' | 'VALIDATION_FAILED' | 'VERSION_CONFLICT' | 'STATE_UNAVAILABLE' | 'CURSOR_STALE' | 'INTERNAL';
+export type DraftErrorCode = 'AUTH_REQUIRED' | 'NOT_FOUND' | 'VALIDATION_FAILED' | 'VERSION_CONFLICT' | 'STATE_UNAVAILABLE' | 'CURSOR_STALE' | 'CLEANUP_PENDING' | 'INTERNAL';
 export type DraftResult<T> = { ok: true; data: T } | { ok: false; error: { code: DraftErrorCode; retryable: boolean; correlationId?: string } };
 export type DraftDocument = ListingCloudDraft & { publicationStartedAt: string | null };
 export type CreateDraftInput = { requestKey: string; expectedAccountId?: string; fields?: ListingDraftFields; source?: { listingId: string; revision: number } };
@@ -55,7 +55,7 @@ export function decodeDraft(row: Omit<DraftRow, 'publication_payload_hash'>, act
   const fields = parseDraftFields(row.fields);
   if (!isId(row.id) || row.owner_id !== actor || row.schema_version !== 1 || !isRevision(row.revision)
     || !timestamp(row.created_at) || !timestamp(row.updated_at) || !fields || !Array.isArray(row.photos)
-    || !['open', 'completed'].includes(row.state) || !isId(row.publication_request_id)
+    || !['open', 'deleting', 'completed'].includes(row.state) || !isId(row.publication_request_id)
     || row.import_receipt_id !== null && !isId(row.import_receipt_id)
     || row.publication_started_at !== null && !timestamp(row.publication_started_at)) throw new Error('INVALID_DRAFT');
   const photos: DraftPhotoReference[] = row.photos.map(photo => {
@@ -69,7 +69,7 @@ export function decodeDraft(row: Omit<DraftRow, 'publication_payload_hash'>, act
     return { kind: photo.kind as 'draft' | 'published', objectPath: photo.objectPath as StorageObjectPath };
   });
   const base = { id: row.id, ownerId: actor, schemaVersion: row.schema_version, revision: row.revision,
-    createdAt: row.created_at, updatedAt: row.updated_at, state: row.state as 'open' | 'completed', fields, photos,
+    createdAt: row.created_at, updatedAt: row.updated_at, state: row.state as 'open' | 'deleting' | 'completed', fields, photos,
     publicationRequestId: row.publication_request_id, importReceiptId: row.import_receipt_id, publicationStartedAt: row.publication_started_at };
   if (row.source_listing_id === null && row.source_revision === null) return { ...base, kind: 'new' };
   if (!isId(row.source_listing_id) || !isRevision(row.source_revision)) throw new Error('INVALID_SOURCE');

@@ -1,9 +1,10 @@
 import Link from 'next/link';
+import { DeleteListingDraftButton } from './DeleteListingDraftButton';
 import type { Locale } from '@/lib/listings/text';
 
 // Minimal dashboard projection; never a complete draft or signed media URL.
 export type ListingDraftListItem = Readonly<{
-  id: string; title?: string; updatedAt: string; kind: 'new' | 'edit'; continueHref?: string;
+  id: string; title?: string; updatedAt: string; kind: 'new' | 'edit'; continueHref?: string; revision?: number; deleting?: boolean;
 }>;
 export function ListingDraftList({ items, locale }: { items: readonly ListingDraftListItem[]; locale: Locale }) {
   const en = locale === 'en';
@@ -22,11 +23,12 @@ export function ListingDraftList({ items, locale }: { items: readonly ListingDra
         <p className="mt-1 text-sm text-muted-text">{item.kind === 'edit' ? (en ? 'Listing edit' : 'עריכת מודעה') : (en ? 'New listing' : 'מודעה חדשה')}</p>
         <p className="mt-1 text-xs text-muted-text">{en ? 'Updated ' : 'עודכן ב־'}<time dateTime={item.updatedAt}>{format.format(new Date(item.updatedAt))}</time></p>
       </div>
-      {item.continueHref && <Link href={item.continueHref}
+      {!item.deleting && item.continueHref && <Link href={item.continueHref}
         aria-label={(en ? 'Continue: ' : 'המשך: ') + (item.title?.trim() || (en ? 'Untitled draft' : 'טיוטה ללא כותרת'))}
         className="rounded-xl border border-card-border px-4 py-3 font-semibold text-teal">
         {en ? 'Continue' : 'המשך'}
       </Link>}
+      {item.revision !== undefined && <DeleteListingDraftButton id={item.id} revision={item.revision} deleting={Boolean(item.deleting)} locale={locale} />}
     </li>)}
   </ul>;
 }

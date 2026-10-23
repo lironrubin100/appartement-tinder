@@ -229,7 +229,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Tasks4.9–4.14 and2.16–2.29 verified within owning handoff scope. Plus now offers explicit New/selected cloud draft/legacy import inside the origin overlay, with stable per-intent retries, owner/revision guards, local-storage degradation and confirmed conflict reload without navigation. Optimized-build39/39 browser acceptance and type/lint/build/unit checks passed. Release/live acceptance pending; next2.30 explicit draft deletion. Cloud publication remains2.31–2.32; full milestone incomplete."
+      "outcome": "Tasks4.9–4.14 and2.16–2.30 verified within owning handoff scope. Explicit private draft deletion now freezes owner/revision, persists exact bounded media cleanup and retries, protects public/source photos and blocks old receipt/UUID resurrection. Shared migration20261023113543 and ordinary-client fault/isolation/bytes checks passed; all28 distinct local browser scenarios pass across targeted rerun, plus SQL/unit/type/lint/build. Task2.30 release/live acceptance pending. Next2.31 publication adapter then2.32 UI; full milestone incomplete."
     }
   },
   "micro_task_dispatch": {

@@ -21,6 +21,6 @@ function loadDraftServices(client) {
     new Function('require', 'module', 'exports', code)(requireLocal, module, module.exports);
     return module.exports;
   }
-  return { actions: load(path.resolve('src/lib/listings/draft-actions.ts')), contract: load(path.resolve('src/lib/listings/draft-service-contract.ts')), media: load(path.resolve('src/lib/listings/draft-media.ts')), mediaActions: load(path.resolve('src/lib/listings/draft-media-actions.ts')), mediaContract: load(path.resolve('src/lib/listings/draft-media-contract.ts')), listingActions: load(path.resolve('src/lib/listings/actions.ts')), imports: load(path.resolve('src/lib/listings/draft-import.ts')), store: load(path.resolve('src/lib/listings/draft-store.ts')) };
+  return { deletionActions: load(path.resolve('src/lib/listings/draft-delete-actions.ts')), deletion: load(path.resolve('src/lib/listings/draft-delete.ts')), actions: load(path.resolve('src/lib/listings/draft-actions.ts')), contract: load(path.resolve('src/lib/listings/draft-service-contract.ts')), media: load(path.resolve('src/lib/listings/draft-media.ts')), mediaActions: load(path.resolve('src/lib/listings/draft-media-actions.ts')), mediaContract: load(path.resolve('src/lib/listings/draft-media-contract.ts')), listingActions: load(path.resolve('src/lib/listings/actions.ts')), imports: load(path.resolve('src/lib/listings/draft-import.ts')), store: load(path.resolve('src/lib/listings/draft-store.ts')) };
 }
 module.exports = { loadDraftServices };

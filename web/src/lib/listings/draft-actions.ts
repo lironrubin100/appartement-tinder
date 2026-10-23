@@ -81,7 +81,8 @@ export async function listListingCloudDrafts(input: DraftListInput = {}): Promis
     if (cursor !== undefined && !after) return failure('CURSOR_STALE');
     let query = client.from('listing_drafts').select(draftColumns).eq('owner_id', user.id)
       .order('updated_at', { ascending: false }).order('id', { ascending: false }).limit(limit + 1);
-    if (state !== 'all') query = query.eq('state', state);
+    if (state === 'open') query = query.in('state', ['open', 'deleting']);
+    else if (state === 'completed') query = query.eq('state', state);
     if (kind === 'new') query = query.is('source_listing_id', null);
     if (kind === 'edit') query = query.not('source_listing_id', 'is', null);
     if (after) query = query.or(`updated_at.lt.${after.updatedAt},and(updated_at.eq.${after.updatedAt},id.lt.${after.id})`);

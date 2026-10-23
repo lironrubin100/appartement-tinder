@@ -69,7 +69,7 @@ export function ListingComposerSession({ ref, accountId, locale, hasPrivatePhone
         loadListingDraft(accountId).then(local => ({ local, unavailable: false })).catch(() => ({ local: undefined, unavailable: true }))]);
       if (!await actor() || !current(operation)) return;
       if (!result.ok || result.data.items.some(draft => draft.ownerId !== accountId)) throw Error('UNAVAILABLE');
-      setItems(result.data.items.map(draft => ({ id: draft.id, revision: draft.revision, title: draft.fields.title, kind: draft.kind, updatedAt: draft.updatedAt, unavailable: draft.publicationStartedAt !== null })));
+      setItems(result.data.items.map(draft => ({ id: draft.id, revision: draft.revision, title: draft.fields.title, kind: draft.kind, updatedAt: draft.updatedAt, deleting: draft.state === 'deleting', unavailable: draft.state !== 'open' || draft.publicationStartedAt !== null })));
       setHasLocalDraft(Boolean(legacy.local)); setLegacyUnavailable(legacy.unavailable); setNextCursor(result.data.next_cursor); setPaged(Boolean(cursor));
       if (!cursor && result.data.items.length === 0 && !legacy.local && !legacy.unavailable) {
         retryChoice.current = { kind: 'new' }; await openChoice({ kind: 'new' }, operation);

@@ -4,7 +4,7 @@ function load(file,dependencies={}) {
  const code=ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
  const m={exports:{}};new Function('require','module','exports',code)(id=>id in dependencies?dependencies[id]:require(id),m,m.exports);return m.exports;
 }
-const {ListingDraftList}=load('src/components/listings/ListingDraftList.tsx',{'next/link':{__esModule:true,default:'a'}});
+const {ListingDraftList}=load('src/components/listings/ListingDraftList.tsx',{'next/link':{__esModule:true,default:'a'},'./DeleteListingDraftButton':{DeleteListingDraftButton:props=>React.createElement('button',{'data-id':props.id},'Delete draft')}});
 const items=Object.freeze([
  Object.freeze({id:'draft-a',title:' Private <home> ',updatedAt:'2026-10-23T00:00:00Z',kind:'new',continueHref:'/en/compose?draft=draft-a'}),
  Object.freeze({id:'draft-b',title:'  ',updatedAt:'2026-10-22T22:00:00Z',kind:'edit',continueHref:'/en/compose?draft=draft-b'})
@@ -33,7 +33,7 @@ const {ListingDraftSection,loadDashboardDrafts}=load('src/components/listings/Li
   const view=await ListingDraftSection({locale,paged:true,result:Promise.resolve({ok:true,data:{items:[fullDraft],next_cursor:'signed+cursor',has_more:true}})});
   const html=renderToStaticMarkup(view);
   assert.match(html,/draftCursor=signed%2Bcursor/);assert.match(html,/saved-drafts/);assert.doesNotMatch(html,/DO NOT SERIALIZE|PRIVATE-PATH|PRIVATE-OWNER/);
-  assert.deepEqual(Object.keys(view.props.children[0].props.items[0]).sort(),['continueHref','id','kind','title','updatedAt']);
+  assert.deepEqual(Object.keys(view.props.children[0].props.items[0]).sort(),['continueHref','deleting','id','kind','revision','title','updatedAt']);
  }
  console.log('PASS HE/EN separate identities/actions, empty/no-action, escaped titles, deterministic dates, minimal private projection, errors and bounded paging');
 })().catch(error=>{console.error(error);process.exitCode=1;});

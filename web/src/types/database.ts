@@ -1452,6 +1452,9 @@ export type Database = {
       };
     };
     Functions: {
+      begin_listing_draft_deletion: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Json };
+      list_listing_draft_deletion_objects: { Args: { p_draft_id: string; p_after?: string | null; p_limit?: number }; Returns: Json };
+      finish_listing_draft_deletion: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: undefined };
       set_listing_draft_photos: {
         Args: { p_draft_id: string; p_expected_revision: number; p_photos: Json };
         Returns: Database['public']['Tables']['listing_drafts']['Row'];

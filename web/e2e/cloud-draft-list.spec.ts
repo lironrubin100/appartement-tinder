@@ -19,7 +19,7 @@ async function signIn(context: BrowserContext, baseURL: string, name: string) {
   return api;
 }
 const draftIds = async (api: Awaited<ReturnType<typeof signIn>>) => {
-  const { data, error } = await api.from('listing_drafts').select('id, fields, photos, publication_started_at').eq('state', 'open').order('updated_at', { ascending: false }).order('id', { ascending: false }).limit(20);
+  const { data, error } = await api.from('listing_drafts').select('id, fields, photos, publication_started_at, source_listing_id, state').in('state', ['open','deleting']).order('updated_at', { ascending: false }).order('id', { ascending: false }).limit(20);
   if (error) throw Error('Ordinary draft read failed');
   return data!;
 };
@@ -41,9 +41,9 @@ for (const locale of ['he', 'en']) for (const width of [390, 1280]) {
       const publicIds = await page.getByTestId('owner-listing').evaluateAll(items => items.map(item => item.getAttribute('data-listing-id')));
       expect(publicIds.sort()).toEqual(published.data!.map(row => row.id).sort());
       expect(publicIds.some(id => rows.some(row => row.id === id))).toBe(false);
-      await expect(section.getByText(en ? 'Listing edit' : 'עריכת מודעה', { exact: true })).toBeVisible();
-      await expect(section.getByRole('link')).toHaveCount(rows.filter(row => !row.publication_started_at).length);
-      for (const row of rows.filter(row => !row.publication_started_at)) await expect(section.locator('[data-draft-id="' + row.id + '"] a')).toHaveAttribute('href', prefix + '/compose?draft=' + row.id);
+      for (const row of rows) await expect(section.locator('[data-draft-id="' + row.id + '"]').getByText(row.source_listing_id ? (en ? 'Listing edit' : 'עריכת מודעה') : (en ? 'New listing' : 'מודעה חדשה'), {exact:true})).toBeVisible();
+      await expect(section.getByTestId('listing-draft').getByRole('link')).toHaveCount(rows.filter(row => row.state === 'open' && !row.publication_started_at).length);
+      for (const row of rows.filter(row => row.state === 'open' && !row.publication_started_at)) await expect(section.locator('[data-draft-id="' + row.id + '"] a')).toHaveAttribute('href', prefix + '/compose?draft=' + row.id);
       await expect(page.locator('html')).toHaveAttribute('dir', en ? 'ltr' : 'rtl');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       const html = await response!.text();
@@ -56,6 +56,16 @@ for (const locale of ['he', 'en']) for (const width of [390, 1280]) {
         mkdirSync(process.env.UX_SCREENSHOTS, { recursive: true });
         await section.scrollIntoViewIfNeeded();
         await page.screenshot({ path: path.join(process.env.UX_SCREENSHOTS, `cloud-drafts-${locale}-${width}.png`) });
+      }
+      const older = section.getByRole('link', {name: en ? 'Older drafts' : 'טיוטות קודמות', exact:true});
+      if (await older.count()) {
+        const next = await api.from('listing_drafts').select('id').in('state',['open','deleting']).order('updated_at',{ascending:false}).order('id',{ascending:false}).range(20,39);
+        expect(next.error).toBeNull(); expect(next.data!.length).toBeGreaterThan(0);
+        await older.click();
+        await expect(section.getByTestId('listing-draft')).toHaveCount(next.data!.length);
+        expect(await section.getByTestId('listing-draft').evaluateAll(items=>items.map(item=>item.getAttribute('data-draft-id')))).toEqual(next.data!.map(row=>row.id));
+        await section.getByRole('link',{name:en?'Latest drafts':'הטיוטות העדכניות',exact:true}).click();
+        await expect(section.getByTestId('listing-draft')).toHaveCount(rows.length);
       }
       // An actual expired/malformed cursor is an error, never an empty list.
       await page.goto(`${prefix}/my-listings?draftCursor=invalid#saved-drafts`);

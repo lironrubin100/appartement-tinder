@@ -34,7 +34,7 @@ type DraftBase = Readonly<{
   revision: number;
   createdAt: string;
   updatedAt: string;
-  state: 'open' | 'completed';
+  state: 'open' | 'deleting' | 'completed';
   fields: ListingDraftFields;
   photos: readonly DraftPhotoReference[]; // Array order is the display order.
   publicationRequestId: string | null;

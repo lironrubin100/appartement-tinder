@@ -34,7 +34,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261021225221_private_listing_drafts.sql'),
   await read('supabase/migrations/20261022075546_save_listing_draft_revision.sql'),
   await read('supabase/migrations/20261022185738_bind_draft_publication_snapshot.sql'),
-  await read('supabase/migrations/20261023014407_private_listing_draft_media.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261023014407_private_listing_draft_media.sql'),
+  await read('supabase/migrations/20261023113543_private_listing_draft_deletion.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -82,6 +83,9 @@ await db.exec(await read('supabase/tests/plan_listing_draft_revision.sql'));
 console.log('PASS: draft revision, import retry, publication freeze and verified completion.');
 await db.exec(await read('supabase/tests/plan_listing_draft_media.sql'));
 console.log('PASS: private media upload/read, immutable objects, owner/revision association, freeze and source preservation.');
+await db.exec('reset role');
+await db.exec(await read('supabase/tests/plan_listing_draft_deletion.sql'));
+console.log('PASS: durable private draft deletion, exact media cleanup, idempotency and isolation.');
 await as(0);
 const position = await rpc('select lat,lng,public_lat,public_lng from public.apartments where id=$1', [listingId]);
 const metres = Math.hypot((position.public_lat - position.lat) * 111320,
