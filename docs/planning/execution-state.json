@@ -231,8 +231,8 @@
     "SL04.2": {
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
-      "worktree": "C:/Users/User/.codex/worktrees/6b9e/appartement tinder",
-      "outcome": "Prior tasks including4.3 released68388ae.4.16 explicit public Save verified locally: live migration20261024083041, full disposable SQL/RLS,20 edit/publication/queue cases, actual ordinary concurrent/lost-response/receipt/cancellation/conflict/refresh acceptance,10 distinct optimized edit-save cases(7+3),14 private edit/auth and5 new-publication regressions pass. Completed-edit route denial fixed; final optimized build/types/lint pass.Initial releaseceea273 is READY/canonical; initial production15s success wait expired although authoritative receipt confirms exactly one completed update. Bounded parallel photo-read follow-up retains before/after account checks;19 unit cases, types/lint/optimized build and3 targeted local Chrome cases pass. Follow-up release/final production18-case acceptance pending; primary shared handoff will record final evidence. Owner requests finish this feature then review next MVP feature; do not implement4.4 in this stage. Full milestone/MVP goal incomplete."
+      "worktree": "C:/Users/User/.codex/worktrees/room44/appartement tinder",
+      "outcome": "Tasks through4.16 are released in6b84c46. Task4.4 has a local owner-only room-availability RPC, D18 pending-reconfirmation marker, inquiry guards and disposable SQL/RLS coverage; npm --prefix web run test:db passed24October. Docker is unavailable. Targetnpbduvjnqnbydolmdpsc was rechecked at live20261024083041 with no availability RPC. Supabase rejected applying the shared schema/security migration because 56 Auth users do not prove the no-real-user gate; no hosted schema/data change, ordinary-client acceptance, commit, push, integration or deployment occurred. Task4.4 remains unchecked; resume only with fresh explicit approval for this identified shared-database risk, then apply and run owner/foreign/guest acceptance."
     }
   },
   "micro_task_dispatch": {

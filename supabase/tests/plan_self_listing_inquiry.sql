@@ -10,6 +10,8 @@ declare
 begin
   insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms)
   values(listing_id,v_owner_id,'user','Self inquiry fixture','Private address',31.25,34.79,2000,3);
+  insert into public.apartment_rooms(apartment_id,monthly_price,available_from,is_available)
+  values(listing_id,2000,'2026-12-01',true);
   select count(*) into before_conversations from public.conversations;
   perform set_config('request.jwt.claim.sub',v_owner_id::text,true);
   execute 'set local role authenticated';

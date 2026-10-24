@@ -42,7 +42,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023192226_core_listing_card.sql'),
   await read('supabase/migrations/20261023200459_versioned_listing_edit.sql'),
   await read('supabase/migrations/20261023202753_open_listing_edit_draft.sql'),
-  await read('supabase/migrations/20261024083041_listing_edit_draft_commit.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261024083041_listing_edit_draft_commit.sql'),
+  await read('supabase/migrations/20261024140000_room_availability_controls.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -64,6 +65,8 @@ for (let i = 0; i < ids.length; i++) {
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
+await db.exec(await read('supabase/tests/plan_room_availability.sql'));
+console.log('PASS: owner-only room availability, public count/range, D18 pending reconfirmation and accepted-chat preservation.');
 await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
 console.log('PASS: reference-only card authority, retry collision, private history and no side effects.');
 await db.exec(await read('supabase/tests/plan_listing_edit.sql'));
@@ -249,6 +252,7 @@ await as(3); assert.equal((await db.query('select * from public.messages where c
 // Apartment inquiry acceptance: availability, ownership, idempotency and address isolation.
 await db.exec('reset role');
 const apartment = await rpc("insert into public.apartments(lister_id,source,title,address,lat,lng,price,bedrooms) values($1,'user','Local fixture','Private exact address',31.25,34.79,2000,3) returning id", [ids[7]]);
+await db.query("insert into public.apartment_rooms(apartment_id,monthly_price,available_from,is_available) values($1,2000,'2026-12-01',true)", [apartment.id]);
 await as(6); const inquiry = await rpc('select public.create_listing_inquiry($1) id', [apartment.id]);
 assert.equal((await db.query('select * from public.listing_address_access where apartment_id=$1', [apartment.id])).rows.length, 0);
 await rejected("update public.listing_inquiries set status='accepted' where id=$1", [inquiry.id]);
