@@ -66,6 +66,7 @@ function fixture(options = {}) {
       from: (bucket) => ({
         download: async (path, _options, params) => {
           calls.push(["download", bucket, path]);
+          if (options.downloadGate) await options.downloadGate;
           assert.equal(params?.cache, "no-store");
           if (options.readOutage)
             return { error: { message: "offline" }, data: null };
@@ -161,6 +162,9 @@ function fixture(options = {}) {
     id,
     listing,
     key,
+    switchActor: () => {
+      who = randomUUID();
+    },
   };
 }
 test("explicit edit keeps original apartment/room identity, only stages private media and completed retries need no photos", async () => {
@@ -312,4 +316,51 @@ test("public source CAS is distinct from private draft conflict and preserves cu
   assert.deepEqual(f.row.fields, before);
   assert.equal(f.row.publication_started_at, null);
   assert.equal(f.uploads.size, 0);
+});
+
+test("independent photo batch preserves order and an account change during reads prevents all writes", async () => {
+  let release;
+  const downloadGate = new Promise((resolve) => {
+    release = resolve;
+  });
+  const f = fixture({ downloadGate });
+  const pending = f.services.editPublishing.saveListingCloudDraftChanges(
+    f.input(),
+  );
+  try {
+    for (
+      let i = 0;
+      i < 100 && f.calls.filter((x) => x[0] === "download").length < 4;
+      i++
+    )
+      await new Promise(setImmediate);
+    assert.equal(
+      f.calls.filter((x) => x[0] === "download").length,
+      4,
+      "All independent reads should start without serial waits",
+    );
+    assert(
+      !f.calls.some((x) =>
+        [
+          "begin_listing_draft_edit",
+          "upload",
+          "commit_listing_draft_edit",
+        ].includes(x[0]),
+      ),
+    );
+    f.switchActor();
+    release();
+    assert.equal((await pending).error.code, "AUTH_REQUIRED");
+    assert.equal(f.uploads.size, 0);
+    assert(
+      !f.calls.some((x) =>
+        ["begin_listing_draft_edit", "commit_listing_draft_edit"].includes(
+          x[0],
+        ),
+      ),
+    );
+  } finally {
+    release();
+    await pending;
+  }
 });

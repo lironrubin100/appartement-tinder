@@ -162,40 +162,53 @@ async function run(
       draft.publicationRequestId,
     );
     if (!model) return fail("VALIDATION_FAILED");
-    const files: File[] = [],
-      digests: string[] = [];
-    for (const [index, photo] of draft.photos.entries()) {
-      if (!(await actor())) return fail("AUTH_REQUIRED");
-      const privatePhoto = photo.kind === "draft";
-      if (
-        privatePhoto &&
-        (!photo.objectPath.startsWith(`${draft.ownerId}/${draft.id}/`) ||
-          !photo.objectPath.endsWith(".jpg"))
+    if (
+      draft.photos.some(
+        (photo) =>
+          photo.kind === "draft" &&
+          (!photo.objectPath.startsWith(`${draft.ownerId}/${draft.id}/`) ||
+            !photo.objectPath.endsWith(".jpg")),
       )
-        return fail("PHOTO_UNAVAILABLE");
-      const r = await client.storage
-        .from(privatePhoto ? DRAFT_MEDIA_BUCKET : "apartment-photos")
-        .download(
-          photo.objectPath,
-          { cacheNonce: randomUUID() },
-          { cache: "no-store" },
+    )
+      return fail("PHOTO_UNAVAILABLE");
+    if (!(await actor())) return fail("AUTH_REQUIRED");
+    // Independent immutable reads are bounded by the existing eight-photo
+    // contract. Recheck identity after the whole batch, before freeze or writes.
+    const reads = await Promise.all(
+      draft.photos.map(async (photo, index) => {
+        const privatePhoto = photo.kind === "draft";
+        const r = await client.storage
+          .from(privatePhoto ? DRAFT_MEDIA_BUCKET : "apartment-photos")
+          .download(
+            photo.objectPath,
+            { cacheNonce: randomUUID() },
+            { cache: "no-store" },
+          );
+        if (
+          r.error ||
+          !r.data ||
+          !r.data.type.startsWith("image/") ||
+          r.data.size <= 0 ||
+          (privatePhoto &&
+            (r.data.type !== "image/jpeg" ||
+              r.data.size > DRAFT_MEDIA_MAX_BYTES))
+        )
+          return null;
+        const file = new File(
+          [await r.data.arrayBuffer()],
+          `${index + 1}.jpg`,
+          {
+            type: r.data.type,
+          },
         );
-      if (!(await actor())) return fail("AUTH_REQUIRED");
-      if (
-        r.error ||
-        !r.data ||
-        !r.data.type.startsWith("image/") ||
-        r.data.size <= 0 ||
-        (privatePhoto &&
-          (r.data.type !== "image/jpeg" || r.data.size > DRAFT_MEDIA_MAX_BYTES))
-      )
-        return fail("PHOTO_UNAVAILABLE", true);
-      const file = new File([await r.data.arrayBuffer()], `${index + 1}.jpg`, {
-        type: r.data.type,
-      });
-      files.push(file);
-      digests.push(await photoDigest(file));
-    }
+        return { file, digest: await photoDigest(file) };
+      }),
+    );
+    if (!(await actor())) return fail("AUTH_REQUIRED");
+    if (reads.some((result) => !result)) return fail("PHOTO_UNAVAILABLE", true);
+    const verified = reads as { file: File; digest: string }[];
+    const files = verified.map((result) => result.file),
+      digests = verified.map((result) => result.digest);
     if (validateListingPhotos(files)) return fail("VALIDATION_FAILED");
     if (!(await actor())) return fail("AUTH_REQUIRED");
     const frozen = await client.rpc("begin_listing_draft_edit", {

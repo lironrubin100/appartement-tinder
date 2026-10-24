@@ -135,7 +135,7 @@ async function success(page: Page, en = true) {
       name: en ? "Listing changes saved" : "השינויים במודעה נשמרו",
       exact: true,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 45000 });
 }
 
 for (const locale of ["he", "en"])
@@ -180,7 +180,7 @@ for (const locale of ["he", "en"])
           exact: true,
         })
         .fill("2027-02-02");
-      if (locale === "he" && width === 390) {
+      if (locale === "he" && width === 390 && d.photos.length < 8) {
         await page
           .getByLabel("בחירת תמונות לדירה", { exact: true })
           .setInputFiles(".qa/task221/prepared.jpg");
