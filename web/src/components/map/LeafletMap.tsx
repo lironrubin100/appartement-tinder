@@ -16,9 +16,6 @@ type Apartment = Tables<'apartments_public'>;
 // Beer Sheva city center — this is where Shutaf launches (DECISIONS.md L3).
 const BEER_SHEVA_CENTER: [number, number] = [31.2530, 34.7915];
 
-// DECISIONS.md D14: cluster below zoom 14. Individual pins from zoom 14 up.
-const CLUSTER_MAX_ZOOM = 14;
-
 // CARTO Basemaps browser key, restricted to the app's origins in CARTO.
 // NEXT_PUBLIC values are embedded by Next.js at build time.
 const CARTO_BASEMAPS_KEY = process.env.NEXT_PUBLIC_CARTO_BASEMAPS_KEY?.trim();
@@ -84,9 +81,10 @@ interface LeafletMapProps {
   apartments: Apartment[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  clusterMaxZoom: number;
 }
 
-export default function LeafletMap({ apartments, selectedId, onSelect }: LeafletMapProps) {
+export default function LeafletMap({ apartments, selectedId, onSelect, clusterMaxZoom }: LeafletMapProps) {
   const [tileError, setTileError] = useState(false);
   const [tileLayerKey, setTileLayerKey] = useState(0);
   const en = usePathname().startsWith('/en/');
@@ -115,7 +113,7 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
         />}
         <MarkerClusterGroup
           iconCreateFunction={clusterIcon}
-          disableClusteringAtZoom={CLUSTER_MAX_ZOOM}
+          disableClusteringAtZoom={clusterMaxZoom}
           spiderfyOnMaxZoom={false}
           showCoverageOnHover={false}
         >

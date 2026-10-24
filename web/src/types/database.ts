@@ -15,6 +15,29 @@ export type Database = {
   };
   public: {
     Tables: {
+      app_config: {
+        Row: {
+          key: string;
+          value: Json;
+          description: string;
+          is_public: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          value: Json;
+          description: string;
+          is_public?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          value?: Json;
+          description?: string;
+          is_public?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       listing_drafts: {
         Row: { id: string; owner_id: string; schema_version: number; revision: number; created_at: string; updated_at: string; state: string; source_listing_id: string | null; source_revision: number | null; fields: Json; photos: Json; publication_request_id: string; import_receipt_id: string | null; publication_started_at: string | null; publication_payload_hash: string | null };
         Insert: { id?: string; fields?: Json; source_listing_id?: string | null; source_revision?: number | null };

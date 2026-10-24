@@ -16,6 +16,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useApartmentFilters } from '@/hooks/useApartmentFilters';
 import type { Tables } from '@/types/database';
+import type { PublicMapConfig } from '@/lib/app-config';
 import { publicAreaLabel } from '@/lib/listings/locationPrivacy';
 import { createListingInquiry } from '@/lib/listings/inquiries';
 
@@ -28,13 +29,16 @@ const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
   ),
 });
 
-const NEW_WITHIN_DAYS = 7;
-function isNewListing(createdAt: string) {
+function isNewListing(createdAt: string, newWithinDays: number) {
   const ageMs = Date.now() - new Date(createdAt).getTime();
-  return ageMs < NEW_WITHIN_DAYS * 24 * 60 * 60 * 1000;
+  return ageMs < newWithinDays * 24 * 60 * 60 * 1000;
 }
 
-export default function MapPage() {
+type MapClientProps = {
+  publicMapConfig: PublicMapConfig;
+};
+
+export default function MapPage({ publicMapConfig }: MapClientProps) {
   const locale = usePathname().startsWith('/en') ? 'en' : 'he';
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +128,12 @@ export default function MapPage() {
                 <p className="text-muted-text">טוען מפה…</p>
               </div>
             ) : (
-              <LeafletMap apartments={filtered} selectedId={selectedId} onSelect={setSelectedId} />
+              <LeafletMap
+                apartments={filtered}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                clusterMaxZoom={publicMapConfig.clusterMaxZoom}
+              />
             )}
           </div>
 
@@ -151,7 +160,7 @@ export default function MapPage() {
                   bedrooms={apt.bedrooms}
                   availableFrom={apt.available_from ?? ''}
                   tags={apt.is_sublet ? ['סאבלט'] : []}
-                  isNew={isNewListing(apt.created_at)}
+                  isNew={isNewListing(apt.created_at, publicMapConfig.newListingWithinDays)}
                   saved={isSaved(apt.id)}
                   savePending={isPending(apt.id)}
                   onSave={handleSave}
