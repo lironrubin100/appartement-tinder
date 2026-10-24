@@ -232,7 +232,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/.codex/worktrees/room44/appartement tinder",
-      "outcome": "Tasks through4.16 are released in6b84c46. Task4.4 has a local owner-only room-availability RPC, D18 pending-reconfirmation marker, inquiry guards and disposable SQL/RLS coverage; npm --prefix web run test:db passed24October. Docker is unavailable. Targetnpbduvjnqnbydolmdpsc was rechecked at live20261024083041 with no availability RPC. Supabase rejected applying the shared schema/security migration because 56 Auth users do not prove the no-real-user gate; no hosted schema/data change, ordinary-client acceptance, commit, push, integration or deployment occurred. Task4.4 remains unchecked; resume only with fresh explicit approval for this identified shared-database risk, then apply and run owner/foreign/guest acceptance."
+      "outcome": "Tasks through4.16 are released in6b84c46. Task4.4 has a local owner-only room-availability RPC, D18 pending-reconfirmation marker, inquiry guards and disposable SQL/RLS coverage; npm --prefix web run test:db passed24October. Docker is unavailable. Targetnpbduvjnqnbydolmdpsc was rechecked at live20261024083041 with no availability RPC. Supabase rejected applying the shared schema/security migration because 56 Auth users do not prove the no-real-user gate. Local source was committed/pushed as9ddff8e on codex/room-availability-backend; no hosted schema/data change, ordinary-client acceptance, integration or deployment occurred. Task4.4 remains unchecked; resume only with fresh explicit approval for this identified shared-database risk, then apply and run owner/foreign/guest acceptance."
     }
   },
   "micro_task_dispatch": {
