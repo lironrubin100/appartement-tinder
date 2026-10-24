@@ -33,6 +33,10 @@ Prefer Docker-backed local Supabase first for schema, RLS, Auth, Storage and Rea
 
 An agent may apply a reviewed migration to the shared Shutaf project **only while `PROJECT_STATUS.md` confirms there are no real-user data and no competing executor owns the migration**. Recheck the project ref and live migration history immediately before applying, then verify the named change and record it. The moment the project contains real users, or target/data state is ambiguous, hosted mutation again requires a fresh owner authorization. This standing preference never authorizes paid Supabase resources, deployment, commit, push or merge.
 
+### Approved-feature migration authorization — owner update, 24 October 2026
+
+For a reviewed migration belonging to an approved bounded feature, do not request a separate approval for each application. Immediately before applying, record/recheck the target project ref, live migration history, Auth-user status and current work ownership. Apply automatically when `PROJECT_STATUS.md` confirms the accounts are demo/QA only and no competing executor owns the migration; then verify and record the exact live migration. Stop for fresh owner approval if real users appear, the target/data or ownership is ambiguous, the operation is destructive, or a material privacy/authorization risk emerges. This does not expand a dispatch beyond its approved feature, or authorize paid resources; ordinary commit, push, integration and deployment remain governed by the standing publication authorization below.
+
 ## 5. Planning and slice dispatch
 
 Read `docs/BUILD_BLUEPRINT.md` for the planning package and `docs/EXECUTION_PROTOCOL.md` for execution. `docs/SLICES.md` defines proposed new slices; the old 114-task plan maps through `docs/LEGACY_SLICE_MAP.md`. Proposals and `needs-decision`/`needs-research` entries are not implementation-ready or authorization to change a DECIDED rule.

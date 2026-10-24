@@ -43,7 +43,7 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023200459_versioned_listing_edit.sql'),
   await read('supabase/migrations/20261023202753_open_listing_edit_draft.sql'),
   await read('supabase/migrations/20261024083041_listing_edit_draft_commit.sql'),
-  await read('supabase/migrations/20261024140000_room_availability_controls.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261024140758_room_availability_controls.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
