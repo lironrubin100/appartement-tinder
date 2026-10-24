@@ -138,3 +138,7 @@ Current UX continuation supersedes the earlier unverified patch status only afte
 ## Task4.15 private edit-draft checkpoint - 23 October2026
 
 Task4.2 released0daefca/Production READY with15 canonical checks. Task4.15 atomic owner open/resume initialization verified: live20261023202753, source/room/photo preservation, ordinary concurrent/retry/private-save/foreign/guest checks and controlled4125ms legacy lock wait.15 local Chrome/12 service/SQL/types/lint/build checks pass. Release pending; next4.3 actual private editor, then4.16 explicit public Save changes. No full edit UI or whole-MVP completion claim. Current primary shared register and owning handoff carry final release evidence. Same6b9e checkout retained for active goal.
+
+## Task4.3 private edit UI checkpoint - 24 October2026
+
+4.15 releasedfe42302. Task4.3 owner edit UI now verified locally: shared composer preserves stable room IDs/order/flags/dates/labels/isSublet, readonly property and private photos; no public edit Save yet.10 distinct actual edit Chrome cases(4+6),26 new-draft/Plus/auth regressions and6 unit/service/types/lint/build pass; both exact new public source/room snapshots and6 JPEG hashes unchanged. Release pending; next4.16 explicit atomic public Save changes and verified edit completion. Current primary shared handoff records final deployment evidence. Keep6b9e for active goal; no new checkout/migration/config/secret.

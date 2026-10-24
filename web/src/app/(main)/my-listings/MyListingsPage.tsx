@@ -94,6 +94,7 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
               <OwnerListingCard
                 listing={listing}
                 locale={locale}
+                manageHref={`${localePrefix(locale)}/compose?listing=${listing.id}`}
                 viewHref={listing.status === 'active' ? `${localePrefix(locale)}/listings/${listing.id}` : undefined}
               >
                 {listing.status === 'active' && (

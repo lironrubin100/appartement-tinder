@@ -22,6 +22,8 @@ import { saveDraftMedia } from '@/lib/listings/draft-media';
 import { SavedDraftPhotos } from '@/components/listings/SavedDraftPhotos';
 import { CloudDraftPublication } from '@/components/listings/CloudDraftPublication';
 import { publishListingCloudDraft, type DraftPublishResult } from '@/lib/listings/draft-publish';
+import { EditListingRooms } from '@/components/listings/EditListingRooms';
+import { editDraftFields, type EditDraftRoom, type ListingEditContext } from '@/lib/listings/edit-draft-fields';
 import { draftPublicationError } from '@/lib/listings/draft-publish-text';
 
 function draftInput(draft: DraftDocument): SavedListingDraft {
@@ -33,7 +35,7 @@ function draftInput(draft: DraftDocument): SavedListingDraft {
 function addressKey(address: SavedAddress | null): string {
   return JSON.stringify([address?.address ?? '', address?.latitude ?? '', address?.longitude ?? '', address?.city ?? '', address?.manual ?? false, address?.confirmed ?? false]);
 }
-function draftFields(input: SavedListingDraft): ListingDraftFields {
+function newDraftFields(input: SavedListingDraft): ListingDraftFields {
   const { title, bedrooms, availableFrom, billsIncluded, description, roomPrices, address } = input;
   return { title, bedrooms, availableFrom, billsIncluded, description, roomPrices,
     ...(address ? { address: { address: address.address, latitude: address.latitude, longitude: address.longitude, city: address.city, manual: address.manual, confirmed: address.confirmed } } : {}) };
@@ -44,7 +46,7 @@ function formatFields(fields: ListingDraftFields, locale: Locale): string {
   return [
     [en ? 'Title' : 'כותרת', fields.title], [en ? 'Bedrooms' : 'חדרים בדירה', fields.bedrooms],
     [en ? 'Available from' : 'תאריך כניסה', fields.availableFrom], [en ? 'Bills included' : 'חשבונות כלולים', fields.billsIncluded === undefined ? '' : fields.billsIncluded ? (en ? 'Yes' : 'כן') : (en ? 'No' : 'לא')],
-    [en ? 'Room prices' : 'מחירי חדרים', fields.roomPrices?.join(', ')], [en ? 'Description' : 'תיאור', fields.description],
+    [en ? 'Room prices' : 'מחירי חדרים', fields.rooms ? fields.rooms.map(room => [room.label, room.monthlyPrice, room.availableFrom, room.isAvailable ? (en ? 'Available' : 'פנוי') : (en ? 'Unavailable' : 'לא פנוי')].join(' · ')).join('\n') : fields.roomPrices?.join(', ')], [en ? 'Description' : 'תיאור', fields.description], [en ? 'Sublet' : 'סאבלט', fields.isSublet === undefined ? '' : fields.isSublet ? (en ? 'Yes' : 'כן') : (en ? 'No' : 'לא')],
     [en ? 'Address' : 'כתובת', fields.address?.address], [en ? 'City' : 'עיר', fields.address?.city],
     [en ? 'Latitude' : 'קו רוחב', fields.address?.latitude], [en ? 'Longitude' : 'קו אורך', fields.address?.longitude],
     [en ? 'Location confirmed' : 'המיקום אושר', fields.address?.confirmed ? (en ? 'Yes' : 'כן') : (en ? 'No' : 'לא')],
@@ -52,7 +54,7 @@ function formatFields(fields: ListingDraftFields, locale: Locale): string {
 }
 export type ComposeFormHandle = { saveAndClose: () => Promise<void> };
 
-export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished, onReloadSaved }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void; onReloadSaved?: () => Promise<boolean> }) {
+export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editContext, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished, onReloadSaved }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; editContext?: ListingEditContext; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void; onReloadSaved?: () => Promise<boolean> }) {
   // Keep the selected editing session anchored through server-action/RSC refreshes.
   // Loading another draft uses the caller's id key; reload is an explicit choice.
   const [cloudDraft] = useState(receivedCloudDraft);
@@ -60,6 +62,8 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   const router = useRouter();
   const [photos, setPhotos] = useState<File[]>([]);
   const [roomPrices, setRoomPrices] = useState<string[]>(cloudDraft?.fields.roomPrices?.length ? [...cloudDraft.fields.roomPrices] : ['']);
+  const [editRooms, setEditRooms] = useState<readonly EditDraftRoom[]>(cloudDraft?.fields.rooms ?? []);
+  const [isSublet, setIsSublet] = useState(cloudDraft?.fields.isSublet ?? false);
   const [bedrooms, setBedrooms] = useState(cloudDraft?.fields.bedrooms ?? '');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -147,6 +151,10 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     return () => { current = false; };
   }, [accountId, cloudDraft]);
 
+  function draftFields(input: SavedListingDraft): ListingDraftFields {
+    return cloudDraft?.kind === 'edit' ? editDraftFields(input, cloudDraft.fields, editRooms, isSublet) : newDraftFields(input);
+  }
+
   function snapshot(form: HTMLFormElement): SavedListingDraft {
     const data = new FormData(form);
     return { version: 1, title: String(data.get('title') ?? ''), bedrooms,
@@ -173,7 +181,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
     // The snapshot is taken after the corresponding form and state updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountId, cloudDraft, draftLoaded, revision, bedrooms, roomPrices, photos, addressDraft, submitting, publicationSnapshot]);
+  }, [accountId, cloudDraft, draftLoaded, revision, bedrooms, roomPrices, editRooms, isSublet, photos, addressDraft, submitting, publicationSnapshot]);
 
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
@@ -409,9 +417,10 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
   return (
     <div className="min-h-[calc(100vh-80px)] w-full bg-page-bg p-4 md:p-8">
       <div className="mx-auto max-w-2xl rounded-shutaf-lg border border-card-border bg-white p-6 shadow-sm md:p-8">
-        <h1 className="mb-2 text-3xl font-bold text-ink">{cloudDraft ? t("עריכת טיוטה", "Edit draft") : t("פרסום דירה חדשה", "Publish an apartment")}</h1>
-        <p className="mb-8 text-sm text-muted-text">{t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
+        <h1 className="mb-2 text-3xl font-bold text-ink">{cloudDraft?.kind === 'edit' ? t("עריכת מודעה", "Edit listing") : cloudDraft ? t("עריכת טיוטה", "Edit draft") : t("פרסום דירה חדשה", "Publish an apartment")}</h1>
+        <p className="mb-8 text-sm text-muted-text">{cloudDraft?.kind === 'edit' ? t("השינויים נשמרים בטיוטה פרטית. המודעה שפורסמה נשארת ללא שינוי.", "Changes are saved in a private draft. Your published listing stays unchanged.") : t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
 
+        {editContext && editContext.currentRevision !== editContext.originalRevision && <p role="status" className="mb-4 rounded-xl bg-orange-soft p-3 text-sm">{t('המודעה השתנתה מאז פתיחת הטיוטה. השינויים שלך נשארים פרטיים.', 'This listing changed after the draft started. Your edits remain private.')}</p>}
         <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => { pendingInput.current = true; setRevision(value => value + 1); if (cloudDraft) setCloudState(current => current.phase === 'error' || current.phase === 'conflict' ? current : { phase: 'dirty' }); }} noValidate>
           <fieldset disabled={submitting || savingDraft || reloading} className="space-y-6">
           <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} defaultValue={initialDraft?.title ?? ''} required maxLength={100} />
@@ -419,8 +428,16 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
             <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type={cloudDraft ? "text" : "number"} inputMode="numeric" maxLength={32} min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
             <Input name="availableFrom" label={t("תאריך כניסה", "Available from")} type={cloudDraft ? "text" : "date"} placeholder={cloudDraft ? "YYYY-MM-DD" : undefined} maxLength={32} defaultValue={initialDraft?.availableFrom ?? ''} required />
           </div>
-          <fieldset disabled={cloudDraft?.kind === 'edit'} inert={cloudDraft?.kind === 'edit'}><AddressField locale={locale} initialDraft={initialDraft?.address} onDraftChange={onAddressChange} /></fieldset>
+          {cloudDraft?.kind === 'edit' ? <section data-testid="edit-property-location" className="space-y-2 rounded-xl bg-neutral-bg-soft p-4 text-sm">
+            <h2 className="font-medium text-ink">{t('מיקום הדירה', 'Property location')}</h2>
+            <p className="break-words">{editContext?.address || t('המיקום שמור במודעה המקורית.', 'Location is retained on the original listing.')}</p>
+            <p className="text-muted-text">{t('כתובת הדירה נשארת ללא שינוי. לדירה אחרת יש ליצור מודעה חדשה.', 'The property address stays unchanged. Create a new listing for a different property.')}</p>
+          </section> : <AddressField locale={locale} initialDraft={initialDraft?.address} onDraftChange={onAddressChange} />}
 
+          {cloudDraft?.kind === 'edit' ? <>
+            <EditListingRooms rooms={editRooms} locale={locale} onChange={setEditRooms} />
+            <label className="flex items-center gap-3 text-sm"><input type="checkbox" name="isSublet" checked={isSublet} onChange={event => setIsSublet(event.target.checked)} className="size-4 accent-orange" />{t('סאבלט', 'Sublet')}</label>
+          </> : <>
           <fieldset className="space-y-3 rounded-shutaf-md border border-card-border p-4">
             <legend className="text-sm font-medium text-ink">{t("חדרים פנויים ומחיר", "Available rooms and prices")}</legend>
             <p className="-mt-2 text-sm text-muted-text">{t("כל חדר מוצג כחלק מהדירה, ולא כמודעה נפרדת.", "Each room belongs to this apartment listing.")}</p>
@@ -449,6 +466,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, accou
             <Button type="button" variant="ghost" onClick={addRoom} disabled={Boolean(bedrooms) && roomPrices.length >= Number(bedrooms)}>{t("+ הוספת חדר פנוי", "+ Add an available room")}</Button>
           </fieldset>
 
+          </>}
           <label className="flex cursor-pointer items-start gap-3 rounded-shutaf-md border border-card-border p-4 text-sm text-ink">
             <input name="billsIncluded" type="checkbox" defaultChecked={initialDraft?.billsIncluded ?? false} className="mt-0.5 size-4 accent-orange" />
             <span><strong className="font-semibold">{t("החשבונות כלולים במחיר", "Bills included")}</strong><span className="mt-1 block text-muted-text">{t("סמנו רק אם המחיר של כל חדר כולל חשבונות שוטפים.", "Select only if every room price includes bills.")}</span></span>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
+import { EditListingForm } from './EditListingForm';
 import ComposeForm, { type ComposeFormHandle } from '@/app/(main)/compose/ComposeForm';
 import { ListingDraftChooser, type ListingDraftChoice, type ListingDraftChoiceItem } from './ListingDraftChooser';
 import { createListingCloudDraft, listListingCloudDrafts, loadListingCloudDraft } from '@/lib/listings/draft-actions';
@@ -117,6 +118,7 @@ export function ListingComposerSession({ ref, accountId, locale, hasPrivatePhone
     if (editor.current) await editor.current.saveAndClose(); else close();
   } }));
 
+  if (screen === 'editor' && selected?.kind === 'edit') return <EditListingForm key={selected.id + ':' + selected.revision} ref={editor} accountId={accountId} locale={locale} draft={selected} onClose={onClose} />;
   if (screen === 'editor' && selected) return <ComposeForm key={selected.id + ':' + selected.revision} ref={editor} accountId={accountId} cloudDraft={selected}
     locale={locale} requiresPrivatePhone={false} hasPrivatePhone={hasPrivatePhone} onClose={onClose} onPublished={onClose} onReloadSaved={reloadSelected} />;
   if (screen === 'choose') return <>
