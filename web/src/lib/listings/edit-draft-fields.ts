@@ -6,6 +6,7 @@ export type ListingEditContext = Readonly<{
   originalRevision: number;
   currentRevision: number;
   address: string | null;
+  status?: 'active' | 'taken' | 'flagged' | 'paused';
 }>;
 /** Preserve identity/inventory from the original draft, never from form controls.
  * Room membership/availability is handled by its own owner controls. */

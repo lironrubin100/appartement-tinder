@@ -21,6 +21,7 @@ import type { ListingEditContext } from "@/lib/listings/edit-draft-fields";
 import { createClient } from "@/utils/supabase/client";
 import { localePrefix, type Locale } from "@/lib/listings/text";
 import { PrivateDraftContent } from "./PrivateDraftContent";
+import { refreshListingCloudDraftSource } from '@/lib/listings/draft-edit-publish';
 type Props = {
   ref?: Ref<ComposeFormHandle>;
   accountId: string;
@@ -129,8 +130,7 @@ function EditListingSession({
         if (
           initialDraft?.kind !== "edit" ||
           initialDraft.ownerId !== accountId ||
-          initialDraft.state !== "open" ||
-          initialDraft.publicationStartedAt ||
+          !['open','completed'].includes(initialDraft.state) ||
           !initialDraft.fields.rooms ||
           typeof initialDraft.fields.isSublet !== "boolean"
         ) {
@@ -142,6 +142,7 @@ function EditListingSession({
           originalRevision: initialDraft.sourceRevision,
           currentRevision: source.data.revision,
           address: source.data.location.address,
+          status: source.data.status,
         });
         setPhase("ready");
       } catch {
@@ -198,6 +199,7 @@ function EditListingSession({
         originalRevision: result.data.sourceRevision,
         currentRevision: source.data.revision,
         address: source.data.location.address,
+        status: source.data.status,
       });
       setSelected(result.data);
       return true;
@@ -220,6 +222,21 @@ function EditListingSession({
         hasPrivatePhone={true}
         onClose={close}
         onReloadSaved={reload}
+        onRefreshSource={async revision => {
+          if (!active.current || busy.current || !selected) return false;
+          busy.current = true;
+          try {
+            const client = createClient();
+            if ((await client.auth.getUser()).data.user?.id !== accountId || !active.current) return false;
+            const result = await refreshListingCloudDraftSource({id:selected.id,expectedRevision:revision,expectedAccountId:accountId});
+            if (!result.ok || !active.current) return false;
+            const source = await loadOwnedListingForEdit(result.data.sourceListingId!,accountId);
+            if (!source.ok || (await client.auth.getUser()).data.user?.id !== accountId || !active.current || result.data.kind !== 'edit') return false;
+            setContext({listingId:result.data.sourceListingId,originalRevision:result.data.sourceRevision,currentRevision:source.data.revision,address:source.data.location.address,status:source.data.status});
+            setSelected(result.data);
+            return true;
+          } finally {busy.current = false;}
+        }}
       />
     );
   return (

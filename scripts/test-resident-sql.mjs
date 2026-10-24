@@ -41,7 +41,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023185301_owned_listing_editor_snapshot.sql'),
   await read('supabase/migrations/20261023192226_core_listing_card.sql'),
   await read('supabase/migrations/20261023200459_versioned_listing_edit.sql'),
-  await read('supabase/migrations/20261023202753_open_listing_edit_draft.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261023202753_open_listing_edit_draft.sql'),
+  await read('supabase/migrations/20261024083041_listing_edit_draft_commit.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -69,6 +70,8 @@ await db.exec(await read('supabase/tests/plan_listing_edit.sql'));
 console.log('PASS: owner atomic edit, one revision, durable retry receipts, preserved inventory/location, rollback and direct-write denial.');
 await db.exec(await read('supabase/tests/plan_listing_edit_draft.sql'));
 console.log('PASS: atomic private edit draft initialization, stable rooms/photos, resume preservation, rollback and authorization.');
+await db.exec(await read('supabase/tests/plan_listing_edit_commit.sql'));
+console.log('PASS: frozen edit snapshot, atomic public update/completion, exact receipt replay, rollback, cancellation and explicit source refresh.');
 await db.exec(await read('supabase/tests/plan_listing_editor.sql'));
 console.log('PASS: one-snapshot owner-only editor model, rooms/media ownership and private location boundary.');
 await db.exec(await read('supabase/tests/plan_listing_drafts.sql'));

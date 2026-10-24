@@ -3,7 +3,7 @@
 import { createServerClient } from '@/utils/supabase/server';
 import { validateListingDraft } from './validation';
 import { revalidatePath } from 'next/cache';
-import { createHash } from 'node:crypto';
+import { stageListingPhoto } from './publication-media';
 import { readListingPublicationForm, listingPublicationPayload, listingPublicationLocationValid } from './publication-contract';
 
 export type PublishListingResult = { error: string } | { error: null; listingId: string };
@@ -52,23 +52,12 @@ export async function publishListing(formData: FormData): Promise<PublishListing
   }
   const photoUrls: string[] = [];
   const photoDigests: string[] = [];
-  const hash = async (blob: Blob) => createHash('sha256').update(Buffer.from(await blob.arrayBuffer())).digest('hex');
 
   try {
     for (const [index, photo] of photos.entries()) {
-      const path = `${listingId}/${index + 1}.jpg`;
-      const digest = await hash(photo);
-      const { error: uploadError } = await supabase.storage
-        .from('apartment-photos')
-        .upload(path, photo, { contentType: 'image/jpeg', upsert: false });
-      if (uploadError) {
-        // A previous attempt may have uploaded successfully despite losing its response.
-        const { data: existing, error: downloadError } = await supabase.storage.from('apartment-photos').download(path);
-        if (downloadError || !existing) throw uploadError;
-        if (await hash(existing) !== digest) return { error: 'ניסיון הפרסום השתנה. פתחו טיוטה חדשה לפני פרסום.' };
-      }
-      photoDigests.push(digest);
-      photoUrls.push(supabase.storage.from('apartment-photos').getPublicUrl(path).data.publicUrl);
+      const staged = await stageListingPhoto(supabase, listingId, index, photo);
+      photoDigests.push(staged.digest);
+      photoUrls.push(staged.url);
     }
 
     const { data: publishedId, error: apartmentError } = await supabase.rpc('publish_apartment_once', {

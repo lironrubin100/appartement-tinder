@@ -226,8 +226,8 @@
   - **הוראות טכניות ברורות:** חבר פתיחת טיוטת עריכה מ־4.15 לטופס המשותף ו־validation משותף. autosave לפרטי בלבד; ציבורי עדיין לא מחובר עד 4.16. אין החלפת כתובת/בעלים ואין טופס שונה בכללים.
   - **קריטריון קבלה:** מחיר/תאריך נשמרים בטיוטה ונפתחים שוב; המחיר הציבורי נשאר ישן עד 4.16.
 
-- [ ] **משימה 4.16: שמירת שינויים מפורשת למודעה**
-  - **קבצים לעריכה/יצירה:** `web/src/lib/listings/editor.ts`, `web/src/components/listings/EditListingForm.tsx`.
+- [x] **משימה 4.16: שמירת שינויים מפורשת למודעה**
+  - **קבצים לעריכה/יצירה:** `web/src/lib/listings/draft-edit-publish.ts`, `web/src/lib/listings/edit-publication-model.ts`, `web/src/lib/listings/publication-media.ts`, `web/src/components/listings/EditListingForm.tsx`, `web/src/components/listings/ListingEditConflict.tsx`, הטופס והשחזור המשותפים, `supabase/migrations/20261024083041_listing_edit_draft_commit.sql`, `supabase/tests/plan_listing_edit_commit.sql`, `web/e2e/edit-listing-commit.spec.ts`.
   - **הוראות טכניות ברורות:** רק שמירת שינויים מפעילה RPC 4.2; autosave שומר draft בלבד. השתמש במתאם התמונות והאימות המשותף; conflict אינו מוחק קלט ודורש רענון/השוואה. סיום טיוטה רק אחרי receipt update מאומת.
   - **קריטריון קבלה:** טיוטת מחיר אינה משנה public; שמירה מפורשת כן; טאב ישן אינו דורס. תמונות/חדרים נשמרים באותה פעולת update.
 

@@ -142,3 +142,7 @@ Task4.2 released0daefca/Production READY with15 canonical checks. Task4.15 atomi
 ## Task4.3 private edit UI checkpoint - 24 October2026
 
 4.15 releasedfe42302. Task4.3 owner edit UI now verified locally: shared composer preserves stable room IDs/order/flags/dates/labels/isSublet, readonly property and private photos; no public edit Save yet.10 distinct actual edit Chrome cases(4+6),26 new-draft/Plus/auth regressions and6 unit/service/types/lint/build pass; both exact new public source/room snapshots and6 JPEG hashes unchanged. Release pending; next4.16 explicit atomic public Save changes and verified edit completion. Current primary shared handoff records final deployment evidence. Keep6b9e for active goal; no new checkout/migration/config/secret.
+
+## Task4.16 explicit public edit release checkpoint - 24 October2026
+
+Live migration20261024083041. Explicit Save changes reuses4.2 atomically with verified selected-draft completion; shared validation/media, frozen retry/cancel/reconcile and confirmed source comparison/refresh. Final optimized build/types/lint/disposable SQL,20 service/queue cases,10 distinct local edit-save cases(7+3),14 private edit/auth and5 new-publication regressions pass. Canonical release pending; see owning handoff for exact fixtures and corrected completed-route defect. Full MVP goal incomplete. Owner requests finish4.16 then review/recommend next feature, not implement4.4 in this stage. Keep existing6b9e; no new checkout/config/secret, preserve ignored state at eventual cleanup.

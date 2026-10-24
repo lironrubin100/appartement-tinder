@@ -9,7 +9,7 @@ import { validateListingDraft } from './validation';
 import { readListingPublicationForm, listingPublicationPayload, listingPublicationLocationValid } from './publication-contract';
 
 export type DraftPublishInput = { id: string; expectedRevision: number; expectedAccountId: string; providerToken?: string };
-export type DraftPublishErrorCode = DraftErrorCode | 'LOCATION_REQUIRED' | 'PHOTO_UNAVAILABLE' | 'PUBLICATION_UNCERTAIN' | 'PUBLISH_FAILED' | 'PUBLICATION_PENDING' | 'PUBLICATION_NOT_STARTED';
+export type DraftPublishErrorCode = DraftErrorCode | 'SOURCE_CONFLICT' | 'LOCATION_REQUIRED' | 'PHOTO_UNAVAILABLE' | 'PUBLICATION_UNCERTAIN' | 'PUBLISH_FAILED' | 'PUBLICATION_PENDING' | 'PUBLICATION_NOT_STARTED';
 export type DraftPublishResult = { ok: true; data: { draftId: string; listingId: string; requestKey: string; revision: number; completed: true } }
   | { ok: false; error: { code: DraftPublishErrorCode; retryable: boolean; message?: string } };
 const failure = (code: DraftPublishErrorCode, retryable = false, message?: string): DraftPublishResult => ({ ok: false, error: { code, retryable, ...(message ? { message } : {}) } });

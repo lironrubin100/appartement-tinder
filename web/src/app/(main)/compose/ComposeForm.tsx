@@ -25,6 +25,8 @@ import { publishListingCloudDraft, type DraftPublishResult } from '@/lib/listing
 import { EditListingRooms } from '@/components/listings/EditListingRooms';
 import { editDraftFields, type EditDraftRoom, type ListingEditContext } from '@/lib/listings/edit-draft-fields';
 import { draftPublicationError } from '@/lib/listings/draft-publish-text';
+import { saveListingCloudDraftChanges } from '@/lib/listings/draft-edit-publish';
+import { ListingEditConflict } from '@/components/listings/ListingEditConflict';
 
 function draftInput(draft: DraftDocument): SavedListingDraft {
   const fields = draft.fields, address = fields.address;
@@ -54,7 +56,7 @@ function formatFields(fields: ListingDraftFields, locale: Locale): string {
 }
 export type ComposeFormHandle = { saveAndClose: () => Promise<void> };
 
-export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editContext, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished, onReloadSaved }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; editContext?: ListingEditContext; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void; onReloadSaved?: () => Promise<boolean> }) {
+export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editContext, accountId, hasPrivatePhone, requiresPrivatePhone, locale = 'he', onClose, onPublished, onReloadSaved, onRefreshSource }: { ref?: Ref<ComposeFormHandle>; cloudDraft?: DraftDocument; editContext?: ListingEditContext; accountId: string; hasPrivatePhone: boolean; requiresPrivatePhone: boolean; locale?: Locale; onClose?: () => void; onPublished?: () => void; onReloadSaved?: () => Promise<boolean>; onRefreshSource?: (revision: number) => Promise<boolean> }) {
   // Keep the selected editing session anchored through server-action/RSC refreshes.
   // Loading another draft uses the caller's id key; reload is an explicit choice.
   const [cloudDraft] = useState(receivedCloudDraft);
@@ -66,6 +68,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
   const [isSublet, setIsSublet] = useState(cloudDraft?.fields.isSublet ?? false);
   const [bedrooms, setBedrooms] = useState(cloudDraft?.fields.bedrooms ?? '');
   const [message, setMessage] = useState('');
+  const [sourceConflict, setSourceConflict] = useState(false), [editSaved, setEditSaved] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [reloading, setReloading] = useState(false), [reloadFailed, setReloadFailed] = useState(false);
@@ -212,15 +215,16 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
   async function finishCloudPublication(data: Extract<DraftPublishResult, { ok: true }>['data']) {
     const expected = publicationSnapshot ?? acknowledged.current;
     if (!expected || data.draftId !== expected.id || data.revision !== expected.revision || data.requestKey !== expected.publicationRequestId
-      || data.listingId !== data.requestKey || !data.completed || !await isCurrentActor()) return;
+      || data.listingId !== (expected.kind === 'edit' ? expected.sourceListingId : data.requestKey) || !data.completed || !await isCurrentActor()) return;
     finished.current = true;
     cloudQueue.current?.stop();
+    if (expected.kind === 'edit') { setEditSaved(data.listingId); return; }
     onPublished?.();
     router.push(`${localePrefix(locale)}/compose/published/${data.listingId}`);
   }
 
   async function publishCloudDraft(form: HTMLFormElement) {
-    if (!cloudDraft || cloudDraft.kind !== 'new' || busy.current || finished.current) return;
+    if (!cloudDraft || busy.current || finished.current) return;
     if (mediaState.current.preparing || mediaState.current.errors) {
       setMessage(t('המתינו להכנת התמונות או הסירו תמונה שנכשלה לפני הפרסום.', 'Wait for photos to finish preparing or remove a failed photo before publishing.')); return;
     }
@@ -238,10 +242,13 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
       if (!await queue?.flush() || !await isCurrentActor()) return;
       saved = acknowledged.current;
       if (!saved || saved.id !== cloudDraft.id || saved.ownerId !== accountId) return;
-      const result = await publishListingCloudDraft({ id: saved.id, expectedRevision: saved.revision, expectedAccountId: accountId, ...(providerToken ? { providerToken } : {}) });
+      const identity = { id: saved.id, expectedRevision: saved.revision, expectedAccountId: accountId };
+      const result = cloudDraft.kind === 'edit' ? await saveListingCloudDraftChanges(identity)
+        : await publishListingCloudDraft({ ...identity, ...(providerToken ? { providerToken } : {}) });
       if (!await isCurrentActor()) return;
       if (result.ok) { await finishCloudPublication(result.data); return; }
-      setMessage(draftPublicationError(result.error, locale));
+      setMessage(draftPublicationError(result.error, locale, cloudDraft.kind));
+      if (result.error.code === 'SOURCE_CONFLICT') setSourceConflict(true);
       const latest = await loadListingCloudDraft(saved.id);
       if (!await isCurrentActor()) return;
       if (latest.ok && latest.data.ownerId === accountId) {
@@ -255,7 +262,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
       } else setPublicationSnapshot(saved);
     } catch {
       if (await isCurrentActor()) {
-        setMessage(draftPublicationError({ code: 'PUBLICATION_UNCERTAIN' }, locale));
+        setMessage(draftPublicationError({ code: 'PUBLICATION_UNCERTAIN' }, locale, cloudDraft.kind));
         if (saved) setPublicationSnapshot(saved);
       }
     } finally {
@@ -360,6 +367,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
   }
 
   async function saveDraftAndClose() {
+    if (finished.current) { if (onClose) onClose(); else router.push(localePrefix(locale) + '/my-listings'); return; }
     if (publicationSnapshot) { await recovery.current?.saveAndClose(); return; }
     if (busy.current || !draftLoaded || !formRef.current) return;
     if (cloudDraft && (mediaState.current.preparing || mediaState.current.errors)) {
@@ -403,6 +411,35 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
   }
   useImperativeHandle(ref, () => ({ saveAndClose: saveDraftAndClose }));
 
+  async function refreshSource() {
+    if (!cloudDraft || cloudDraft.kind !== 'edit' || !onRefreshSource || busy.current || !formRef.current || mediaState.current.preparing || mediaState.current.errors) return false;
+    const input = snapshot(formRef.current);
+    busy.current = true; setReloading(true);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    try {
+      if (!await isCurrentActor()) return false;
+      pendingInput.current = false; setLocalComparison(draftFields(input));
+      cloudQueue.current?.offer(draftFields(input), mediaState.current.items);
+      if (!await cloudQueue.current?.flush() || !await isCurrentActor()) return false;
+      const saved = acknowledged.current;
+      if (!saved || saved.id !== cloudDraft.id) return false;
+      const refreshed = await onRefreshSource(saved.revision);
+      if (refreshed) { finished.current = true; return true; }
+      const latest = await loadListingCloudDraft(saved.id);
+      if (await isCurrentActor() && latest.ok && latest.data.revision !== saved.revision) {
+        cloudQueue.current?.stop(); setCloudState({phase:'conflict',error:'VERSION_CONFLICT'}); setComparison(latest.data);
+      }
+      return false;
+    } finally { if (active.current) { busy.current = false; setReloading(false); } }
+  }
+
+  if (editSaved) return <section className="mx-auto max-w-2xl space-y-5 p-6" dir={locale === 'en' ? 'ltr' : 'rtl'}>
+    <h1 className="text-2xl font-semibold">{t('השינויים במודעה נשמרו', 'Listing changes saved')}</h1>
+    <p>{t('המודעה עודכנה וטיוטת העריכה הושלמה.', 'The listing was updated and this edit draft is complete.')}</p>
+    <div className="flex flex-wrap gap-3">{editContext?.status === 'active' && <Link href={`${localePrefix(locale)}/listings/${editSaved}`} className="rounded-xl bg-orange px-4 py-3 font-semibold text-white">{t('צפייה במודעה', 'View listing')}</Link>}
+      <Button type="button" variant="ghost" onClick={() => { if (onClose) onClose(); else router.push(localePrefix(locale) + '/my-listings'); }}>{t('המודעות שלי', 'My listings')}</Button></div>
+  </section>;
+
   if (publicationSnapshot) return <CloudDraftPublication ref={recovery} snapshot={publicationSnapshot} accountId={accountId} locale={locale}
     providerToken={addressDraft?.selected?.token} onPublished={finishCloudPublication}
     onClose={() => { finished.current = true; if (onClose) onClose(); else window.location.assign(localePrefix(locale) + '/my-listings'); }}
@@ -418,11 +455,12 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
     <div className="min-h-[calc(100vh-80px)] w-full bg-page-bg p-4 md:p-8">
       <div className="mx-auto max-w-2xl rounded-shutaf-lg border border-card-border bg-white p-6 shadow-sm md:p-8">
         <h1 className="mb-2 text-3xl font-bold text-ink">{cloudDraft?.kind === 'edit' ? t("עריכת מודעה", "Edit listing") : cloudDraft ? t("עריכת טיוטה", "Edit draft") : t("פרסום דירה חדשה", "Publish an apartment")}</h1>
-        <p className="mb-8 text-sm text-muted-text">{cloudDraft?.kind === 'edit' ? t("השינויים נשמרים בטיוטה פרטית. המודעה שפורסמה נשארת ללא שינוי.", "Changes are saved in a private draft. Your published listing stays unchanged.") : t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
+        <p className="mb-8 text-sm text-muted-text">{cloudDraft?.kind === 'edit' ? t("השינויים נשמרים כטיוטה פרטית. שמירת שינויים מעדכנת את המודעה שפורסמה.", "Changes are saved privately. Choose Save changes to update the published listing.") : t("מודעה אחת לדירה. הוסיפו את החדרים הפנויים ואת המחיר החודשי של כל אחד.", "Add the available rooms and the monthly price for each room.")}</p>
 
         {editContext && editContext.currentRevision !== editContext.originalRevision && <p role="status" className="mb-4 rounded-xl bg-orange-soft p-3 text-sm">{t('המודעה השתנתה מאז פתיחת הטיוטה. השינויים שלך נשארים פרטיים.', 'This listing changed after the draft started. Your edits remain private.')}</p>}
         <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} onChange={() => { pendingInput.current = true; setRevision(value => value + 1); if (cloudDraft) setCloudState(current => current.phase === 'error' || current.phase === 'conflict' ? current : { phase: 'dirty' }); }} noValidate>
           <fieldset disabled={submitting || savingDraft || reloading} className="space-y-6">
+          {cloudDraft?.kind === 'edit' && (sourceConflict || editContext && editContext.currentRevision !== editContext.originalRevision) && <ListingEditConflict listingId={cloudDraft.sourceListingId} accountId={accountId} locale={locale} onRefresh={refreshSource} />}
           <Input name="title" label={t("כותרת המודעה", "Listing title")} placeholder={t("דירת 3 חדרים ליד האוניברסיטה", "3-bedroom apartment near the university")} defaultValue={initialDraft?.title ?? ''} required maxLength={100} />
           <div className="grid gap-6 sm:grid-cols-2">
             <Input name="bedrooms" label={t("מספר חדרים בדירה", "Bedrooms in the apartment")} placeholder="3" type={cloudDraft ? "text" : "number"} inputMode="numeric" maxLength={32} min="1" max="20" step="1" required value={bedrooms} onChange={(event) => { setBedrooms(event.target.value); setMessage(''); }} />
@@ -519,10 +557,11 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
               <Button type="button" variant="ghost" disabled={reloading} onClick={() => { void reloadSavedVersion(); }}>{t('טעינת הגרסה השמורה', 'Load saved version')}</Button>
               {reloadFailed && <p role="alert" className="text-sm text-error">{t('לא הצלחנו לטעון את הגרסה השמורה. השינויים שלך נשארו כאן.', 'Could not load the saved version. Your edits are still here.')}</p>}
             </div>}
-            <p className="text-sm text-muted-text">{cloudDraft.kind === 'new' ? t('השינויים נשמרים כטיוטה פרטית. רק לחיצה על פרסום תיצור מודעה.', 'Changes are saved privately. Choose Publish listing to make the listing public.') : t('השינויים נשמרים בטיוטה פרטית בלבד.', 'Changes are saved in a private draft only.')}</p>
+            <p className="text-sm text-muted-text">{cloudDraft.kind === 'new' ? t('השינויים נשמרים כטיוטה פרטית. רק לחיצה על פרסום תיצור מודעה.', 'Changes are saved privately. Choose Publish listing to make the listing public.') : t('השמירה האוטומטית פרטית. שמירת שינויים מעדכנת את המודעה.', 'Autosave is private. Save changes updates the listing.')}</p>
           </div>}
           <div className="flex flex-col gap-3 sm:flex-row">
             {(!cloudDraft || cloudDraft.kind === 'new') && <Button type="submit" className="flex-1" disabled={submitting || (requiresPrivatePhone && !hasPrivatePhone)}>{submitting ? t("מפרסמים את המודעה…", "Publishing…") : t("פרסום המודעה", "Publish listing")}</Button>}
+            {cloudDraft?.kind === 'edit' && <Button type="submit" className="flex-1" disabled={submitting}>{submitting ? t('שומרים שינויים…', 'Saving changes…') : t('שמירת שינויים', 'Save changes')}</Button>}
             <Button type="button" variant="ghost" className="flex-1" onClick={saveDraftAndClose}>{savingDraft ? t('שומרים טיוטה…', 'Saving draft…') : t('שמירת טיוטה וסגירה', 'Save draft and close')}</Button>
           </div>
           {!cloudDraft && <details className="text-sm text-muted-text">
@@ -531,7 +570,7 @@ export default function ComposeForm({ ref, cloudDraft: receivedCloudDraft, editC
           </details>}
           </fieldset>
           {savingDraft && <p role="status" className="text-sm text-body-text">{t('שומרים טיוטה…', 'Saving draft…')}</p>}
-          {submitting && <p role="status" className="text-sm text-body-text">{t("מכינים את התמונות ומפרסמים את המודעה…", "Preparing photos and publishing…")}</p>}
+          {submitting && <p role="status" className="text-sm text-body-text">{cloudDraft?.kind === 'edit' ? t('שומרים את השינויים במודעה…', 'Saving listing changes…') : t("מכינים את התמונות ומפרסמים את המודעה…", "Preparing photos and publishing…")}</p>}
         </form>
       </div>
     </div>

@@ -1464,6 +1464,10 @@ export type Database = {
       };
     };
     Functions: {
+      begin_listing_draft_edit: { Args: { p_draft_id: string; p_expected_revision: number; p_photo_digests: Json }; Returns: Json };
+      commit_listing_draft_edit: { Args: { p_draft_id: string; p_expected_revision: number; p_reconcile_only?: boolean }; Returns: Json };
+      cancel_listing_draft_edit: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
+      refresh_listing_edit_draft: { Args: { p_draft_id: string; p_expected_revision: number }; Returns: Database['public']['Tables']['listing_drafts']['Row'] };
       update_owned_listing: { Args: { p_listing_id: string; p_expected_revision: number; p_request_key: string; p_model: Json }; Returns: Json };
       open_listing_edit_draft: { Args: { p_listing_id: string; p_request_key: string }; Returns: Database["public"]["Tables"]["listing_drafts"]["Row"] };
       get_owned_listing_editor: { Args: { p_listing_id: string }; Returns: Json };
