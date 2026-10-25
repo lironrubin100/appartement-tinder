@@ -1,5 +1,26 @@
 # Current worktree consolidation
 
+## Non-destructive review — 25 October 2026
+
+This review refreshed the generated Git inventory against `master` at
+`a993bb8b297ac66d5e7a758e665a7d37166c78af`. It made no worktree, branch,
+archive, fixture, environment-file or hosted-data deletion. `git worktree
+prune --dry-run` found no stale registrations. Existing recovery refs and all
+six stashes resolve.
+
+| Disposition | Checkouts | Evidence / condition |
+| --- | --- | --- |
+| Retain | Primary, `e21c`, `room44`, `6b9e` | Primary owns current records; `e21c` has the unmerged App Config change; `room44` and `6b9e` retain private QA/environment material. |
+| Archive private material first | `e175`, `f185` | Their commits are contained in `master`, but ignored environment/QA artifacts require a verified private archive before any retirement. |
+| Preserve unique history | `7da4` | Its two authorization/documentation commits are not ancestors of `master`; retain the branch and inspect it separately rather than treating it as disposable. |
+| Ready for ordinary removal only after explicit owner approval | `1e59`, `a6de`, `92e7`, `bd33`, `ffcb` | Clean, no meaningful ignored state found, and each HEAD is already contained in `master`. Use `git worktree remove` without force only after rechecking active ownership. |
+
+The `6b9e` status entry is a file-stat refresh artifact: `git diff --quiet`
+found no content diff before or after index refresh. Do not use that display
+state as evidence of unarchived source work. No local or remote branch name is
+deleted by this review. Revisit this table after the owner decides whether the
+five ready checkouts may be removed.
+
 17 October 2026. **13 registered worktrees reduced to2**: primary project checkout and the currently active planning chat (bd33). Eleven inactive checkouts were retired after verified recoverable archival; three already-merged local branch names were removed. Six local branches remain, including four historical unmerged refs retained for recovery; these are pointers, not extra checkouts. No remote branch was deleted.
 
 The plan/automatic next-feature workflow was pushed to master at8304667 and the primary checkout fast-forwarded to it. Further lifecycle/cleanup records are in this followup and the owning handoff. No unfinished feature was blindly merged into the app.
