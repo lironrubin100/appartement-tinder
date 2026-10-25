@@ -350,7 +350,11 @@
           "16.31",
           "16.33"
         ],
-        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md",
+        "block": {
+          "reason": "No approved private demo address fixture exists for the exact retained owners, and no configured provider capability can establish a valid publication location. The four ordinary-owner reads found zero owned listings; do not invent coordinates or property ownership.",
+          "revisit_when": "An owner-approved, private exact-three address fixture bound to npbduvjnqnbydolmdpsc is supplied, or an approved provider/manual-location capability is configured and verified for these exact synthetic owners."
+        }
       },
       "16.36": {
         "depends_on": [
