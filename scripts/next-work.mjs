@@ -9,6 +9,20 @@ export function parseMicroTasks(markdown) {
     .map((match) => ({ id: match[2], done: match[1].toLowerCase() === 'x', title: match[3] }));
 }
 
+// The approved demo queue stays in physical checklist order, not packet resume order.
+export function parseDemonstrationTasks(markdown) {
+  const start = markdown.indexOf('## שלב א׳');
+  const end = markdown.indexOf('## שלב ב׳', start);
+  if (start < 0 || end < 0) return [];
+  let section;
+  const tasks = [];
+  for (const line of markdown.slice(start, end).split(/\r?\n/)) {
+    if (line.startsWith('### ')) section = line.match(/SL\d+(?:\.\d+)?/)?.[0];
+    for (const task of parseMicroTasks(line)) tasks.push({ ...task, section });
+  }
+  return tasks;
+}
+
 export function validateExecution(manifest, ledger) {
   const errors = [];
   const ids = new Set(manifest.packets.map((p) => p.id));
@@ -23,6 +37,9 @@ export function validateExecution(manifest, ledger) {
       errors.push('Invalid owner micro-task dispatch');
     }
   }
+  if (ledger.checklist_continuation && (ledger.checklist_continuation.plan !== 'implementation_plan.md' || ledger.checklist_continuation.stage !== 'A')) errors.push('Invalid checklist continuation');
+  const override = ledger.owner_priority_override;
+  if (override?.status === 'ready' && (!/^\d+\.\d+$/.test(override.task ?? '') || !override.scope || !override.issue || !/^docs\/workstreams\/[A-Za-z0-9_.-]+\.md$/.test(override.handoff ?? ''))) errors.push('Ready owner priority requires task, issue, scope and handoff');
   for (const id of ids) {
     const row = ledger.packets?.[id];
     if (!row || !allowed.includes(row.status)) { errors.push(`${id}: missing/invalid execution status`); continue; }
@@ -40,9 +57,16 @@ export function validateExecution(manifest, ledger) {
   return errors;
 }
 
-export function chooseNext(manifest, ledger, checklist) {
+export function chooseNext(manifest, ledger, checklist, demonstrationTasks) {
   const byId = new Map(manifest.packets.map((p) => [p.id, p]));
   const eligible = (id) => byId.get(id).state === 'ready' && byId.get(id).depends_on.every((dep) => ledger.packets[dep].status === 'verified');
+  const override = ledger.owner_priority_override;
+  if (override?.status === 'ready') {
+    const selected = checklist?.filter((task) => task.id === override.task);
+    if (selected?.length !== 1 || selected[0].done || !override.scope || !override.issue || !override.handoff) return { action: 'blocked', packet: null, reason: 'Ready owner-priority task is missing, duplicated, completed or unscoped; reconcile its evidence.' };
+    return { action: 'owner-priority', packet: null, task: override.task, issue: override.issue, scope: override.scope, handoff: override.handoff,
+      note: 'Explicit owner-approved subset; check actual task prerequisites/target/ownership. This does not verify or waive its parent packet.' };
+  }
   const dispatch = ledger.micro_task_dispatch;
   if (dispatch) {
     if (!checklist || new Set(checklist.map((task) => task.id)).size !== checklist.length ||
@@ -64,12 +88,26 @@ export function chooseNext(manifest, ledger, checklist) {
       }
       return { action: 'micro-task', packet: dispatch.packet, task: next.id, plan: dispatch.plan,
         prerequisites: byId.get(dispatch.packet).depends_on,
-        note: 'Execute only this physical checklist task, verify, publish under standing authorization, then ask before the next. Parent evidence gaps remain open.' };
+        note: 'Verify the selected task within a bounded outcome; publish under standing authorization and continue the approved queue. Stop for a blocker/new decision. Parent evidence gaps remain open.' };
     }
     if (ledger.packets[dispatch.packet].status !== 'verified') {
       return { action: 'reconcile-micro-task-evidence', packet: dispatch.packet,
         note: 'All milestone boxes are checked; verify the bounded packet evidence before resuming the ordinary queue.' };
     }
+  }
+  if (ledger.checklist_continuation) {
+    if (!demonstrationTasks?.length || new Set(demonstrationTasks.map((task) => task.id)).size !== demonstrationTasks.length ||
+        demonstrationTasks.some((task) => !task.section || checklist?.filter((row) => row.id === task.id).length !== 1 || checklist.find((row) => row.id === task.id).done !== task.done)) {
+      return { action: 'blocked', packet: null, reason: 'Stage A checklist is missing or inconsistent; no fallback to another queue.' };
+    }
+    const task = demonstrationTasks.find((task) => !task.done);
+    if (!task) return { action: 'reconcile-demonstration-evidence', packet: null, note: 'All Stage A tasks checked; verify the combined demonstration before selecting further scope. No full-MVP completion inferred.' };
+    const packet = byId.has(task.section) ? task.section : manifest.packets.find((row) => row.parent === task.section)?.id;
+    if (!packet || !eligible(packet) || ledger.packets[packet].status === 'blocked') return { action: 'blocked', packet: packet ?? null, task: task.id,
+      reason: 'Selected Stage A task needs its prerequisite artifacts/evidence reconciled; preserve checklist order.',
+      missing_prerequisites: packet ? byId.get(packet).depends_on.filter((dep) => ledger.packets[dep].status !== 'verified') : [] };
+    return { action: 'micro-task', packet, task: task.id, plan: ledger.checklist_continuation.plan,
+      prerequisites: byId.get(packet).depends_on, note: 'Stage A physical order. Reuse existing verified behavior; task acceptance does not certify its full parent packet. Continue only after actual checks pass.' };
   }
   for (const status of ['in-progress', 'verification-incomplete']) {
     const id = ledger.priority.find((id) => ledger.packets[id].status === status && eligible(id));
@@ -90,9 +128,10 @@ async function main() {
     try { await access(resolve(root, row.handoff)); } catch { errors.push(`${id}: missing handoff file`); }
   }
   if (errors.length) throw new Error(errors.join('\n'));
-  const checklist = ledger.micro_task_dispatch
-    ? parseMicroTasks(await readFile(resolve(root, ledger.micro_task_dispatch.plan), 'utf8')) : undefined;
-  const next = chooseNext(manifest, ledger, checklist);
+  const plan = ledger.micro_task_dispatch || ledger.checklist_continuation || ledger.owner_priority_override?.status === 'ready'
+    ? await readFile(resolve(root, 'implementation_plan.md'), 'utf8') : undefined;
+  const checklist = plan ? parseMicroTasks(plan) : undefined;
+  const next = chooseNext(manifest, ledger, checklist, plan ? parseDemonstrationTasks(plan) : undefined);
   if (process.argv.includes('--json')) console.log(JSON.stringify(next, null, 2));
   else {
     console.log(next.packet ? `${next.action.toUpperCase()} ${next.packet}` : next.action.toUpperCase());

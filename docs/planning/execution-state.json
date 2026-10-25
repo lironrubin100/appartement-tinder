@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24",
+  "updated_at": "2026-10-25",
   "meaning": "Progress only, not product authority. Initially pending means not reconciled by this plan, not missing implementation.",
   "priority": [
     "SL04.2",
@@ -292,14 +292,18 @@
       "6.29",
       "4.19"
     ],
-    "reason": "Direct owner priority 21 October: complete owner management/cloud drafts/individual inquiry inbox next, after the current micro-task; follow physical checklist one task at a time."
+    "reason": "Owner 21 October physical owner-management order retained; owner 25 October authorizes automatic continuation after verified outcomes, with blockers/new choices stopping dispatch."
   },
   "owner_priority_override": {
-    "date": "2026-10-23",
-    "packet": "SL10.1",
-    "after_task": "4.1",
-    "handoff": "docs/workstreams/2026-10-23-listing-sharing.md",
-    "scope": "Guest apartment viewing/browsing and links; accepted personal/group chat public-reference cards with modular preview. Complete release of4.1 first;4.2 remains pending.",
-    "status": "delivered-b0d96b2-production-18-passed"
+    "date": "2026-10-25",
+    "task": "16.1",
+    "issue": "DEMO-CONTENT-PHOTOS-001",
+    "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md",
+    "scope": "After workflow/QA preparation: representative complete synthetic people/apartments with proper photos, idempotent retained demo content and real browser image acceptance. Approved bounded subset, not full SL16.",
+    "status": "ready"
+  },
+  "checklist_continuation": {
+    "plan": "implementation_plan.md",
+    "stage": "A"
   }
 }

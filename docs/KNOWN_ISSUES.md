@@ -1,6 +1,14 @@
 # Known issues
 
-This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20October2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
+This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20 October 2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
+
+## DEMO-CONTENT-PHOTOS-001 — Demo people and apartments need complete, representative profiles with visible photos
+
+- Reported by owner, 25 October 2026. The owner wants many representative resident profiles and apartment listings with proper photos and completed relevant fields, so browsing and detail screens can be inspected as a realistic product. The current experience feels incomplete or not working correctly; this is a reported symptom, not a reproduced image-loading defect.
+- State: reported; diagnosis pending. Check separately for insufficient/incomplete synthetic content, tiny placeholder images, missing or inaccessible image objects/URLs, and rendering failures. Do not assume that adding more accounts alone fixes the problem.
+- Priority update,25 October 2026: owner promoted this to the next near-term outcome for a cheaper executor after instruction/QA preparation, ahead of normal feature continuation. Use task16.1 and its bounded work card in the existing audit handoff; diagnose missing content and image loading separately. Reuse authorized retained demo identities and preserve them; do not create/reset another cohort each run.
+- Expected outcome: a useful variety of clearly synthetic people and apartments, with complete approved fields, proper profile/cover/gallery images and enough content to inspect Discover, apartment cards and detail views. Verify actual image loading, refresh persistence and HE/EN phone/desktop rendering. Preserve public/private field boundaries; define the bounded content set when this item is dispatched.
+- No browser/database diagnosis, account creation, image upload or repair was performed for this intake. Owning review: [MVP focus audit](workstreams/2026-10-25-mvp-focus-audit.md).
 
 ## DISCOVER-LISTER-LIVE-001 — Live discovery functions exclude listers
 
@@ -32,7 +40,7 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 ## CHAT-UNREAD-001 — Unread badge sticks at one, including own sent message
 
 - Reported: owner, 16 October 2026, questionnaire Q25.
-- State: fixed and verified for SL08.1 on19October2026. Application95f333b; live migration20261019211840. Real HE desktop/EN390px two-browser unread/read/background/reconnect/reload checks2/2 passed; ordinary-client outsider/block/idempotency checks passed. See [handoff](workstreams/2026-10-19-cloud-mvp-progress.md).
+- State: fixed and verified for SL08.1 on19 October 2026. Application95f333b; live migration20261019211840. Real HE desktop/EN390px two-browser unread/read/background/reconnect/reload checks2/2 passed; ordinary-client outsider/block/idempotency checks passed. See [handoff](workstreams/2026-10-19-cloud-mvp-progress.md).
 - Symptom: chat repeatedly shows one new message regardless of reading, even when the owner/user sent the message themselves.
 - Owner slice: SL08; decision anchors F2/F5 and group-history/block rules.
 - Diagnosis: client wall-clock read writes on mount/insert, including hidden threads; inbox compared timestamps. Replaced with authenticated, clamped, monotonic server sequence markers after focused visible rendering; sender/system messages excluded, account inbox invalidates on persisted signals. Group cutoffs/denials covered in SQL.

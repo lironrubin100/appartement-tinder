@@ -1,3 +1,5 @@
+> Execution update25 October 2026: this is a reference map, not a required whole-file startup read. Use START_NEXT_WORK and EXECUTION_PROTOCOL; current order/state are WORK_PLAN and the selector. Old planning snapshots below remain dated context.
+
 # Shutaf — תוכנית הבנייה
 
 Updated: 17 October 2026 (Asia/Jerusalem).
@@ -79,4 +81,4 @@ E7 follow-up resolved: share listing card in chat; each member saves independent
 Structural check: `node scripts/check-planning.mjs`. After an authorized canonical decision edit, refresh its generated coverage with `node scripts/check-planning.mjs --write-decisions` (new IDs need explicit owner-slice assignment in the coverage manifest first). Generated dates/counts describe this planning snapshot, not feature verification.
 
 
-Current priority: working MVP and university-funding demonstration. Follow WORK_PLAN order, preserve settled rules, and keep cosmetic polish/general launch/legal preparation from blocking independent local implementation. Privacy/authorization are concrete correctness requirements in each journey. 21 local packets cover required SL00–SL16; no runtime completion inferred.
+Current priority: working MVP and university-funding demonstration. Follow WORK_PLAN order, preserve settled rules, and keep cosmetic polish/general launch/legal preparation from blocking independent local implementation. Privacy/authorization are concrete correctness requirements in each journey. 23 bounded packets cover required SL00–SL16; no runtime completion inferred.

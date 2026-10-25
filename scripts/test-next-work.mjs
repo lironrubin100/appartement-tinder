@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chooseNext, validateExecution, parseMicroTasks } from './next-work.mjs';
+import { chooseNext, validateExecution, parseMicroTasks, parseDemonstrationTasks } from './next-work.mjs';
 import { readFileSync } from 'node:fs';
 const manifest = { packets: [
   {id:'A',state:'ready',depends_on:[]},
@@ -99,7 +99,13 @@ test('integrated production checklist is atomic and agrees with owner dispatch',
       assert.equal(body.split(`**${field}:**`).length-1,1,`${body.split('\n')[0]} ${field}`);
   }
   assert.deepEqual(validateExecution(actualManifest,ledger),[]);
-  const next=chooseNext(actualManifest,ledger,checklist);
+  const next=chooseNext(actualManifest,ledger,checklist,parseDemonstrationTasks(text));
+  if(ledger.owner_priority_override?.status==='ready') {
+    assert.equal(next.action,'owner-priority');
+    assert.equal(next.task,ledger.owner_priority_override.task);
+    assert.equal(next.packet,null);
+    return;
+  }
   const first=checklist.find(t=>!t.done);
   if(first && ledger.micro_task_dispatch.task_ids.includes(first.id)) {
     assert.equal(next.action,'micro-task');assert.equal(next.packet,'SL04.2');assert.equal(next.task,first.id);
@@ -108,4 +114,42 @@ test('integrated production checklist is atomic and agrees with owner dispatch',
   } else {
     assert.notEqual(next.action,'micro-task');
   }
+});
+
+test('Stage A milestone transition preserves checklist order ahead of Google acceptance', () => {
+  const text=readFileSync(new URL('../implementation_plan.md',import.meta.url),'utf8');
+  const ledger=JSON.parse(readFileSync(new URL('../docs/planning/execution-state.json',import.meta.url),'utf8'));
+  const packets=JSON.parse(readFileSync(new URL('../docs/planning/packets.json',import.meta.url),'utf8'));
+  delete ledger.owner_priority_override;
+  ledger.checklist_continuation={plan:'implementation_plan.md',stage:'A'};
+  ledger.packets[ledger.micro_task_dispatch.packet].status='verified';
+  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)});
+  const checklist=parseMicroTasks(text).map(advance), demo=parseDemonstrationTasks(text).map(advance);
+  const next=chooseNext(packets,ledger,checklist,demo);
+  assert.equal(next.task,'3.1');assert.equal(next.packet,'SL03.1');
+  assert.equal(next.action,'blocked');assert.deepEqual(next.missing_prerequisites,['SL02.1']);
+  assert.equal(ledger.packets['SL01.2'].status,'verification-incomplete');
+  // Once real prerequisite evidence is reconciled, dispatch the same task.
+  ledger.packets['SL02.1'].status='verified';
+  assert.equal(chooseNext(packets,ledger,checklist,demo).action,'micro-task');
+});
+
+test('missing Stage A source fails closed and checked demo requires evidence review', () => {
+  const l=fresh();for(const row of Object.values(l.packets))row.status='verified';
+  l.checklist_continuation={plan:'implementation_plan.md',stage:'A'};
+  assert.equal(chooseNext(manifest,l,[]).action,'blocked');
+  const tasks=[{id:'3.1',done:true,title:'demo',section:'SL03'}];
+  assert.equal(chooseNext(manifest,l,tasks,tasks).action,'reconcile-demonstration-evidence');
+});
+
+test('explicit ready owner subset selects a real unchecked task without verifying its parent', () => {
+  const {ledger,checklist}=ownerQueue();
+  ledger.owner_priority_override={status:'ready',task:'2.16',issue:'DEMO',scope:'named approved subset',handoff:'docs/workstreams/demo.md'};
+  const next=chooseNext(manifest,ledger,checklist);
+  assert.equal(next.action,'owner-priority');assert.equal(next.task,'2.16');assert.equal(next.packet,null);
+  assert.equal(ledger.packets.C.status,'pending');
+  checklist[2].done=true;
+  assert.equal(chooseNext(manifest,ledger,checklist).action,'blocked');
+  ledger.owner_priority_override.task='9.99';
+  assert.equal(chooseNext(manifest,ledger,checklist).action,'blocked');
 });
