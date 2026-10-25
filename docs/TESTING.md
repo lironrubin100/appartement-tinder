@@ -10,6 +10,8 @@ From the repository root: node scripts/check-planning.mjs; node --test scripts/t
 
 ## Fixture purposes
 
+Owner update25October: prioritize one small, full, reusable testing pool for subsequent Terra executors. Owner reports only three personal accounts and all remaining users created by agents; live inventory counted56 Auth/profiles,53 synthetically marked,62 apartments. Preserve all three unmarked accounts (liron/Noa matching alone is not a complete identity guard), four completed retained demos and active ownership. Existing exact-three web/.qa/room44-pool manifest is the setup source; no replacement cohort per task. Explicit scoped shared-project setup is authorized for those three synthetic IDs after target/collision/ownership checks; card0.11 performs it, not ensure/run. Cards0.7→0.11→0.8→0.9→0.12→0.10 govern prepared profiles/photos, repeatable scenarios and reversible retirement of incomplete legacy fixtures. No bulk permanent Auth/history deletion is implied; any such concrete critical action remains separately reviewable.
+
 - Retained owner demos: keep their content, identities and ignored manifests for inspection. Do not reset or adopt them as a mutable QA pool.
 - Dedicated reusable QA: exact marked accounts, explicitly prepared once and reused for repeatable scenarios. New listing/inquiry/group/message IDs can be scoped to each run; account identities stay. Tests own scenario preconditions/reversible cleanup and reject drift rather than hiding it.
 - Pristine/destructive cases: minimal separate actors for first onboarding, exact age boundaries, deletion/suspension or other irreversible transitions. Keep those separate from the reusable pool and demos.

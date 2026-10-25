@@ -150,7 +150,7 @@ test('Stage A milestone transition preserves checklist order ahead of Google acc
   delete ledger.owner_priority_override;
   ledger.checklist_continuation={plan:'implementation_plan.md',stage:'A'};
   ledger.packets[ledger.micro_task_dispatch.packet].status='verified';
-  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9'].includes(t.id)});
+  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9','0.10','0.11','0.12'].includes(t.id)});
   const checklist=parseMicroTasks(text).map(advance), demo=parseDemonstrationTasks(text).map(advance);
   const next=chooseNext(packets,ledger,checklist,demo);
   assert.equal(next.task,'3.1');assert.equal(next.packet,'SL03.1');
@@ -184,7 +184,7 @@ test('explicit ready owner subset selects a real unchecked task without verifyin
 
 test('every real A/B/deferred task has a bounded card without a second backlog', async () => {
   const source=await loadTaskSource();
-  assert.equal(source.tasks.length,239);
+  assert.equal(source.tasks.length,242);
   assert.deepEqual(validateTaskCards(source.tasks,source.manifest,source.ledger),[]);
   for (const task of source.tasks) {
     const card=buildBrief(task,source.manifest,source.ledger,source.decisions);
@@ -209,6 +209,8 @@ test('duplicate/missing contracts, escaping scopes and atomic cycles fail closed
 
 test('a blocked login does not block independent assets or waive content dependencies',async()=>{
   const source=await loadTaskSource();
+  for (const id of ['16.31','16.32','16.33','16.34','16.35','16.36','16.1']) source.tasks.find(t=>t.id===id).done=false;
+  source.ledger.atomic_dispatch.steps['16.31'].block={reason:'missing key in this synthetic scenario',revisit_when:'configured'};
   const next={action:'owner-priority',packet:null,task:'16.1'};
   const selected=atomicSelection(next,source.tasks,source.ledger);
   assert.equal(selected.task,'16.32');assert.equal(selected.parent_task,'16.1');
@@ -217,6 +219,24 @@ test('a blocked login does not block independent assets or waive content depende
   source.tasks.find(t=>t.id==='16.33').done=true;
   assert.equal(atomicSelection(next,source.tasks,source.ledger).action,'blocked');
   assert.equal(source.tasks.find(t=>t.id==='16.1').done,false);
+});
+
+test('owner QA priority prepares complete actors before live reuse and preserves unfinished demo work',async()=>{
+  const source=await loadTaskSource();
+  const next={action:'owner-priority',packet:null,task:'0.10'};
+  for (const id of ['0.7','0.11','0.8','0.9','0.12','0.10']) source.tasks.find(t=>t.id===id).done=false;
+  for (const id of ['0.7','0.11','0.8','0.9','0.12','0.10']) {
+    const selected=atomicSelection(next,source.tasks,source.ledger);
+    assert.equal(selected.task,id);
+    assert.notEqual(selected.action,'blocked');
+    source.tasks.find(t=>t.id===id).done=true;
+  }
+  assert.equal(source.tasks.find(t=>t.id==='16.35').done,false);
+  assert.equal(source.tasks.find(t=>t.id==='16.36').done,false);
+  source.tasks.find(t=>t.id==='0.11').done=false;
+  source.tasks.find(t=>t.id==='0.9').done=false;
+  source.ledger.atomic_dispatch.steps['0.11'].block={reason:'identity baseline unavailable in this scenario',revisit_when:'resolved'};
+  assert.equal(atomicSelection(next,source.tasks,source.ledger).action,'blocked');
 });
 
 test('usage waits for every exhausted window and unknown allowance is never zero',()=>{

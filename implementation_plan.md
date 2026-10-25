@@ -34,18 +34,33 @@
 
 - [ ] **משימה 0.7: הכנת חשבונות QA קבועים ותרחיש בסיס**
   - **קבצים לעריכה/יצירה:** `web/scripts/qa-fixtures.mjs`, `web/scripts/qa-pool.mjs`, `web/scripts/test-qa-fixtures.mjs`, `docs/TESTING.md`.
-  - **הוראות טכניות ברורות:** התאם לשימוש חוזר בתשתית הקיימת ובמניפסט שלוש הזהויות שהוכן; בדוק שאין יצירה/מחיקה אוטומטית בעת ensure/run. הגדר baseline לפרופילים ומזהי actor יציבים במניפסט פרטי. אין הרשאה להקים חשבונות משותפים בגלל סעיף זה; setup חי מורשה נבדק בנפרד ב־0.9.
+  - **הוראות טכניות ברורות:** התאם לשימוש חוזר בתשתית הקיימת ובמניפסט שלוש הזהויות שהוכן ב־web/.qa/room44-pool; אל תיצור cohort חלופי. מפה owner/accepted_requester/pending_requester לתפקיד הנדרש בכל בדיקה. הגדר baseline לפרופילים מלאים ותמונה אמיתית בגודל צפייה, provenance, target ומזהי actor יציבים במניפסט פרטי; missing/drift מדווחים, לא מרופאים ביצירת חשבון. ensure/run אינם יוצרים/מוחקים חשבון או משנים סיסמה. setup חי אושר במפורש ב־25 באוקטובר אבל שייך רק ל־0.11; אין כתיבה חיה בכרטיס זה ואין שימוש בדמו התצוגה כ־QA mutable.
   - **קריטריון קבלה:** בדיקת helper חוזרת משתמשת באותם IDs ובאותם credentials, overlap נחסם ו־drift מדווח; הכנה מקומית אינה מוצגת כהתחברות חיה. העדף reuse של בדיקות c24502e במקום מימוש מחדש.
 
 - [ ] **משימה 0.8: ניקוי נתוני תרחיש QA בלי מחיקת החשבונות**
   - **קבצים לעריכה/יצירה:** `web/scripts/qa-fixtures.mjs`, `web/scripts/qa-pool.mjs`, `web/scripts/test-qa-pool.mjs`, `docs/TESTING.md`.
-  - **הוראות טכניות ברורות:** אחרי 0.7 הוסף journal פרטי לנתוני run שנוצרו: group/listing/inquiry/conversation/media IDs בלבד. תחת lease, cleanup מחזיר baseline רק למשאבי ה־run, עם guard שכל owner/member/invitee/requester/participant הוא QA המורשה ושאין peer/cascade לא ידוע. אין reset לפרופילים/סיסמאות או delete של accounts/Storage metadata. כשל משמר journal וחוסם rerun עד recovery; אין public reset endpoint.
+  - **הוראות טכניות ברורות:** אחרי 0.7 הוסף journal פרטי לנתוני run שנוצרו: group/listing/inquiry/conversation/media IDs בלבד. תחת lease, cleanup מחזיר baseline רק למשאבי ה־run, עם guard שכל owner/member/invitee/requester/participant הוא QA המורשה ושאין peer/cascade לא ידוע. אין reset לפרופילים/סיסמאות או delete של accounts/Storage metadata. כשל משמר journal וחוסם rerun עד recovery; אין public reset endpoint. בכרטיס זה בדיקות מבודדות בלבד; הקבלה החיה בשתי ריצות שייכת ל־0.9 אחרי הכנת המאגר המלא ב־0.11.
   - **קריטריון קבלה:** בדיקה מבודדת של create→cleanup→create על אותם IDs עוברת; outside participant או ID שאינו של ה־run מונעים את כל הניקוי. כשל באמצע נשמר ומשוחזר באופן מדויק; החשבונות/הפרופילים והדמו אינם נמחקים.
 
 - [ ] **משימה 0.9: קבלת שתי הרצות קבוצות ופניות על אותם חשבונות**
   - **קבצים לעריכה/יצירה:** `web/e2e/qa-reuse.spec.ts`, `web/scripts/test-qa-fixtures.mjs`, `docs/TESTING.md`, `docs/workstreams/implementation-plan-SL00.md`.
-  - **הוראות טכניות ברורות:** אחרי 0.8 וב־backend מבודד מזוהה או target משותף שאושר במפורש, הרץ פעמיים עם ordinary actors: יצירת קבוצה, פנייה/אישור, guard teardown ואז baseline. אין תלות ביכולת משתמש admin לצאת מקבוצה ואין שימוש בדמו כתשתית QA mutable. בדוק גם interruption/recovery; עצור על הרשאה/מפתח חסרים במקום ליצור cohort נוסף.
+  - **הוראות טכניות ברורות:** אחרי 0.8 ו־0.11, ב־backend מבודד מזוהה או npbduvjnqnbydolmdpsc תחת אישור הבעלים25באוקטובר למאגר הסינתטי המדויק, הרץ פעמיים עם ordinary actors: יצירת קבוצה, פנייה/אישור, guard teardown ואז baseline. אין תלות ביכולת משתמש admin לצאת מקבוצה ואין שימוש בדמו כתשתית QA mutable. בדוק גם interruption/recovery; עצור על הרשאה/מפתח חסרים במקום ליצור cohort נוסף. רשום מיפוי role→ID וקבלות קיימות כדי שהמבצע הבא יקבל manifest ופקודה, בלי ליצור fixtures מחדש.
   - **קריטריון קבלה:** שתי הרצות אמיתיות מסתיימות על אותו סט actor IDs; כל run data הוסר/שוחזר במדויק, אין שאריות לא צפויות, profiles/passwords נשמרו ו־outsider נדחה. mock/PGlite אינם מוצגים כקבלה זו.
+
+- [ ] **משימה 0.11: הכנת המאגר החי עם פרופילים מלאים ותמונות**
+  - **קבצים לעריכה/יצירה:** `web/scripts/qa-fixtures.mjs`, `web/scripts/qa-pool.mjs`, `web/scripts/test-qa-fixtures.mjs`, `docs/TESTING.md`.
+  - **הוראות טכניות ברורות:** אחרי0.7 השתמש במניפסט שלוש הזהויות הקיים ב־web/.qa/room44-pool, לא במניפסט ארבעת דמו התצוגה. הבעלים25באוקטובר מאשר setup חד־פעמי של אותן זהויות ב־npbduvjnqnbydolmdpsc ונתונים סינתטיים; המפתח המקומי כבר הוגדר. בדוק target/history/ownership והיעדר ID/email collision לפני כל כתיבה. אם החשבונות כבר קיימים בדוק credentials ו־reuse, בלי reset אוטומטי. השלמת שם/גיל בגיר/ביוגרפיה/עובדות והעדפות תקינות ותמונה מתוך assets שנבדקו דרך ordinary owner routes לאחר provisioning מורשה. secrets וקבלות נשארים ignored. חשבונות אחרים ודמו התצוגה אינם משתנים; בלי schema/config או קניית ספק.
+  - **קריטריון קבלה:** שלוש זהויות יציבות עוברות ordinary login, baseline מלא והצגת תמונה תקינה; public projection אינו חושף DOB/phone/preferences. ensure וריצה חוזרת שומרים אותם IDs/credentials וללא כפילות media; שמירת פרטי baseline וקבלות במניפסט מאפשרת למבצע חדש להשתמש בחשבון בלי הכנה נוספת. HE/EN ו־390px/desktop נבדקו לפרופילים בפועל או נרשם חסם מדויק בלי לסמן הושלם.
+
+- [ ] **משימה 0.12: הסרת דמו חלקי מהתצוגה עם שימור התאוששות**
+  - **קבצים לעריכה/יצירה:** `web/scripts/qa-fixtures.mjs`, `web/scripts/test-qa-fixtures.mjs`, `docs/TESTING.md`, `docs/workstreams/implementation-plan-SL00.md`.
+  - **הוראות טכניות ברורות:** אחרי0.11 מפה בקריאה בלבד חשבונות ונכסים סינתטיים ישנים בלי תמונה תקינה או baseline מלא; URL לבדו אינו ראיה לתמונה תקינה ויש לזהות1x1/placeholders. השתמש ב־exact-ID manifest פרטי עם סיבה, target, snapshot והפניות תלויות, ו־dry-run ללא mutation. שמור את שלושת החשבונות שאינם marked-test (כולל מועמדי liron/Noa), ארבעת הדמו המלאים, מאגר QA החדש, retained manifests וכל actor בבעלות פעילה. בעלים מאשר הסרת דמו חלקי; תחילה הסרה הפיכה מגילוי/רשימות דרך מנגנוני סטטוס קיימים, בלי פילטר מוצר חדש, מחיקת Auth/שיחות/Storage או שינוי חשבון לא מסווג. אם אין דרך קיימת ובטוחה להסתיר פרופיל/נכס, רשום את הבחירה החסרה במקום למחוק לצמיתות. recheck counts/IDs/ownership מיד לפני apply; אין sweep לפי domain בלבד ואין cascade בלתי ידוע.
+  - **קריטריון קבלה:** רשומות שסווגו חלקיות אינן מופיעות בגילוי/מפה אחרי reload; נכסים/חשבונות מלאים והמאגר נשארים נגישים ופועלים. מספרי before/after וה־exact IDs תואמים לתוכנית שנשמרה, rollback על snapshot מבודד מוכח, dry-run שני ללא שינויים מיותרים, וללא פגיעה בהיסטוריה/חשבונות שמורים. חשבון לא מסווג נשאר untouched עם סיבה.
+
+- [ ] **משימה 0.10: קבלת סביבת בדיקות מוכנה למבצע הבא**
+  - **קבצים לעריכה/יצירה:** `docs/TESTING.md`, `docs/workstreams/implementation-plan-SL00.md`, `PROJECT_STATUS.md`, `docs/planning/execution-state.json`.
+  - **הוראות טכניות ברורות:** אחרי0.7/0.11/0.8/0.9/0.12 חבר את הראיות הקיימות: מבצע חדש מקבל role manifest ופקודת run, בוחר חשבונות מוכנים ואינו יוצר נתונים מאפס. תעד באותו TESTING את baseline, lease, התרחיש, cleanup/recovery והחריג לבדיקות pristine. אין מסמך onboarding נוסף. סגירת הקדימות הזמנית מחזירה לתור המאושר;16.35 נשארת חסומה על כתובת ולא מסומנת כבוצעה.
+  - **קריטריון קבלה:** כל חמש המשימות עם ראיות מלאות; smoke של מבצע חדש משתמש במאגר הקיים, מזהה drift/lease, מריץ תרחיש פעמיים בלי חשבון נוסף ומשאיר baseline. אפליקציה אינה מציגה את הדמו החלקי שסווג להסרה; profile/browser/API/cleanup evidence מובחנים. סגור owner_priority_override רק אחרי קבלה, בלי לסמן את SL00/SL16 כולו כאומת.
 
 ### SL01 — כניסה ופרופילים הדרושים לליבה
 

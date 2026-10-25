@@ -296,10 +296,10 @@
   },
   "owner_priority_override": {
     "date": "2026-10-25",
-    "task": "16.1",
-    "issue": "DEMO-CONTENT-PHOTOS-001",
-    "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md",
-    "scope": "After workflow/QA preparation: representative complete synthetic people/apartments with proper photos, idempotent retained demo content and real browser image acceptance. Approved bounded subset, not full SL16.",
+    "task": "0.10",
+    "issue": "QA-FIXTURE-REUSE",
+    "handoff": "docs/workstreams/implementation-plan-SL00.md",
+    "scope": "Owner requests complete reusable QA accounts/photos and scenario fixtures for focused executors, plus reversible removal of incomplete legacy demos from discovery. Reuse exact-three room44 pool manifest, preserve three unmarked owner accounts and four completed retained demos. One new Terra executor per card; no cohort creation per run.",
     "status": "ready"
   },
   "checklist_continuation": {
@@ -323,6 +323,13 @@
         "16.34",
         "16.35",
         "16.36"
+      ],
+      "0.10": [
+        "0.7",
+        "0.11",
+        "0.8",
+        "0.9",
+        "0.12"
       ]
     },
     "steps": {
@@ -352,8 +359,8 @@
         ],
         "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md",
         "block": {
-          "reason": "No approved private demo address fixture exists for the exact retained owners, and no configured provider capability can establish a valid publication location. The four ordinary-owner reads found zero owned listings; do not invent coordinates or property ownership.",
-          "revisit_when": "An owner-approved, private exact-three address fixture bound to npbduvjnqnbydolmdpsc is supplied, or an approved provider/manual-location capability is configured and verified for these exact synthetic owners."
+          "reason": "No approved private exact-three listing address fixture or configured verified provider; four retained demos have zero owned listings. Existing asset preparation does not authorize invented coordinates.",
+          "revisit_when": "Approved valid address fixture/provider capability is available and target/owner checks pass; preserve unverified evidence."
         }
       },
       "16.36": {
@@ -384,17 +391,21 @@
         }
       },
       "0.7": {
-        "depends_on": []
+        "depends_on": [],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
       "0.8": {
         "depends_on": [
           "0.7"
-        ]
+        ],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
       "0.9": {
         "depends_on": [
-          "0.8"
-        ]
+          "0.8",
+          "0.11"
+        ],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
       "8.12": {
         "depends_on": [
@@ -407,6 +418,28 @@
           "9.9"
         ],
         "source": "docs/KNOWN_ISSUES.md#group-leave-admin-001--group-exit-feels-unavailable"
+      },
+      "0.11": {
+        "depends_on": [
+          "0.7"
+        ],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
+      },
+      "0.12": {
+        "depends_on": [
+          "0.11"
+        ],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
+      },
+      "0.10": {
+        "depends_on": [
+          "0.7",
+          "0.11",
+          "0.8",
+          "0.9",
+          "0.12"
+        ],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
       }
     }
   },
