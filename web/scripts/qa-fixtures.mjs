@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { readFile, writeFile, mkdir, access, unlink } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
+import { spawn, execFileSync } from 'node:child_process';
+import { join } from 'node:path';
+import { validatePool, withPoolLease } from './qa-pool.mjs';
 
 const root = new URL('../', import.meta.url);
 const at = name => new URL(name, root);
@@ -16,13 +19,47 @@ const fixtureDirectory = process.env.QA_FIXTURE_DIRECTORY ?? '.qa';
 const artifact = name => `${fixtureDirectory}/${name}`;
 if (!Number.isInteger(fixtureCount) || fixtureCount < 1 || fixtureCount > 9 || !/^[a-z0-9-]+$/.test(fixturePrefix))
   throw new Error('Invalid isolated QA fixture configuration.');
-async function fixtures() {
+async function fixtures(count = fixtureCount, prefix = fixturePrefix) {
   if (!(await exists(fixtureManifest))) throw new Error(`No QA fixture manifest. Prepare ${fixtureCount} isolated identities and apply its authorized provisioning SQL before retrying.`);
+  if (arguments.length === 0 && await exists(artifact('run.json'))) {
+    const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
+    if (run.purpose === 'reusable-qa') { count = run.ids?.length; prefix = run.prefix; }
+  }
   const rows = JSON.parse(await readFile(at(fixtureManifest), 'utf8'));
-  if (rows.length !== fixtureCount || rows.some(r => !/^[0-9a-f-]{36}$/.test(r.id) || r.email !== `${fixturePrefix}-${r.id}@example.invalid` || !r.password))
-    throw new Error(`Expected exactly ${fixtureCount} generated QA identities; refusing this manifest.`);
-  if (new Set(rows.map(r => r.id)).size !== fixtureCount) throw new Error('Duplicate fixture identity.');
+  if (rows.length !== count || rows.some(r => !/^[0-9a-f-]{36}$/.test(r.id) || r.email !== `${prefix}-${r.id}@example.invalid` || !r.password))
+    throw new Error(`Expected exactly ${count} generated QA identities; refusing this manifest.`);
+  if (new Set(rows.map(r => r.id)).size !== count) throw new Error('Duplicate fixture identity.');
   return rows;
+}
+
+async function reusablePool() {
+  if (!(await exists(fixtureManifest)) || !(await exists(artifact('run.json')))) throw new Error('No existing reusable QA pool. Prepare a dedicated pool once with prepare --reusable --actors=owner,requester,outsider; never replace retained demos.');
+  const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
+  const config = await settings();
+  const rows = await fixtures(run.ids?.length, run.prefix);
+  validatePool(rows, run, config.url);
+  return { run, rows, config };
+}
+
+async function checkAccounts(rows, config, requireReady = false) {
+  for (const row of rows) {
+    const client = createClient(config.url, config.key, { auth: { persistSession: false, autoRefreshToken: false } });
+    try {
+      const result = await client.auth.signInWithPassword({ email: row.email, password: row.password });
+      if (result.error || result.data.user?.id !== row.id) throw new Error(`QA sign-in failed (${result.error?.name ?? 'identity mismatch'}). Preserve the existing manifest and diagnose; no new accounts were generated.`);
+      if (requireReady) {
+        const profile = await client.from('profiles').select('id,onboarded,mode').eq('id', row.id).single();
+        if (profile.error || profile.data?.id !== row.id || !profile.data.onboarded) throw new Error('Reusable QA actor is not ready. Complete its approved role explicitly; no profile reset or provisioning was performed.');
+      }
+    } finally { await client.auth.signOut({ scope: 'local' }).catch(() => {}); }
+  }
+}
+
+async function guardPoolDisposal() {
+  if (await exists(artifact('run.json'))) {
+    const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
+    if (run.purpose === 'reusable-qa' && !process.argv.includes('--discard-reusable-pool')) throw new Error('Reusable QA pool is retained. Disposal additionally requires --discard-reusable-pool and explicit owner intent for these exact IDs.');
+  }
 }
 function cleanupGuard(rows) {
   const ids = rows.map(r => quote(r.id)).join(',');
@@ -59,10 +96,18 @@ async function settings() {
   return { url, key: env.NEXT_PUBLIC_SUPABASE_ANON_KEY };
 }
 
+async function main() {
 if (command === 'prepare') {
   if (await exists(fixtureManifest)) throw new Error('An existing QA run needs cleanup; refusing to overwrite credentials.');
   const { url } = await settings();
-  const rows = Array.from({ length: fixtureCount }, () => {
+  const reusable = process.argv.includes('--reusable');
+  const actorArgument = process.argv.find(value => value.startsWith('--actors='));
+  const actors = actorArgument?.slice('--actors='.length).split(',');
+  if (actorArgument && (!reusable || actors.length < 1 || actors.length > 9 || new Set(actors).size !== actors.length || actors.some(name => !/^[a-z][a-z0-9_-]{0,39}$/.test(name)))) throw new Error('Use --actors=owner,requester,outsider only with --reusable; names must be distinct.');
+  if (reusable && !actors) throw new Error('Name the required reusable actors with --actors; no automatic nine-account cohort.');
+  if (actors && process.env.QA_FIXTURE_COUNT && fixtureCount !== actors.length) throw new Error('Actor list conflicts with QA_FIXTURE_COUNT.');
+  const count = actors?.length ?? fixtureCount;
+  const rows = Array.from({ length: count }, () => {
     const id = randomUUID(); return { id, email: `${fixturePrefix}-${id}@example.invalid`, password: `${randomUUID()}Aa1!` };
   });
   await mkdir(at(fixtureDirectory), { recursive: true });
@@ -87,11 +132,32 @@ commit;\n`;
  (select count(*) from public.groups where admin_id in ${scope}) as groups_remaining,
  (select count(*) from storage.objects where split_part(name,'/',1) in ${scope}) as storage_objects_remaining;\n`;
   await writeFile(at(fixtureManifest), JSON.stringify(rows, null, 2), { mode: 0o600, flag: 'wx' });
-  for (const [name, body] of Object.entries({ 'provision.sql': provision, 'prepare-cleanup.sql': prepareCleanupSql(rows, url), 'cleanup.sql': cleanup, 'verify.sql': verify, 'run.json': JSON.stringify({ created: new Date().toISOString(), target: url, ids: rows.map(r => r.id) }, null, 2) }))
+  const run = { created: new Date().toISOString(), target: url, ids: rows.map(r => r.id), ...(reusable ? {version:1,purpose:'reusable-qa',prefix:fixturePrefix,actors:Object.fromEntries(actors.map((name,i)=>[name,rows[i].id]))} : {}) };
+  for (const [name, body] of Object.entries({ 'provision.sql': provision, 'prepare-cleanup.sql': prepareCleanupSql(rows, url), 'cleanup.sql': cleanup, 'verify.sql': verify, 'run.json': JSON.stringify(run, null, 2) }))
     await writeFile(at(artifact(name)), body, { mode: 0o600 });
-  console.log(`Prepared ${fixtureCount} isolated identities for ${url}. SQL is in ${fileURLToPath(at(`${fixtureDirectory}/`))}. No database changes performed.`);
+  console.log(`Prepared ${count} ${reusable ? 'dedicated reusable QA' : 'isolated'} identities for ${url}. SQL is in ${fileURLToPath(at(`${fixtureDirectory}/`))}. No database changes performed.`);
+} else if (command === 'ensure' || command === 'run') {
+  const childArgs = process.argv.slice(process.argv.indexOf('--') + 1);
+  if (command === 'run' && (!process.argv.includes('--') || !childArgs.length)) throw new Error('Usage: qa-fixtures.mjs run -- node <test runner>');
+  const { run, rows, config } = await reusablePool();
+  const listing = execFileSync('git', ['worktree','list','--porcelain'], { cwd: fileURLToPath(root), encoding:'utf8' });
+  const primary = listing.split(/\r?\n/).find(line => line.startsWith('worktree '))?.slice(9);
+  if (!primary) throw new Error('Cannot find shared QA lease location; no test started.');
+  await withPoolLease(join(primary,'web','.qa','pool-leases'), {target:config.url,ids:run.ids}, async () => {
+    await checkAccounts(rows, config, true);
+    if (command === 'ensure') console.log(`Validated ${rows.length} existing named QA actors; no account/content creation or reset. Scenario preconditions still belong to its test.`);
+    else {
+      const code = await new Promise((resolve,reject) => {
+        const child = spawn(childArgs[0], childArgs.slice(1), { cwd:fileURLToPath(root), stdio:'inherit', shell:false,
+          env:{...process.env,QA_FIXTURE_COUNT:String(rows.length),QA_FIXTURE_PREFIX:run.prefix,QA_FIXTURE_MANIFEST:fixtureManifest,QA_FIXTURE_DIRECTORY:fixtureDirectory} });
+        child.once('error',reject);child.once('exit',(code,signal)=>resolve(signal ? 1 : (code ?? 1)));
+      });
+      process.exitCode = code;
+    }
+  });
 } else if (command === 'prepare-cleanup') {
   if (!process.argv.includes('--discard-fixtures')) throw new Error('Retained demos must remain intact. To generate disposal SQL for an explicitly discarded run, use prepare-cleanup --discard-fixtures. No remote action is automatic.');
+  await guardPoolDisposal();
   const rows = await fixtures();
   const { url } = await settings();
   const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
@@ -99,18 +165,15 @@ commit;\n`;
   await writeFile(at(artifact('prepare-cleanup.sql')), prepareCleanupSql(rows, url), { mode: 0o600 });
   console.log(`Generated only ${artifact('prepare-cleanup.sql')}. Review and explicitly apply it to the confirmed target only when discarding these exact synthetic fixtures. No remote mutation performed.`);
 } else if (command === 'check') {
-  const rows = await fixtures();
   const { url, key } = await settings();
   const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
+  const rows = await fixtures(run.purpose === 'reusable-qa' ? run.ids?.length : fixtureCount, run.purpose === 'reusable-qa' ? run.prefix : fixturePrefix);
+  if (run.purpose === 'reusable-qa') validatePool(rows,run,url);
   if (run.target !== url) throw new Error('Fixture project differs from current environment.');
-  for (const row of rows) {
-    const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-    const result = await client.auth.signInWithPassword(row);
-    if (result.error || result.data.user?.id !== row.id) throw new Error('QA sign-in failed; provision this run through the authorized database connector first.');
-    await client.auth.signOut();
-  }
-  console.log(`All ${fixtureCount} isolated QA accounts can sign in. Acceptance will not silently skip.`);
+  await checkAccounts(rows,{url,key});
+  console.log(`All ${rows.length} exact QA accounts can sign in. Acceptance will not silently skip.`);
  } else if (command === 'storage') {
+  await guardPoolDisposal();
   const rows = await fixtures();
   const { url, key } = await settings();
   const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
@@ -146,8 +209,11 @@ commit;\n`;
 } else if (command === 'forget') {
   // The agent must have checked zero counts through the connector before supplying this flag.
   if (!process.argv.includes('--verified-clean')) throw new Error('First verify all five database counts are zero; then use --verified-clean.');
+  await guardPoolDisposal();
   await fixtures();
   for (const name of [fixtureManifest, artifact('provision.sql'), artifact('prepare-cleanup.sql'), artifact('cleanup.sql'), artifact('verify.sql'), artifact('run.json')])
     if (await exists(name)) await unlink(at(name));
   console.log('Removed temporary credentials and this run\'s SQL files.');
-} else throw new Error('Usage: node scripts/qa-fixtures.mjs prepare|check|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
+} else throw new Error('Usage: qa-fixtures.mjs prepare [--reusable --actors=owner,requester,outsider]|ensure|run -- node <test>|check|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
+}
+main().catch(error => { console.error(error.message); process.exitCode = 1; });
