@@ -1,6 +1,10 @@
 # MVP focus and execution-instruction audit — 25 October 2026
 
-## Current follow-up: instruction review and approved workflow preferences
+## Current implementation checkpoint
+
+25 October: QA helper c24502e and workflow simplification 5ca24ef are verified and committed on codex/streamline-execution; publication is next. Selector: 19/19, QA contract checks: 5/5. All 229 task IDs/order/flags preserved. Task 16.1 is the next owner-priority outcome; visible photos are not yet delivered. The earlier review snapshots below are dated history, superseded by the implementation and publication checkpoints at the end.
+
+## Earlier review: instruction audit and approved workflow preferences
 
 This section supersedes the earlier interview's pending-continuation wording below. Owner requests a review/recommendation first, before feature execution. Direct answers in this follow-up: continue through an approved queue without per-task permission, stopping for a blocker/new decision; give short summaries and update existing records, creating a document only for a distinct necessary role; investigate reusing QA accounts instead of continually provisioning new ones. Existing critical-action, data/ownership and privacy gates remain. Automation is not being enabled in this review.
 
@@ -191,6 +195,6 @@ QA helper committed as c24502e. Final selector checks: 19/19 passed; check-plann
 
 Other chat was instructed to use exactly owner, accepted_requester and pending_requester (plus guest), prepare a dedicated retained QA pool once and reuse ensure/run. Existing demos must not be adopted/reset. Initial safe pool provisioning is a separate unresolved operational step; no accounts were created/deleted by this change. App Config owner holds master integration pending this workflow release.
 
-The cheaper demo executor prepared two offline-only validator files. Independent review found public/private field and contract-alignment corrections; these are still uncommitted preparation, not visible photo completion. No suitable assets, exact retained identity mapping, hosted publication or browser acceptance has been performed. Task 16.1 remains unchecked.
+The cheaper demo executor prepared two offline-only validator files; public/private field and contract corrections were reviewed, and 3/3 offline checks passed. A generic validator without a real content manifest is not a useful release yet: both drafts were preserved under ignored web/.qa/workflow/demo-content-preparation instead of adding unused tools to the normal reading path. This is preparation, not visible photo completion. No suitable assets, exact retained identity mapping, hosted publication or browser acceptance has been performed. Task 16.1 remains unchecked.
 
 Automation remains paused while the one-time operational setup and demo executor path are reconciled. No duplicate scheduled job or new chat was created. This audit changes the execution flow, not the product policy or runtime release claims. Next: publish verified tooling/instructions, communicate the source SHA, then complete the scoped demo card with the cheaper executor; keep the unavailable live step explicit.
