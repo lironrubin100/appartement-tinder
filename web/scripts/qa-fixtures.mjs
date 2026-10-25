@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { spawn, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { validatePool, validateBaseline, withPoolLease, REQUIRED_REUSABLE_QA_ROLES } from './qa-pool.mjs';
+import { validatePool, validateBaseline, withPoolLease, REQUIRED_REUSABLE_QA_ROLES, setupPoolActors } from './qa-pool.mjs';
 
 const root = new URL('../', import.meta.url);
 const at = name => new URL(name, root);
@@ -137,6 +137,29 @@ commit;\n`;
   for (const [name, body] of Object.entries({ 'provision.sql': provision, 'prepare-cleanup.sql': prepareCleanupSql(rows, url), 'cleanup.sql': cleanup, 'verify.sql': verify, 'run.json': JSON.stringify(run, null, 2) }))
     await writeFile(at(artifact(name)), body, { mode: 0o600 });
   console.log(`Prepared ${count} ${reusable ? 'dedicated reusable QA' : 'isolated'} identities for ${url}. SQL is in ${fileURLToPath(at(`${fixtureDirectory}/`))}. No database changes performed.`);
+} else if (command === 'setup') {
+  const { parseEnv } = await import('./ensure-demo-content.mjs');
+  if (!process.argv.includes('--apply')) throw new Error('Card 0.11 setup requires --apply and fresh target/history/ownership checks.');
+  const { run, rows, config } = await reusablePool();
+  if (fixtureDirectory !== '.qa/room44-pool' || fixtureManifest !== '.qa/room44-pool/accounts.json') throw new Error('Setup only accepts the existing room44 pool.');
+  const cwd = fileURLToPath(root);
+  const primary = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd, encoding: 'utf8' }).split(/\r?\n/)[0];
+  if (primary.replaceAll('\\', '/') !== `worktree ${cwd.replaceAll('\\', '/').replace(/\/$/, '').replace(/\/web$/, '')}`) throw new Error('Setup must run in the primary checkout.');
+  for (const path of [fixtureManifest, artifact('run.json'), '.qa/demo-recovery/admin.env']) execFileSync('git', ['check-ignore', '--quiet', path], { cwd });
+  const adminEnv = parseEnv(await readFile(at('.qa/demo-recovery/admin.env'), 'utf8'));
+  if (adminEnv.get('SUPABASE_PROJECT_REF') !== 'npbduvjnqnbydolmdpsc' || !adminEnv.get('SUPABASE_SECRET_KEY')) throw new Error('Missing target-bound local admin settings.');
+  const admin = createClient(config.url, adminEnv.get('SUPABASE_SECRET_KEY'), { auth: { persistSession: false, autoRefreshToken: false } });
+  await withPoolLease(join(cwd, '.qa', 'pool-leases'), { target: config.url, ids: run.ids }, async () => {
+    const receipt = await setupPoolActors({ rows, run, target: config.url, admin: admin.auth.admin,
+      clientFor: () => createClient(config.url, config.key, { auth: { persistSession: false, autoRefreshToken: false } }),
+      portraitBytes: portrait => readFile(new URL(portrait.source.replace(/^web\//, ''), root)),
+      saveReceipt: receipt => writeFile(at(artifact('setup-receipt.json')), JSON.stringify(receipt, null, 2), { mode: 0o600 }),
+    });
+    // Ready means ordinary API baseline validated; browser acceptance remains separate.
+    run.baseline.state = 'ready';
+    await writeFile(at(artifact('run.json')), JSON.stringify(run, null, 2), { mode: 0o600 });
+    console.log(JSON.stringify({ setup: 'ordinary-api-verified', actors: Object.keys(receipt.actors), private_denied: receipt.private_denied, browser_acceptance: 'pending' }));
+  });
 } else if (command === 'ensure' || command === 'run') {
   const childArgs = process.argv.slice(process.argv.indexOf('--') + 1);
   if (command === 'run' && (!process.argv.includes('--') || !childArgs.length)) throw new Error('Usage: qa-fixtures.mjs run -- node <test runner>');

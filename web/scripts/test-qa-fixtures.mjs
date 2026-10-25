@@ -6,6 +6,26 @@ import { mkdir, mkdtemp, readFile, writeFile, copyFile, rm } from 'node:fs/promi
 import { join, resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { setupPoolActors } from './qa-pool.mjs';
+
+test('setup rejects identity collisions and existing credential failures before creating any actor', async () => {
+  const target = 'https://npbduvjnqnbydolmdpsc.supabase.co';
+  const ids = [1,2,3].map(n => `10000000-0000-4000-8000-${String(n).padStart(12,'0')}`);
+  const rows = ids.map(id => ({ id, email: `qa-pool-${id}@example.invalid`, password: 'local-test-only' }));
+  const run = { version:1, purpose:'reusable-qa', prefix:'qa-pool', target, ids, actors:Object.fromEntries(roles.map((role,i)=>[role,ids[i]])) };
+  run.baseline = readyBaseline(run);
+  const bytes = Buffer.alloc(2048, 1);
+  for (const actor of Object.values(run.baseline.actors)) actor.portrait.sha256 = createHash('sha256').update(bytes).digest('hex');
+  let writes = 0;
+  const options = { rows, run, target, portraitBytes:async()=>bytes, saveReceipt:async()=>{writes++;},
+    clientFor:()=>({ auth:{signInWithPassword:async()=>({error:{message:'invalid'}}),signOut:async()=>({})} }),
+    admin:{listUsers:async()=>({data:{users:[{id:ids[0],email:'unrelated@example.invalid'}]}}),createUser:async()=>{writes++;}} };
+  await assert.rejects(setupPoolActors(options), /collision/);
+  options.admin.listUsers = async()=>({data:{users:[rows[1]]}});
+  await assert.rejects(setupPoolActors(options), /credentials failed/);
+  assert.equal(writes, 0, 'missing first actor is not provisioned before later existing credentials are checked');
+});
 
 const web=fileURLToPath(new URL('../',import.meta.url));
 const roles=['owner','accepted_requester','pending_requester'];

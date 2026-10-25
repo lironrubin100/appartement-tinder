@@ -44,6 +44,8 @@ node scripts/qa-fixtures.mjs prepare --reusable --actors=owner,accepted_requeste
 
 prepare only writes exact-ID private credentials/provision/disposal SQL; it performs no remote mutation and refuses an existing manifest. It declares a pending baseline, not a successful login. Card0.11 alone may complete/validate that baseline for the existing exact IDs through the authorized credential-safe path on the confirmed target; until then ensure/run fail before any sign-in or hosted write. No hard-coded known passwords or repeated real-email signup. Existing retained demo manifests are deliberately rejected as a reusable pool.
 
+Card0.11 setup command (primary checkout only, after fresh target/history/ownership checks): set QA_FIXTURE_MANIFEST to `.qa/room44-pool/accounts.json` and QA_FIXTURE_DIRECTORY to `.qa/room44-pool`, then run `node scripts/qa-fixtures.mjs setup --apply` from web. It reuses the existing target-bound ignored admin settings from demo-recovery only for exact-ID account creation, validates all identity/email collisions and existing credentials before writing, and never resets a password. Canonical profiles and portraits use ordinary actor sessions. Private setup receipts preserve partial progress; rerun reuses accounts/media. API-validated `baseline.state=ready` enables ensure/run but does not claim browser acceptance or scenario cleanup. Browser screenshots/receipts and the owning checkpoint provide those separate results. No schema/global setting or unrelated actor changes are permitted.
+
 ~~~powershell
 node scripts/qa-fixtures.mjs ensure
 node scripts/qa-fixtures.mjs run -- node node_modules/@playwright/test/cli.js test e2e/<affected-spec>.spec.ts --workers=1
