@@ -328,11 +328,7 @@
     "steps": {
       "16.31": {
         "depends_on": [],
-        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md",
-        "block": {
-          "reason": "Private Auth-admin key is not configured; four-demo recovery is already approved.",
-          "revisit_when": "Owner configures the private key locally and the blocker is explicitly rechecked; never print the value."
-        }
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
       },
       "16.32": {
         "depends_on": [],
