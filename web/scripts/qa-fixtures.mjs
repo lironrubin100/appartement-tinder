@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { spawn, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { validatePool, withPoolLease } from './qa-pool.mjs';
+import { validatePool, validateBaseline, withPoolLease, REQUIRED_REUSABLE_QA_ROLES } from './qa-pool.mjs';
 
 const root = new URL('../', import.meta.url);
 const at = name => new URL(name, root);
@@ -37,8 +37,9 @@ async function reusablePool() {
   const run = JSON.parse(await readFile(at(artifact('run.json')), 'utf8'));
   const config = await settings();
   const rows = await fixtures(run.ids?.length, run.prefix);
+  const baseline = validateBaseline(run);
   validatePool(rows, run, config.url);
-  return { run, rows, config };
+  return { run, rows, config, baseline };
 }
 
 async function checkAccounts(rows, config, requireReady = false) {
@@ -103,7 +104,7 @@ if (command === 'prepare') {
   const reusable = process.argv.includes('--reusable');
   const actorArgument = process.argv.find(value => value.startsWith('--actors='));
   const actors = actorArgument?.slice('--actors='.length).split(',');
-  if (actorArgument && (!reusable || actors.length < 1 || actors.length > 9 || new Set(actors).size !== actors.length || actors.some(name => !/^[a-z][a-z0-9_-]{0,39}$/.test(name)))) throw new Error('Use --actors=owner,requester,outsider only with --reusable; names must be distinct.');
+  if (actorArgument && (!reusable || JSON.stringify(actors) !== JSON.stringify(REQUIRED_REUSABLE_QA_ROLES))) throw new Error('A reusable pool must use exactly owner,accepted_requester,pending_requester; no broad replacement cohort is allowed.');
   if (reusable && !actors) throw new Error('Name the required reusable actors with --actors; no automatic nine-account cohort.');
   if (actors && process.env.QA_FIXTURE_COUNT && fixtureCount !== actors.length) throw new Error('Actor list conflicts with QA_FIXTURE_COUNT.');
   const count = actors?.length ?? fixtureCount;
@@ -132,14 +133,15 @@ commit;\n`;
  (select count(*) from public.groups where admin_id in ${scope}) as groups_remaining,
  (select count(*) from storage.objects where split_part(name,'/',1) in ${scope}) as storage_objects_remaining;\n`;
   await writeFile(at(fixtureManifest), JSON.stringify(rows, null, 2), { mode: 0o600, flag: 'wx' });
-  const run = { created: new Date().toISOString(), target: url, ids: rows.map(r => r.id), ...(reusable ? {version:1,purpose:'reusable-qa',prefix:fixturePrefix,actors:Object.fromEntries(actors.map((name,i)=>[name,rows[i].id]))} : {}) };
+  const run = { created: new Date().toISOString(), target: url, ids: rows.map(r => r.id), ...(reusable ? {version:1,purpose:'reusable-qa',prefix:fixturePrefix,actors:Object.fromEntries(actors.map((name,i)=>[name,rows[i].id])),baseline:{version:1,target:url,state:'pending-live-validation',actors:{}}} : {}) };
   for (const [name, body] of Object.entries({ 'provision.sql': provision, 'prepare-cleanup.sql': prepareCleanupSql(rows, url), 'cleanup.sql': cleanup, 'verify.sql': verify, 'run.json': JSON.stringify(run, null, 2) }))
     await writeFile(at(artifact(name)), body, { mode: 0o600 });
   console.log(`Prepared ${count} ${reusable ? 'dedicated reusable QA' : 'isolated'} identities for ${url}. SQL is in ${fileURLToPath(at(`${fixtureDirectory}/`))}. No database changes performed.`);
 } else if (command === 'ensure' || command === 'run') {
   const childArgs = process.argv.slice(process.argv.indexOf('--') + 1);
   if (command === 'run' && (!process.argv.includes('--') || !childArgs.length)) throw new Error('Usage: qa-fixtures.mjs run -- node <test runner>');
-  const { run, rows, config } = await reusablePool();
+  const { run, rows, config, baseline } = await reusablePool();
+  if (baseline.state !== 'ready') throw new Error('Reusable QA baseline is declared locally but not live-validated. Card 0.11 must complete the exact existing actors; no sign-in, account creation, password reset, or hosted write was attempted.');
   const listing = execFileSync('git', ['worktree','list','--porcelain'], { cwd: fileURLToPath(root), encoding:'utf8' });
   const primary = listing.split(/\r?\n/).find(line => line.startsWith('worktree '))?.slice(9);
   if (!primary) throw new Error('Cannot find shared QA lease location; no test started.');

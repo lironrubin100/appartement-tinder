@@ -32,24 +32,24 @@ Current limitation: the maintained helper implements identity validation and lea
 
 ## Dedicated reusable pool
 
-Existing controls: QA_FIXTURE_MANIFEST and QA_FIXTURE_DIRECTORY select a private ignored cohort; QA_FIXTURE_PREFIX controls marked emails. Use a separate directory/manifest for the dedicated pool. QA_FIXTURE_COUNT remains supported for legacy/pristine runs. prepare --reusable requires named actors and sizes the cohort to that list (1–9); an explicit count must agree.
+Existing controls: QA_FIXTURE_MANIFEST and QA_FIXTURE_DIRECTORY select a private ignored cohort; QA_FIXTURE_PREFIX controls marked emails. Use a separate directory/manifest for the dedicated pool. QA_FIXTURE_COUNT remains supported for legacy/pristine runs. The dedicated reusable pool is exactly three named roles: owner, accepted_requester, pending_requester. Its ignored run manifest maps those roles to stable IDs and carries the private canonical-profile baseline: completed resident state, name/bio, adult DOB, facts, private preferences, disclosure, and a tracked fictional 1024×1536 portrait's source/provenance/SHA-256/owner-path template. The exact IDs and credentials remain only in that ignored manifest.
 
 From web, prepare locally once (example shell environment overrides; values here are paths, not secrets):
 
 ~~~powershell
 $env:QA_FIXTURE_MANIFEST='.qa/pool/accounts.json'
 $env:QA_FIXTURE_DIRECTORY='.qa/pool'
-node scripts/qa-fixtures.mjs prepare --reusable --actors=owner,requester,outsider
+node scripts/qa-fixtures.mjs prepare --reusable --actors=owner,accepted_requester,pending_requester
 ~~~
 
-prepare only writes exact-ID private credentials/provision/disposal SQL; it performs no remote mutation and refuses an existing manifest. Apply provisioning only through an authorized credential-safe path on the confirmed target, then complete each actor's approved role. No hard-coded known passwords or repeated real-email signup. Existing retained demo manifests are deliberately rejected as a reusable pool.
+prepare only writes exact-ID private credentials/provision/disposal SQL; it performs no remote mutation and refuses an existing manifest. It declares a pending baseline, not a successful login. Card0.11 alone may complete/validate that baseline for the existing exact IDs through the authorized credential-safe path on the confirmed target; until then ensure/run fail before any sign-in or hosted write. No hard-coded known passwords or repeated real-email signup. Existing retained demo manifests are deliberately rejected as a reusable pool.
 
 ~~~powershell
 node scripts/qa-fixtures.mjs ensure
 node scripts/qa-fixtures.mjs run -- node node_modules/@playwright/test/cli.js test e2e/<affected-spec>.spec.ts --workers=1
 ~~~
 
-ensure validates existing named identities/target and ordinary sign-in plus completed own profile; it creates/resets nothing. It does not prove a scenario's listings/messages/inquiries are pristine. run holds per-actor filesystem leases in the primary checkout's ignored web/.qa/pool-leases while running its child. Overlapping subsets/copied manifests on this computer cannot run against the same actor simultaneously. A stopped/crashed process may leave a lease: investigate the named run/owner and release only a verified stale lease; never automatically expire it or mint a replacement cohort. Cross-machine execution still needs shared ownership coordination/isolated targets.
+ensure validates the existing named identities/target, ordinary sign-in and completed own profile only after the private baseline is marked ready; it creates/resets nothing. It does not prove a scenario's listings/messages/inquiries are pristine. run holds per-actor filesystem leases in the primary checkout's ignored web/.qa/pool-leases while running its child. Overlapping subsets/copied manifests on this computer cannot run against the same actor simultaneously. A stopped/crashed process may leave a lease: investigate the named run/owner and release only a verified stale lease; never automatically expire it or mint a replacement cohort. Cross-machine execution still needs shared ownership coordination/isolated targets.
 
 check remains ordinary sign-in preflight for legacy or reusable manifests. Existing suites using indexed nine-account fixtures still require their documented actors; a three-actor pool is for an appropriately scoped test, not fake coverage of a nine-actor suite. New fixtures record named actors in run.json; migrate a test's role requirements when changing that test, rather than weakening assertions.
 

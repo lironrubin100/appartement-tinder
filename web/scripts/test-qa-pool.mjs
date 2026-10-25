@@ -7,9 +7,12 @@ import { validatePool, withPoolLease } from './qa-pool.mjs';
 
 const ids=['10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000003'];
 const target='http://127.0.0.1:54321';
+const roles=['owner','accepted_requester','pending_requester'];
 function pool() {
   const rows=ids.map(id=>({id,email:`qa-pool-${id}@example.invalid`,password:'fixture-test-only'}));
-  return {rows,run:{version:1,purpose:'reusable-qa',prefix:'qa-pool',target,ids:[...ids],actors:{owner:ids[0],requester:ids[1],outsider:ids[2]}}};
+  const actors=Object.fromEntries(roles.map((role,index)=>[role,ids[index]]));
+  const baseline={version:1,target,state:'ready',actors:Object.fromEntries(roles.map(role=>[role,{id_ref:role,profile:{completed:true,mode:'resident',name:`QA ${role}`,birth_date:'1999-01-01',bio:'Fictional reusable QA actor.',facts:{cleanliness:'tidy_shared'},preferences:{strict_non_smoking:true},disclosed_fields:['cleanliness']},portrait:{owner_role:role,source:'web/public/demo-content/portraits/demo-portrait-01.png',sha256:'a'.repeat(64),bytes:2048,width:1024,height:1536,storage_path_template:'{actor_id}/qa-pool-portrait.png',provenance:'Tracked fictional portrait asset; card 0.11 uploads through the owner route.'}}]))};
+  return {rows,run:{version:1,purpose:'reusable-qa',prefix:'qa-pool',target,ids:[...ids],actors,baseline}};
 }
 async function clean(directory) {
   const path=resolve(directory);
@@ -23,8 +26,8 @@ test('three exact reusable actors validate without provisioning or replacing ide
   assert.equal(validatePool(rows,run,target),rows);
   assert.equal(JSON.stringify({rows,run}),before);
 });
-test('demo/legacy manifests and wrong target or identity cannot become reusable QA',()=>{
-  for(const change of [p=>delete p.run.purpose,p=>p.run.purpose='demo',p=>p.run.target='https://other.invalid',p=>p.rows[0].email='someone@example.com',p=>p.rows[0].id=p.rows[1].id,p=>p.run.ids.reverse(),p=>p.run.actors.outsider=ids[0],p=>delete p.run.actors.owner]) {
+test('demo/legacy manifests and wrong target, roles, or baseline cannot become reusable QA',()=>{
+  for(const change of [p=>delete p.run.purpose,p=>p.run.purpose='demo',p=>p.run.target='https://other.invalid',p=>p.rows[0].email='someone@example.com',p=>p.rows[0].id=p.rows[1].id,p=>p.run.ids.reverse(),p=>p.run.actors.pending_requester=ids[0],p=>delete p.run.actors.owner,p=>delete p.run.baseline,p=>p.run.baseline.actors.owner.portrait.sha256='bad']) {
     const p=pool();change(p);assert.throws(()=>validatePool(p.rows,p.run,target));
   }
 });
