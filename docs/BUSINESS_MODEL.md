@@ -11,9 +11,42 @@ DECISIONS.md remains authoritative for binding product and business rules. This 
 
 Owner intent confirmed in chat on 15 October: prepare a genuinely usable closed-pilot prototype and a clear vision for a university investment fund, before public release. Keep a durable, evolving place for business-model and Pro ideas while building. This does not approve payments or change existing deferrals.
 
+## Phone planning agent: writing boundary and implementation handoff
+
+Owner setup, 25 October 2026: the phone agent handles funding preparation, business reasoning and product decisions with the owner; it does not implement code. Its only repository writing surface is this existing file. Read current master PROJECT_STATUS.md, this section and only relevant DECISIONS.md rows before each changed topic; record the source commit/date. Historical interview notes below are not current policy.
+
+- Allowed: maintain business hypotheses/evidence and append or update the owner's product-change entries below. Distinguish real traction, synthetic demonstration data and assumptions in funding material. Record unavailable implementation/runtime evidence as unknown.
+- Delivery with verified GitHub write access: a bounded documentation branch and pull request changing only docs/BUSINESS_MODEL.md. With read-only access: return the same compact CHANGE summary to the owner, who relays it to Codex for recording here. GitHub access alone does not prove write capability. No direct master push/merge, force push, new worktree, generated document library or extra instruction file. Update the existing entry for a topic rather than duplicating it after each conversation.
+- Outside scope: code, schema/data/configuration, credentials, AGENTS, DECISIONS, PRD, work ordering/checkmarks and executor status. The phone agent may propose their changes here, including a desired MVP priority; it must not mark implementation as complete or silently rewrite canonical policy.
+- Status must distinguish proposed, owner-approved, deferred and rejected. Owner-approved requires the owner's explicit answer/wording and date/source; a suggestion or the agent's recommendation is not approval. Preserve settled answers and ask only about a genuinely unresolved choice. Critical external-action/data/cost gates remain in AGENTS.
+
+### Product-change intake
+
+Reuse stable CHANGE IDs (CHANGE-001, CHANGE-002, ...); update an existing entry for the same topic. Use this compact shape for each real entry; do not add a blank template entry:
+
+~~~text
+CHANGE-ID / short title
+Date + repository source commit:
+Problem and desired user-visible behavior:
+Owner answer (exact short wording + source); status:
+Why / funding or user evidence (fact versus hypothesis):
+Timing: MVP / later / priority undecided
+Relevant decision/task IDs, known contradiction or uncertainty:
+Acceptance example (what a user can do when it works):
+Codex disposition: unreviewed / routed to existing IDs / blocked with reason
+~~~
+
+### Codex intake of a named entry
+
+When the owner dispatches a specific CHANGE ID or its PR, read that entry and the affected current contracts; do not re-audit the project or read all business history. Reconcile duplicates, existing implementation and genuine decision conflicts. Respect the recorded owner approval; clarify only missing consequential choices rather than repeating settled questions. Proposed/deferred entries are not implementation authorization.
+
+For an approved product change, update the affected canonical DECISIONS row and downstream spec/checklist/packet only as needed, preserve stable IDs and existing evidence, then record the destination IDs in the entry. Business-only reasoning stays here; future product ideas go to the existing ROADMAP by stable IDEA ID. Prepare one bounded ready work card in the existing owning record for normal execution. A clear accepted backlog item is separate from verified implementation, integration and deployment. Intake neither silently replaces the active task nor changes MVP priority; record an explicit owner priority change when one was actually made.
+
+No background synchronization is implied: the phone PR or owner-relayed summary is a handoff, and the owner can dispatch it with "Integrate CHANGE-001 from this PR into the project plan, then continue the approved queue." The existing automation stays unchanged by this setup.
+
 ## Existing decisions to preserve
 
-- G2: Pro unblur concerns both identity and photo, with server-side authorization; it does not authorize implementation before other open monetization choices are resolved.
+- G2: private saver identities remain withheld in the MVP. Future Pro visibility is a post-MVP hypothesis requiring its own privacy approval, not a current entitlement.
 - G3: pricing/payment rails remain RESEARCH; illustrative design pricing is not approved pricing.
 - G4: additional benefits remain OPEN. G6 now DECIDED: paid Pro is outside the initial prototype; exact future timing/pricing still unresolved.
 - K1: web first, native phase two.
@@ -24,7 +57,7 @@ Owner intent confirmed in chat on 15 October: prepare a genuinely usable closed-
 | --- | --- | --- | --- | --- |
 | BIZ-01 | First pilot audience and unmet need | Beer Sheva roommate/apartment marketplace per A1; narrower recruiting cohort pending | Partly defined | Owner interview; user conversations |
 | BIZ-02 | Who pays and why | Owner ideas: local-business map placements; professional-lister tools; resident Pro with advanced preferences | Proposed, not approved pricing/features | Validate each payer separately; no billing in initial prototype |
-| BIZ-03 | Free core and paid boundaries | Existing G2 commitment; rest governed by G3-G6 | Open / research | Confirm proposed tiers without blocking essential marketplace loop by accident |
+| BIZ-03 | Free core and paid boundaries | G2 preserves MVP saver privacy; paid features/pricing remain future hypotheses under G3-G6 | Open / research | Validate proposed tiers without treating them as current entitlements or blocking the essential marketplace loop |
 | BIZ-04 | Initial proof of value | Working closed pilot + credible demonstration desired | Goal confirmed; measurable threshold pending | Track journeys completed, response/use feedback, distinguish synthetic demo data |
 | BIZ-05 | Fund/program and request | No specific target; owner mentions Cactus/Ben-Gurion options and wants budget/resources/team support | Intent confirmed | Do not describe a feature checklist as a guarantee of funding |
 | BIZ-06 | Supply/recruitment | Owner proposes temporary day-one seeding from Facebook/other listings plus student social groups; not ongoing scraping after adoption | Proposed acquisition experiment; conflicts with current D0 | Resolve source permission, publisher consent, availability/freshness, receiver of inquiries, labeling and sunset before implementation |

@@ -7,6 +7,7 @@ Web-first roommate/apartment marketplace: Next.js, Supabase; Expo is later.
 - DECISIONS.md owns approved product/architecture rules. PRD, ARCHITECTURE and domain specs are downstream. Preserve settled rules; ask about an actual contradiction/new product choice.
 - Read primary PROJECT_STATUS.md and the latest checkpoint of the owning workstream, then check HEAD/local changes. The primary is the first entry of git worktree list --porcelain.
 - Execute through docs/START_NEXT_WORK.md and docs/EXECUTION_PROTOCOL.md. Read only the selected task, named decision rows, relevant contract sections and affected source. Do not reload the planning library or repeat a project audit for ordinary work.
+- Phone planning writes only docs/BUSINESS_MODEL.md under its planning-agent boundary. On a named CHANGE/PR handoff, reconcile that entry into canonical decisions and the existing execution plan; no automatic priority change or whole-project re-audit.
 - Residents start on Discover (Map preference allowed); listers start on My Listings. One resident profile supports Individuals/Groups. D1/B10 separate property-poster intake. Native public apartment links are allowed under E8; no external listing/communication ecosystem under D0.
 
 ## Owner authorization
