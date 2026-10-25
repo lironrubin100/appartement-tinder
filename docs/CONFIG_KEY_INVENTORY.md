@@ -8,4 +8,11 @@ This branch starts the inventory with the key introduced by task 2.19. It is not
 
 Test harness controls `UX_SCREENSHOTS`, `UX_LIVE_JOURNEY`, `QA_FIXTURE_MANIFEST`, `TEST_ORIGIN` and fixture manifests are documented in docs/TESTING.md. They do not configure runtime product policy or replace target-specific mutation authorization.
 
-QA helper update25 October 2026: existing QA_FIXTURE_COUNT/PREFIX/MANIFEST/DIRECTORY controls remain harness-only. CLI prepare --reusable --actors=... records purpose/named actors in ignored run.json; ensure and run reuse them with per-actor leases. No new product app_config key or environment secret was introduced. See docs/TESTING.md for target/retention/disposal behavior.
+QA helper update, 25 October 2026: existing QA_FIXTURE_COUNT/PREFIX/MANIFEST/DIRECTORY controls remain harness-only. CLI prepare --reusable --actors=... records purpose/named actors in ignored run.json; ensure and run reuse them with per-actor leases. No new product app_config key or environment secret was introduced. See docs/TESTING.md for target/retention/disposal behavior.
+
+
+### Private one-time demo recovery operator configuration — 25 October 2026
+
+- SUPABASE_PROJECT_REF: explicit fixed recovery target npbduvjnqnbydolmdpsc; read only by web/scripts/recover-demo-access.mjs from ignored web/.qa/demo-recovery/admin.env.
+- SUPABASE_SECRET_KEY: server-only Supabase Auth-admin key, supplied locally in that same ignored file. Never app_config, NEXT_PUBLIC, browser code, tracked source or tool output. No value/default is stored in this registry; no hosted configuration change was made.
+- This is operator-only tooling for the owner's four approved synthetic identities. Exact target/identity preflight, private credential checkpoints and ordinary sign-in are required. It neither authorizes new accounts nor grants general data reset. No new product app_config key.

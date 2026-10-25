@@ -1,16 +1,16 @@
 # Git branch and worktree inventory
 
-Generated: 25 Oct 2026, 10:01 (Asia/Jerusalem); 2026-10-25T08:01:07.631Z.
+Generated: 25 Oct 2026, 10:20 (Asia/Jerusalem); 2026-10-25T08:20:25.735Z.
 
-Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `codex/streamline-execution`. Cached GitHub reference: origin/master at 86f95f5; this script does not fetch or infer deployment state.
+Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at 4eca5c7; this script does not fetch or infer deployment state.
 
 This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STATUS.md](../PROJECT_STATUS.md) and its handoffs for acceptance evidence. A contained HEAD can still have unmerged local changes. Detached means the checkout has no branch name. A lock is a Git worktree lock, not proof a chat is currently running.
 
 ## Worktrees
 
-| Checkout | Branch | HEAD | Local changes | HEAD in codex/streamline-execution? | Git lock |
+| Checkout | Branch | HEAD | Local changes | HEAD in master? | Git lock |
 | --- | --- | --- | --- | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | codex/streamline-execution | c24502e2 | 14 tracked; 3 untracked entries | Yes | No |
+| C:/Users/User/Desktop/appartement tinder | master | 4eca5c76 | 6 tracked; 2 untracked entries | Yes | No |
 | C:/Users/User/.codex/worktrees/1e59/appartement tinder | (detached) | c2df1494 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | codex/implementation-plan | a66f12a3 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | codex/standing-agent-authorization | f571b785 | Could not read | Unknown | No |
@@ -25,7 +25,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 ## Local branches
 
-| Branch | HEAD | Upstream | HEAD in codex/streamline-execution? |
+| Branch | HEAD | Upstream | HEAD in master? |
 | --- | --- | --- | --- |
 | codex/app-config-centralization | ef8617c | None | No |
 | codex/archive-master-pre-sync-20261025 | e1b0784 | None | No |
@@ -45,8 +45,8 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 | codex/room-availability-backend | 86f95f5 | origin/codex/room-availability-backend | Yes |
 | codex/sl01-lister-safe-browsing | f4d1d4a | None | Yes |
 | codex/standing-agent-authorization | f571b78 | origin/codex/standing-agent-authorization | No |
-| codex/streamline-execution | c24502e | None | Yes |
-| master | 86f95f5 | origin/master | Yes |
+| codex/streamline-execution | 4eca5c7 | origin/codex/streamline-execution | Yes |
+| master | 4eca5c7 | origin/master | Yes |
 | onboarding-flow-impl | 71cec18 | None | No |
 | worktree-map-completeness | fe35d6f | None | No |
 
@@ -54,7 +54,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Last commit description |
 | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | feat(qa): reuse named fixture pools with guarded actor leases |
+| C:/Users/User/Desktop/appartement tinder | docs: clarify verified audit and demo preparation boundaries |
 | C:/Users/User/.codex/worktrees/1e59/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | Check this checkout directly |

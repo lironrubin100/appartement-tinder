@@ -5,10 +5,16 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 ## DEMO-CONTENT-PHOTOS-001 — Demo people and apartments need complete, representative profiles with visible photos
 
 - Reported by owner, 25 October 2026. The owner wants many representative resident profiles and apartment listings with proper photos and completed relevant fields, so browsing and detail screens can be inspected as a realistic product. The current experience feels incomplete or not working correctly; this is a reported symptom, not a reproduced image-loading defect.
-- State: reported; diagnosis pending. Check separately for insufficient/incomplete synthetic content, tiny placeholder images, missing or inaccessible image objects/URLs, and rendering failures. Do not assume that adding more accounts alone fixes the problem.
+- State: missing synthetic content source-confirmed 25 October by bounded read-only inventory of six explicitly marked resident demos: name/bio present, canonical facts/photo URL/gallery/owned listings absent; no profile-photo objects found. Rendering/image-loading failure remains unverified. Do not assume that more accounts alone fixes the problem.
 - Priority update,25 October 2026: owner promoted this to the next near-term outcome for a cheaper executor after instruction/QA preparation, ahead of normal feature continuation. Use task16.1 and its bounded work card in the existing audit handoff; diagnose missing content and image loading separately. Reuse authorized retained demo identities and preserve them; do not create/reset another cohort each run.
 - Expected outcome: a useful variety of clearly synthetic people and apartments, with complete approved fields, proper profile/cover/gallery images and enough content to inspect Discover, apartment cards and detail views. Verify actual image loading, refresh persistence and HE/EN phone/desktop rendering. Preserve public/private field boundaries; define the bounded content set when this item is dispatched.
-- No browser/database diagnosis, account creation, image upload or repair was performed for this intake. Owning review: [MVP focus audit](workstreams/2026-10-25-mvp-focus-audit.md).
+- Follow-up: owner approved one-time access recovery of four existing marked demo accounts; credentials were not historically retained. No account creation, live credential reset, image upload or browser acceptance yet. Ordinary recovery requires a credential-safe admin path. Owning review: [MVP focus audit](workstreams/2026-10-25-mvp-focus-audit.md).
+
+## GROUP-LEAVE-ADMIN-001 — Group exit feels unavailable
+
+- Reported by owner, 25 October 2026, while discussing repeatable QA state. Browser reproduction pending; do not infer that all group exit is missing.
+- Source check: GroupActions renders Leave for a non-admin's own membership and calls remove_group_member. The migration rejects removal of the admin, and the UI provides no admin Leave control. This confirms a current admin limitation, not a newly approved transfer/disband policy.
+- Keep product lifecycle acceptance separate from test cleanup. QA needs guarded exact-run scenario teardown even when no normal product exit is available. No UI/schema change in this workflow scope; revisit against the existing group/lifecycle contract before proposing a fix.
 
 ## DISCOVER-LISTER-LIVE-001 — Live discovery functions exclude listers
 

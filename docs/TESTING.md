@@ -16,6 +16,18 @@ From the repository root: node scripts/check-planning.mjs; node --test scripts/t
 
 A missing fixture is a setup diagnosis, not a reason to create nine new accounts by default. Never print/commit credentials or provisioning SQL, which contains temporary passwords. Confirm generated artifacts are ignored. Keep incomplete manifests for recovery.
 
+## Repeatable scenario state
+
+Persistent accounts are only the identity baseline; ensure does not reset scenario data. Owner clarification, 25 October: creating/accepting a group or inquiry must not make the next run impossible. Keep completed profiles/login identities, create the minimum new run-owned group/listing/inquiry/conversation when needed, and explicitly restore the scenario after the run. An accepted relationship used as a precondition can remain a named baseline; a test of acceptance itself needs its own controlled pending state.
+
+Use one ignored run journal with target, pool IDs, run ID and the exact IDs/object paths returned during that run. Under the actor lease: assert baseline → create scenario → exercise through ordinary actors → capture result → guarded cleanup → assert baseline again. On failure, keep the journal and stop reuse until recovery; never solve drift by creating replacement accounts. Finally hooks are required but are not proof cleanup succeeded.
+
+Before any shared cleanup, verify every affected group member/invite/requester/conversation participant and listing owner belongs to the leased QA actors, all resource IDs are explicitly recorded as created by this run, and no retained baseline/demo, outside peer, unknown cascade or media object would be affected. Fail closed on drift. Delete/remove only run-owned resources in dependency order; retain account IDs and stable profiles. Storage removal uses the ordinary owner API, not Storage metadata SQL. Such cleanup is separate from account disposal.
+
+Preferred implementation is an isolated local backend with a known seed/snapshot between scenarios. SQL transaction rollback is useful for SQL tests; browser/Auth/Realtime requests do not share that transaction and need explicit teardown or an isolated restore. On a shared target use only a reviewed exact-ID recovery procedure under the target/data/ownership authorization. A test-only privileged reset belongs in the private test runner, never a public application reset endpoint or a new RLS bypass.
+
+Current limitation: the maintained helper implements identity validation and leases, not this scenario journal/reset. Do not describe account reuse as a complete repeatability solution. The next bounded QA change must implement and verify one create-group → guarded teardown → same-accounts second run, including outsider/drift rejection and a failed-run recovery case, before broadening to other scenarios. Existing whole-cohort cleanup is disposal and must not be used for this reset. Pristine onboarding/deletion cases may still need minimal disposable actors.
+
 ## Dedicated reusable pool
 
 Existing controls: QA_FIXTURE_MANIFEST and QA_FIXTURE_DIRECTORY select a private ignored cohort; QA_FIXTURE_PREFIX controls marked emails. Use a separate directory/manifest for the dedicated pool. QA_FIXTURE_COUNT remains supported for legacy/pristine runs. prepare --reusable requires named actors and sizes the cohort to that list (1–9); an explicit count must agree.
@@ -40,6 +52,16 @@ ensure validates existing named identities/target and ordinary sign-in plus comp
 check remains ordinary sign-in preflight for legacy or reusable manifests. Existing suites using indexed nine-account fixtures still require their documented actors; a three-actor pool is for an appropriately scoped test, not fake coverage of a nine-actor suite. New fixtures record named actors in run.json; migrate a test's role requirements when changing that test, rather than weakening assertions.
 
 Local helper contract checks (no hosted target): node --test web/scripts/test-qa-pool.mjs web/scripts/test-qa-fixtures.mjs from root. These cover identity/target rejection, pool reuse, overlapping leases and actual CLI behavior against a localhost fake Auth/Data service. They are not live Supabase acceptance.
+
+## Approved retained-demo access recovery
+
+Owner approved one-time access recovery on 25 October for exactly the four de100001 cohort IDs ending 1–4. Their content must remain. This is separate from QA-pool provisioning/disposal and requires no repeated owner confirmation within that exact scope.
+
+From the primary checkout's web directory, node scripts/recover-demo-access.mjs prepare writes one ignored .qa/demo-recovery/credentials.json and refuses overwrite; dry-run reports only counts. The private .qa/demo-recovery/admin.env must contain SUPABASE_PROJECT_REF=npbduvjnqnbydolmdpsc and SUPABASE_SECRET_KEY with a server-only project key supplied locally, never in chat/Git/NEXT_PUBLIC. The helper reads existing public URL/anon settings internally; it never prints values. Missing configuration stops before Auth mutation.
+
+node scripts/recover-demo-access.mjs --apply preflights exact target/all four IDs and synthetic email marker before any update, uses supported Auth-admin password updates, verifies ordinary sign-in and local sign-out, and checkpoints private credentials so partial recovery resumes without resetting an already-working account. It runs only from primary and leases those exact actors. It changes no profile/listing content. Preserve the manifest for future ordinary-owner demo work; do not adopt it as a QA pool. Current preparation has zero verified live accounts; assets/content/browser acceptance remain open.
+
+Focused recovery checks: node --test web/scripts/test-recover-demo-access.mjs. Wrong target/port/embedded credentials, unmarked identity and partial-recovery cases are contract tests, not evidence that hosted recovery ran. Never print SDK/config/JSON-parser errors containing private values.
 
 ## Legacy/pristine acceptance
 
