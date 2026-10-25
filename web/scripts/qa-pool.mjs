@@ -1,10 +1,146 @@
 // Reusable QA identities are explicit; retained demo manifests are never adopted implicitly.
-import { mkdir, open, readFile, unlink } from 'node:fs/promises';
+import { mkdir, open, readFile, unlink, rename, writeFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const sha256 = /^[a-f0-9]{64}$/i;
+const scenarioTables = { group: 'groups', listing: 'apartments', inquiry: 'listing_inquiries', conversation: 'conversations' };
+
+// Journals contain identifiers only. The pre-run inventory prevents a retained
+// resource being adopted as a newly created test resource, even with QA owners.
+export function beginScenario(run, baseline) {
+  if (run.purpose !== 'reusable-qa' || run.baseline?.state !== 'ready') throw new Error('Scenario needs a validated reusable pool.');
+  const journal = { version: 1, target: run.target, pool_ids: [...run.ids], run_id: randomUUID(), state: 'active', baseline, resources: [], media: [] };
+  validateScenario(journal, run);
+  return journal;
+}
+
+export function validateScenario(journal, run) {
+  const canonicalId = id => typeof id === 'string' && uuid.test(id) && id === id.toLowerCase();
+  if (!/^[a-z0-9-]+$/.test(run.prefix ?? '') || !Array.isArray(run.ids) || run.ids.length !== 3 || run.ids.some(id => !canonicalId(id)) || new Set(run.ids).size !== 3 ||
+      journal?.version !== 1 || journal.target !== run.target || JSON.stringify(journal.pool_ids) !== JSON.stringify(run.ids) ||
+      !uuid.test(journal.run_id ?? '') || !['active', 'cleaning', 'failed', 'clean'].includes(journal.state) ||
+      !record(journal.baseline) || !Array.isArray(journal.resources) || !Array.isArray(journal.media)) throw new Error('Scenario journal does not match this pool/target.');
+  for (const kind of Object.keys(scenarioTables)) if (!Array.isArray(journal.baseline[kind]) || journal.baseline[kind].some(id => !canonicalId(id))) throw new Error('Pre-run resource inventory is incomplete or noncanonical.');
+  const keys = new Set();
+  for (const resource of journal.resources) {
+    if (!Object.hasOwn(scenarioTables, resource.kind) || !canonicalId(resource.id) || journal.baseline[resource.kind].includes(resource.id) ||
+        keys.has(`${resource.kind}:${resource.id}`) || Object.keys(resource).some(key => !['kind', 'id'].includes(key))) throw new Error('Resource is retained, duplicated or not owned by this run.');
+    keys.add(`${resource.kind}:${resource.id}`);
+  }
+  for (const item of journal.media) if (!run.ids.includes(item.owner_id) || !['apartment-photos', 'profile-photos'].includes(item.bucket) ||
+      typeof item.path !== 'string' || !item.path.startsWith(`${item.owner_id}/${journal.run_id}/`) || item.path.includes('..') ||
+      Object.keys(item).some(key => !['owner_id', 'bucket', 'path'].includes(key))) throw new Error('Media must use an exact actor/run-owned prefix.');
+  return journal;
+}
+
+export async function saveScenario(path, journal) {
+  const temp = `${path}.${randomUUID()}.tmp`;
+  await writeFile(temp, JSON.stringify(journal, null, 2), { mode: 0o600, flag: 'wx' });
+  await rename(temp, path);
+}
+
+export async function recordScenarioResource({ journal, run, kind, id, save }) {
+  if (journal.state !== 'active') throw new Error('Recover the previous scenario before recording new resources.');
+  const next = structuredClone(journal);
+  next.resources.push({ kind, id });
+  validateScenario(next, run);
+  await save(next);
+  Object.assign(journal, next);
+}
+
+export function assertScenarioClean(journal, run) {
+  validateScenario(journal, run);
+  if (journal.state !== 'clean') throw new Error('Previous QA scenario requires exact journal recovery before rerun; no child started.');
+}
+
+export function scenarioCleanupSql(journal, run) {
+  validateScenario(journal, run);
+  const literal = value => `'${JSON.stringify(value).replaceAll("'", "''")}'::jsonb`;
+  const roots = journal.resources.map(resource => ({ table: scenarioTables[resource.kind], id: resource.id }));
+  // Only known descendants can be touched. New schema relationships fail closed
+  // when they actually reference a run resource, including SET NULL and RESTRICT.
+  const allowed = ['groups', 'apartments', 'listing_inquiries', 'conversations', 'group_members', 'group_invites', 'likes', 'group_admission_votes', 'conversation_members', 'messages', 'apartment_rooms', 'apartment_interests', 'apartment_reports', 'saves'];
+  return `begin;
+create temporary table qa_cleanup_nodes(rel oid, body jsonb, primary key(rel,body)) on commit drop;
+do $qa$ declare
+ roots jsonb := ${literal(roots)}; actors jsonb := ${literal(run.ids)};
+ baseline jsonb := ${literal(journal.baseline)};
+ allowed jsonb := ${literal(allowed)};
+ root jsonb; node record; fk record; child record; field record;
+ child_rel regclass; predicate text; affected integer; added integer;
+begin
+ if (select count(*) from auth.users where id::text in (select jsonb_array_elements_text(actors)) and email = '${run.prefix}' || '-' || id::text || '@example.invalid') <> jsonb_array_length(actors) then raise exception 'QA identity guard failed'; end if;
+ -- Lock known resource/descendant tables before graph discovery so an ordinary
+ -- writer cannot insert a new reference between validation and deletion.
+ for field in select value #>> '{}' as name from jsonb_array_elements(allowed) order by 1 loop
+   child_rel := to_regclass('public.' || field.name);
+   if child_rel is not null then execute format('lock table %s in share row exclusive mode',child_rel); end if;
+ end loop;
+ for root in select value from jsonb_array_elements(roots) loop
+   execute format('insert into qa_cleanup_nodes select $1,to_jsonb(t) from public.%I t where id=$2::uuid on conflict do nothing',root->>'table') using to_regclass('public.' || (root->>'table'))::oid,root->>'id';
+ end loop;
+ -- A failed create response may leave a resource before its ID is journaled.
+ -- Do not declare a clean baseline while any new actor-owned root is untracked.
+ if exists(select 1 from public.groups t where actors ? t.admin_id::text and not (baseline->'group') ? t.id::text and not exists(select 1 from jsonb_array_elements(roots) r where r->>'table'='groups' and r->>'id'=t.id::text))
+ or exists(select 1 from public.apartments t where actors ? t.lister_id::text and not (baseline->'listing') ? t.id::text and not exists(select 1 from jsonb_array_elements(roots) r where r->>'table'='apartments' and r->>'id'=t.id::text))
+ or exists(select 1 from public.listing_inquiries t where actors ? t.requester_id::text and not (baseline->'inquiry') ? t.id::text and not exists(select 1 from jsonb_array_elements(roots) r where r->>'table'='listing_inquiries' and r->>'id'=t.id::text))
+ or exists(select 1 from public.conversations t where (exists(select 1 from public.conversation_members m where m.conversation_id=t.id and actors ? m.user_id::text) or exists(select 1 from public.groups g where g.id=t.group_id and actors ? g.admin_id::text)) and not (baseline->'conversation') ? t.id::text and not exists(select 1 from jsonb_array_elements(roots) r where r->>'table'='conversations' and r->>'id'=t.id::text))
+ then raise exception 'Unjournaled actor resource; recover creation response before cleanup'; end if;
+ loop
+   added := 0;
+   for node in select * from qa_cleanup_nodes loop
+     for fk in select c.conrelid,c.conkey,c.confkey from pg_constraint c where c.contype='f' and c.confrelid=node.rel loop
+       select string_agg(format('to_jsonb(t)->>%L = $1->>%L', ca.attname,pa.attname),' and ') into predicate
+       from unnest(fk.conkey,fk.confkey) k(child_num,parent_num)
+       join pg_attribute ca on ca.attrelid=fk.conrelid and ca.attnum=k.child_num
+       join pg_attribute pa on pa.attrelid=node.rel and pa.attnum=k.parent_num;
+       for child in execute format('select to_jsonb(t) as body from %s t where %s',fk.conrelid::regclass,predicate) using node.body loop
+         if not exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.oid=fk.conrelid and n.nspname='public' and allowed ? c.relname) then raise exception 'Unknown dependent table; no cleanup'; end if;
+         insert into qa_cleanup_nodes values(fk.conrelid,child.body) on conflict do nothing;
+         get diagnostics affected = row_count; added := added + affected;
+       end loop;
+     end loop;
+   end loop;
+   exit when added=0;
+ end loop;
+ for node in select n.*,c.relname from qa_cleanup_nodes n join pg_class c on c.oid=n.rel loop
+   -- Every root entity reached through a dependency must itself be journaled.
+   if node.relname in ('groups','apartments','listing_inquiries','conversations') and not exists(select 1 from jsonb_array_elements(roots) r where r->>'table'=node.relname and r->>'id'=node.body->>'id') then raise exception 'Unjournaled dependent entity; no cleanup'; end if;
+   for field in select key,value from jsonb_each_text(node.body) where key in ('admin_id','lister_id','requester_id','user_id','from_user','to_user','sender_id','invitee_id','inviter_id','voter_id','actor_id','owner_id','reporter_id','reported_id') loop
+     if field.value is not null and not actors ? field.value then raise exception 'Outside actor in cleanup graph'; end if;
+   end loop;
+   -- Deleting a run entity must not modify or detach an existing conversation,
+   -- apartment or group reached through a forward reference either.
+   for field in select key,value from jsonb_each_text(node.body) where key in ('group_id','to_group','apartment_id','conversation_id') and value is not null loop
+     if not exists(select 1 from jsonb_array_elements(roots) r where r->>'id'=field.value and r->>'table'=case when field.key in ('group_id','to_group') then 'groups' when field.key='apartment_id' then 'apartments' else 'conversations' end) then raise exception 'Reference to retained baseline entity'; end if;
+   end loop;
+ end loop;
+ -- Only recorded roots are deleted; proven run-only dependent rows follow their
+ -- existing FK rules. Profiles/Auth/Storage are never deletion targets.
+ for root in select value from jsonb_array_elements(roots) order by case value->>'table' when 'listing_inquiries' then 1 when 'conversations' then 2 when 'groups' then 3 else 4 end loop
+   execute format('delete from public.%I where id=$1::uuid',root->>'table') using root->>'id';
+ end loop;
+end $qa$;
+commit;`;
+}
+
+// Call under the pool lease. executeSql must execute the whole SQL transaction;
+// removeMedia uses an ordinary owner Storage API and exact paths, never metadata SQL.
+export async function cleanupScenario({ journal, run, save, executeSql, removeMedia }) {
+  validateScenario(journal, run);
+  journal.state = 'cleaning'; await save(journal);
+  try {
+    await executeSql(scenarioCleanupSql(journal, run));
+    if (journal.media.length && typeof removeMedia !== 'function') throw new Error('Ordinary owner media cleanup is unavailable.');
+    for (const item of journal.media) await removeMedia(item);
+    journal.state = 'clean'; await save(journal);
+  } catch (error) {
+    journal.state = 'failed'; await save(journal);
+    throw error;
+  }
+}
 export const REQUIRED_REUSABLE_QA_ROLES = ['owner', 'accepted_requester', 'pending_requester'];
 
 // Card 0.11 only. Privileged access is restricted to exact-ID account creation;

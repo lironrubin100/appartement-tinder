@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { spawn, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { validatePool, validateBaseline, withPoolLease, REQUIRED_REUSABLE_QA_ROLES, setupPoolActors } from './qa-pool.mjs';
+import { validatePool, validateBaseline, assertScenarioClean, withPoolLease, REQUIRED_REUSABLE_QA_ROLES, setupPoolActors } from './qa-pool.mjs';
 
 const root = new URL('../', import.meta.url);
 const at = name => new URL(name, root);
@@ -169,6 +169,9 @@ commit;\n`;
   const primary = listing.split(/\r?\n/).find(line => line.startsWith('worktree '))?.slice(9);
   if (!primary) throw new Error('Cannot find shared QA lease location; no test started.');
   await withPoolLease(join(primary,'web','.qa','pool-leases'), {target:config.url,ids:run.ids}, async () => {
+    if (command === 'run' && await exists(artifact('scenario.json'))) {
+      assertScenarioClean(JSON.parse(await readFile(at(artifact('scenario.json')), 'utf8')), run);
+    }
     await checkAccounts(rows, config, true);
     if (command === 'ensure') console.log(`Validated ${rows.length} existing named QA actors; no account/content creation or reset. Scenario preconditions still belong to its test.`);
     else {

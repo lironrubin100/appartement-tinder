@@ -37,7 +37,7 @@
   - **הוראות טכניות ברורות:** התאם לשימוש חוזר בתשתית הקיימת ובמניפסט שלוש הזהויות שהוכן ב־web/.qa/room44-pool; אל תיצור cohort חלופי. מפה owner/accepted_requester/pending_requester לתפקיד הנדרש בכל בדיקה. הגדר baseline לפרופילים מלאים ותמונה אמיתית בגודל צפייה, provenance, target ומזהי actor יציבים במניפסט פרטי; missing/drift מדווחים, לא מרופאים ביצירת חשבון. ensure/run אינם יוצרים/מוחקים חשבון או משנים סיסמה. setup חי אושר במפורש ב־25 באוקטובר אבל שייך רק ל־0.11; אין כתיבה חיה בכרטיס זה ואין שימוש בדמו התצוגה כ־QA mutable.
   - **קריטריון קבלה:** בדיקת helper חוזרת משתמשת באותם IDs ובאותם credentials, overlap נחסם ו־drift מדווח; הכנה מקומית אינה מוצגת כהתחברות חיה. העדף reuse של בדיקות c24502e במקום מימוש מחדש.
 
-- [ ] **משימה 0.8: ניקוי נתוני תרחיש QA בלי מחיקת החשבונות**
+- [x] **משימה 0.8: ניקוי נתוני תרחיש QA בלי מחיקת החשבונות**
   - **קבצים לעריכה/יצירה:** `web/scripts/qa-fixtures.mjs`, `web/scripts/qa-pool.mjs`, `web/scripts/test-qa-pool.mjs`, `docs/TESTING.md`.
   - **הוראות טכניות ברורות:** אחרי 0.7 הוסף journal פרטי לנתוני run שנוצרו: group/listing/inquiry/conversation/media IDs בלבד. תחת lease, cleanup מחזיר baseline רק למשאבי ה־run, עם guard שכל owner/member/invitee/requester/participant הוא QA המורשה ושאין peer/cascade לא ידוע. אין reset לפרופילים/סיסמאות או delete של accounts/Storage metadata. כשל משמר journal וחוסם rerun עד recovery; אין public reset endpoint. בכרטיס זה בדיקות מבודדות בלבד; הקבלה החיה בשתי ריצות שייכת ל־0.9 אחרי הכנת המאגר המלא ב־0.11.
   - **קריטריון קבלה:** בדיקה מבודדת של create→cleanup→create על אותם IDs עוברת; outside participant או ID שאינו של ה־run מונעים את כל הניקוי. כשל באמצע נשמר ומשוחזר באופן מדויק; החשבונות/הפרופילים והדמו אינם נמחקים.
