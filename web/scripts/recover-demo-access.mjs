@@ -75,6 +75,8 @@ export async function applyPreparedRecovery({ targetUrl, expectedRef, manifest, 
   for (let i = 0; i < users.length; i++) manifest.accounts[i].email = users[i].email;
   await saveManifest(manifest);
 
+  let updatedCount = 0;
+  let alreadyWorkingCount = 0;
   for (const account of manifest.accounts) {
     // A crash after Auth accepted an update but before checkpointing is recovered by
     // testing the prepared credential first; never blindly update an already-working one.
@@ -87,6 +89,7 @@ export async function applyPreparedRecovery({ targetUrl, expectedRef, manifest, 
       finally { try { await client.auth.signOut({ scope: 'local' }); } catch { /* local session cleanup only */ } }
     };
     if (await verifyLogin()) {
+      alreadyWorkingCount++;
       if (account.status !== 'verified') { account.status = 'verified'; await saveManifest(manifest); }
       continue;
     }
@@ -97,13 +100,19 @@ export async function applyPreparedRecovery({ targetUrl, expectedRef, manifest, 
     catch { throw new RecoveryError('Auth password recovery failed; manifest checkpoint retained for safe resume.'); }
     if (update?.error || update?.data?.user?.id !== account.id)
       throw new RecoveryError('Auth password recovery failed; manifest checkpoint retained for safe resume.');
+    updatedCount++;
     account.status = 'updated';
     await saveManifest(manifest);
     if (!(await verifyLogin())) throw new RecoveryError('Ordinary sign-in verification failed; checkpoint retained and no repeat update will be attempted.');
     account.status = 'verified';
     await saveManifest(manifest);
   }
-  return { target_ref: TARGET_REF, verified_count: manifest.accounts.filter(a => a.status === 'verified').length };
+  return {
+    target_ref: TARGET_REF,
+    verified_count: manifest.accounts.filter(a => a.status === 'verified').length,
+    updated_count: updatedCount,
+    already_working_count: alreadyWorkingCount,
+  };
 }
 
 const webRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -166,7 +175,7 @@ async function main(args) {
     createSignInClient: url => createClient(url, settings.anonKey, { auth: { persistSession: false, autoRefreshToken: false } }),
     saveManifest: atomicSave,
   }));
-  console.log(`Recovery complete: ${result.verified_count} of four approved synthetic identities passed ordinary sign-in and local sign-out.`);
+  console.log(`Recovery complete: ${result.verified_count} of four approved synthetic identities passed ordinary sign-in and local sign-out; passwords updated ${result.updated_count}; already working ${result.already_working_count}.`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

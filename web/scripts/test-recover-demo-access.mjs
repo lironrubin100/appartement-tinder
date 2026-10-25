@@ -72,7 +72,12 @@ test('resumes a partial run without updating an already-working account again', 
   assert.equal(updateCalls.get(DEMO_IDS[0]), 1);
 
   const result = await applyPreparedRecovery(args);
-  assert.deepEqual(result, { target_ref: TARGET_REF, verified_count: 4 });
+  assert.deepEqual(result, {
+    target_ref: TARGET_REF,
+    verified_count: 4,
+    updated_count: 3,
+    already_working_count: 1,
+  });
   assert.equal(updateCalls.get(DEMO_IDS[0]), 1, 'verified first account was not reset again');
   assert.equal(updateCalls.get(DEMO_IDS[1]), 2, 'failed update retried once with the same prepared credential');
   assert.equal(manifest.accounts.every(row => row.status === 'verified'), true);
