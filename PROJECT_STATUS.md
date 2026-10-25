@@ -2,6 +2,16 @@
 
 Updated 25 October 2026 (Asia/Jerusalem). This is current navigation, not product policy or a fresh runtime certification. [DECISIONS](DECISIONS.md) owns product rules. Read one owning checkpoint, not every historical row. Previous full register remains in Git 86f95f5; the primary pre-sync history/audit are also preserved in codex/archive-master-pre-sync-20261025 and codex/archive-mvp-focus-audit-wip.
 
+## תמונת מצב לבעלים
+
+- היעד: הדגמה עובדת — שותפים → קבוצה → דירה → פנייה בהסכמה → צ׳אט. בדיקת המסלול המשולב עדיין פתוחה.
+- הושלם בתהליך העבודה: audit, תור משימות ממוקד ובדיקות כלי הבחירה. אין מכך טענה שכל יכולות המוצר נבנו או נבדקו.
+- הקרוב בתור: ארבע תמונות אנשים (16.32), גלריות לשלוש דירות (16.33), ואז השלמת התוכן ובדיקתו בממשק (16.34–16.36) לאחר שחזור הגישה (16.31). התוכנית הבאה: QA חוזר 0.7–0.9, קבלת זמינות חדרים, פקדי זמינות ומרכז פניות לבעלים. אין שינוי קדימות מכוח התקציר.
+- חסמים רשומים: מפתח מקומי חסר לשחזור הדמו; הרשאה/הכנה בטוחה להרצת QA על היעד המשותף; קבלת 4.4 נשארת בבעלות room44. מימוש ניקוי תרחישים חוזר עדיין חסר.
+- מצב ריצה: Plan; האוטומציה מושהית, ועדכוני התיעוד המקומיים ממתינים לפרסום. אין כרגע משימת מוצר שהופעלה בשיחה הזאת.
+
+זהו סיכום של התור והראיות, לא תור נוסף. מעדכנים רק סעיף שהשתנה אחרי תוצאה/חסם/תיעדוף; שורות הבעלות והמשימות שלהלן נשארות המקור המפורט.
+
 ## Current owners and next work
 
 | Work | Current state / evidence | Owner / location | Next step |

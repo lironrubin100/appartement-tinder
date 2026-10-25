@@ -10,6 +10,12 @@ Build executes one selected atomic card. It may update its own acceptance/state/
 
 Scheduled Build runs take one card per fresh context. Entry, usage cooldown, claim/recovery and release commands are maintained only in START_NEXT_WORK. If all cards in a milestone are checked, reconcile its actual combined evidence before advancing. The configured light model performs execution; Plan prepares the work and resolves real ambiguities. No model is treated as incapable of error: acceptance and scope checks remain mandatory.
 
+### Changing decisions, tasks or code
+
+Plan updates an approved decision and only its affected cards/dependencies together. Unstarted cards retain their ID when the outcome is unchanged; delivered requirements keep their original evidence and receive a follow-up for changed behavior. Correct falsely claimed completion explicitly. Recheck only affected prerequisite artifacts/acceptance, not the entire project. Record a short delta in the existing owning checkpoint; no replacement plan or new report.
+
+Coordinate at a safe checkpoint before editing an active writer's overlapping scope. Preserve partial source/diff and ownership. The selector's brief fingerprint is the card revision: changed instructions require reconciliation before a lease resumes. A clear bounded owner-requested code correction can update the active card or add one follow-up under existing authorization; only a new consequential choice needs another planning interview. Keep independent ready work available and state the next eligible task.
+
 ## Start and work card
 
 Use [START_NEXT_WORK](START_NEXT_WORK.md) and the selector. Check primary status, owning checkpoint, HEAD/diff, target and current owner. Read the selected task/packet and only required decision/contract sections. Existing code or a pending ledger alone does not prove a gap; reconcile narrowly.
@@ -35,6 +41,8 @@ Prefer isolated local Supabase. If Docker/baseline is unavailable, shared-target
 Use a dedicated reusable QA pool for repeatable cases, retained demos for owner inspection, and minimal fresh actors for pristine/destructive cases. Validate manifest/target/IDs/roles and scenario state; serialize shared actors. Never silently reset a retained demo, real user, shared database or unrelated storage. Reset/cleanup only exact run-owned state with guards; preserve ignored recovery manifests until verified. No real-user/bulk notifications without explicit authorization.
 
 ## Evidence and continuation
+
+Maintain the compact owner view in existing PROJECT_STATUS at meaningful completion/blocker/priority checkpoints: milestone, latest verified outcome, next three priorities, blockers and precise owner action if needed. Distinguish approved, implemented-awaiting-acceptance, verified and deferred capability; checkbox totals are not product completion percentages. Report visible outcome/check/next step briefly after a completed result, keep unchanged scheduled waits quiet, and answer status questions from existing evidence without a fresh audit or stopping independent approved work. Do not create a second queue/dashboard document.
 
 Keep existing stable checklist IDs/flags. A task is checked only after its own acceptance passes. Planning/execution-state.json records packets as pending, in-progress, verification-incomplete, blocked or verified; it is distinct from the checklist's bounded demo coverage. Active/incomplete rows name handoff/worktree. Blocked rows need reason/revisit_when. Verified packets require exact40-character source SHA, absolute worktree, clean or SHA256 diff evidence, dated outcome/checks and verified manifest prerequisites. Assess changed artifacts before reusing earlier evidence.
 
