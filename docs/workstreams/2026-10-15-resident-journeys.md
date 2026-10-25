@@ -51,7 +51,7 @@ Reproduce using `docs/TESTING.md`: from web, `npm ci`, `npm run test:db`, prepar
 
 Completed: committed c80e9b2, fast-forwarded local master, pushed to GitHub and confirmed the remote SHA. The nested map experiment was preserved. Next development uses docs/NEXT_CONVERSATION_PROMPT.md after resolving the next slices' OPEN choices. Apple signup is explicitly deferred under updated B1; do not block on it. No complete Google OAuth round trip, load/concurrency proof, full older-screen translation or public-launch approval is claimed.
 
-`docs/NEXT_MVP_FEATURES.md` selects block/report, apartment-card sharing and atomic listing editing. `docs/NEXT_CONVERSATION_PROMPT.md` is the next-chat prompt. Keep them synchronized with final Git/verification state before handoff.
+`docs/NEXT_MVP_FEATURES.md` selects block/report, apartment-card sharing and atomic listing editing. `Git 6955c7f:docs/NEXT_CONVERSATION_PROMPT.md` is the next-chat prompt. Keep them synchronized with final Git/verification state before handoff.
 
 At this checkpoint: six local branches and seven worktrees; no new worktree was added. Main holds the earlier verified apartment integration; resident integration/push is next. See the final integration record below when present.
 

@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chooseNext, validateExecution, parseMicroTasks, parseDemonstrationTasks } from './next-work.mjs';
+import { chooseNext, validateExecution, parseMicroTasks, parseDemonstrationTasks, parseStageTasks, executionStage, parseTaskCards, validateTaskCards, atomicSelection, buildBrief, loadTaskSource, usageDecision, dispatchDecision, parseInstinctNotes, claim, release, resumeLease, fingerprint } from './next-work.mjs';
 import { readFileSync } from 'node:fs';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve, dirname, basename } from 'node:path';
 const manifest = { packets: [
   {id:'A',state:'ready',depends_on:[]},
   {id:'B',state:'ready',depends_on:['A']},
@@ -102,7 +105,8 @@ test('integrated production checklist is atomic and agrees with owner dispatch',
   const next=chooseNext(actualManifest,ledger,checklist,parseDemonstrationTasks(text));
   if(ledger.owner_priority_override?.status==='ready') {
     assert.equal(next.action,'owner-priority');
-    assert.equal(next.task,ledger.owner_priority_override.task);
+    assert.equal(next.parent_task ?? next.task,ledger.owner_priority_override.task);
+    if (next.parent_task) assert.ok(ledger.atomic_dispatch.children[next.parent_task].includes(next.task));
     assert.equal(next.packet,null);
     return;
   }
@@ -116,6 +120,29 @@ test('integrated production checklist is atomic and agrees with owner dispatch',
   }
 });
 
+test('Stage B cannot run before evidence and uses the B packet rather than A mapping', () => {
+  const text=readFileSync(new URL('../implementation_plan.md',import.meta.url),'utf8');
+  const ledger=JSON.parse(readFileSync(new URL('../docs/planning/execution-state.json',import.meta.url),'utf8'));
+  const packets=JSON.parse(readFileSync(new URL('../docs/planning/packets.json',import.meta.url),'utf8'));
+  delete ledger.owner_priority_override; delete ledger.micro_task_dispatch;
+  ledger.checklist_continuation.stage='B';
+  assert.equal(chooseNext(packets,ledger,parseMicroTasks(text),parseStageTasks(text,'B')).action,'blocked');
+  ledger.checklist_continuation.stage_acceptance.A={status:'verified',source_sha:'a'.repeat(40),verified_at:'2026-10-25T00:00:00Z',handoff:'docs/workstreams/demo.md',checks:[{command_or_scenario:'combined actual demo',result:'passed'}]};
+  const cards=parseTaskCards(text);
+  assert.match(validateTaskCards(cards,packets,ledger).join('\n'),/verified stage has unfinished/);
+  const aIds=new Set(cards.filter(task=>task.stage==='A').map(task=>task.id));
+  const checklist=parseMicroTasks(text).map(task=>({...task,done:task.done||aIds.has(task.id)}));
+  cards.filter(task=>task.stage==='A').forEach(task=>{task.done=true;});
+  assert.deepEqual(validateTaskCards(cards,packets,ledger),[]);
+  assert.equal(executionStage(ledger),'B');
+  const next=chooseNext(packets,ledger,checklist,parseStageTasks(text,'B'));
+  assert.equal(next.task,'0.4');assert.equal(next.packet,'SL00.2');
+  assert.equal(next.action,'micro-task');
+  const done=parseMicroTasks(text).map(task=>({...task,done:true}));
+  const stageDone=parseStageTasks(text,'B').map(task=>({...task,done:true}));
+  assert.equal(chooseNext(packets,ledger,done,stageDone).action,'reconcile-mvp-evidence');
+});
+
 test('Stage A milestone transition preserves checklist order ahead of Google acceptance', () => {
   const text=readFileSync(new URL('../implementation_plan.md',import.meta.url),'utf8');
   const ledger=JSON.parse(readFileSync(new URL('../docs/planning/execution-state.json',import.meta.url),'utf8'));
@@ -123,7 +150,7 @@ test('Stage A milestone transition preserves checklist order ahead of Google acc
   delete ledger.owner_priority_override;
   ledger.checklist_continuation={plan:'implementation_plan.md',stage:'A'};
   ledger.packets[ledger.micro_task_dispatch.packet].status='verified';
-  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)});
+  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9'].includes(t.id)});
   const checklist=parseMicroTasks(text).map(advance), demo=parseDemonstrationTasks(text).map(advance);
   const next=chooseNext(packets,ledger,checklist,demo);
   assert.equal(next.task,'3.1');assert.equal(next.packet,'SL03.1');
@@ -152,4 +179,104 @@ test('explicit ready owner subset selects a real unchecked task without verifyin
   assert.equal(chooseNext(manifest,ledger,checklist).action,'blocked');
   ledger.owner_priority_override.task='9.99';
   assert.equal(chooseNext(manifest,ledger,checklist).action,'blocked');
+});
+
+
+test('every real A/B/deferred task has a bounded card without a second backlog', async () => {
+  const source=await loadTaskSource();
+  assert.equal(source.tasks.length,238);
+  assert.deepEqual(validateTaskCards(source.tasks,source.manifest,source.ledger),[]);
+  for (const task of source.tasks) {
+    const card=buildBrief(task,source.manifest,source.ledger,source.decisions);
+    assert.equal(card.approved_stage_scope,task.stage!=='C');
+    assert.ok(card.scope&&card.instructions&&card.acceptance);
+    assert.ok(card.record_files.includes('docs/planning/execution-state.json'));
+  }
+  const task=source.tasks.find(t=>t.id==='16.32');
+  const card=buildBrief(task,source.manifest,source.ledger,source.decisions);
+  assert.ok(card.instructions.includes('אל תעלה לשרת'));
+  assert.ok(JSON.stringify(card).length<14000,'one focused brief, not the entire planning library');
+});
+
+test('duplicate/missing contracts, escaping scopes and atomic cycles fail closed', async () => {
+  const source=await loadTaskSource();
+  for (const mutate of [s=>s.tasks.push(s.tasks[0]),s=>delete s.tasks[0].acceptance,s=>s.tasks[0].file_scope='`../outside`',s=>s.ledger.atomic_dispatch.steps['16.31'].depends_on=['16.34']]) {
+    const copy=structuredClone(source);mutate(copy);
+    assert.ok(validateTaskCards(copy.tasks,copy.manifest,copy.ledger).length>0);
+  }
+  assert.throws(()=>parseTaskCards('## שלב א׳\n### SL00\n- [ ] **משימה 0.1: test**\n  - **קריטריון קבלה:** one\n  - **קריטריון קבלה:** two'),/duplicate/);
+});
+
+test('a blocked login does not block independent assets or waive content dependencies',async()=>{
+  const source=await loadTaskSource();
+  const next={action:'owner-priority',packet:null,task:'16.1'};
+  const selected=atomicSelection(next,source.tasks,source.ledger);
+  assert.equal(selected.task,'16.32');assert.equal(selected.parent_task,'16.1');
+  source.tasks.find(t=>t.id==='16.32').done=true;
+  assert.equal(atomicSelection(next,source.tasks,source.ledger).task,'16.33');
+  source.tasks.find(t=>t.id==='16.33').done=true;
+  assert.equal(atomicSelection(next,source.tasks,source.ledger).action,'blocked');
+  assert.equal(source.tasks.find(t=>t.id==='16.1').done,false);
+});
+
+test('usage waits for every exhausted window and unknown allowance is never zero',()=>{
+  const now=Date.parse('2026-10-25T00:00:00Z');
+  const at=seconds=>now/1000+seconds;
+  assert.equal(usageDecision(null,now).action,'unknown');
+  assert.equal(usageDecision({ordinaryUsageAllowed:true,rateLimitsByLimitId:{codex:{primary:{usedPercent:60,resetsAt:at(300)}}}},now).action,'available');
+  const stopped=usageDecision({ordinaryUsageAllowed:false,rateLimitsByLimitId:{codex:{primary:{usedPercent:100,resetsAt:at(300)},secondary:{usedPercent:100,resetsAt:at(600)}}}},now);
+  assert.equal(stopped.action,'wait');assert.equal(Date.parse(stopped.not_before),now+600000);
+  assert.equal(usageDecision({ordinaryUsageAllowed:false},now).action,'wait');
+});
+
+test('scheduler guards audit-only scope, cooldown, competing writer and dirty checkout',()=>{
+  const next={action:'micro-task',task:'1.1'};
+  assert.equal(dispatchDecision({control:{enabled:false},next}).action,'paused');
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},state:{not_before:'2099-01-01T00:00:00Z'},next}).action,'wait');
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},lease:{task:'1.1'},next}).action,'busy');
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},dirty:true,next}).action,'blocked');
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},next}).task,'1.1');
+});
+
+test('Instinct ideas stay notes and only unhandled intake is surfaced once',()=>{
+  const notes=parseInstinctNotes('# Business\n### NOTE-20261025-001 thought\n- Type: idea\n- Routing: pending\nJust a raw thought.\n### NOTE-20261025-002 settled\n- Type: decision\n- Owner approval: confirmed\n- Owner words: keep core free\n- Routing: recorded\n## Other business notes\nnot part of this note');
+  assert.equal(notes.length,2);assert.equal(notes[0].owner_approval,'unconfirmed');
+  assert.ok(!notes[1].text.includes('not part of this note'));
+  const result=dispatchDecision({control:{enabled:true,mode:'build'},notes,next:{action:'micro-task',task:'1.1'}});
+  assert.equal(result.action,'intake');assert.equal(result.notes.length,1);
+  assert.equal(result.notes[0].type,'idea');assert.equal(result.task,'intake');
+  assert.ok(result.brief.instructions.includes('No product code/data changes'));
+  const resumed=dispatchDecision({control:{enabled:true,mode:'build'},notes,lease:{task:'intake',thread_id:'same',token:'own'},ownThread:'same',dirty:true});
+  assert.equal(resumed.action,'resume');assert.equal(resumed.task,'intake');assert.equal(resumed.lease_token,'own');
+  notes[0].routing='recorded';
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},notes,next:{action:'micro-task',task:'1.1'}}).action,'micro-task');
+});
+
+test('only the owner token releases a lease and concurrent runs cannot claim twice',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'shutaf-dispatch-'));
+  try {
+    const lease=await claim(dir,'16.32',fingerprint({task:'16.32'}),'old-thread');
+    await assert.rejects(claim(dir,'16.33',fingerprint({task:'16.33'})),/already claimed/);
+    await assert.rejects(release(dir,'foreign'),/Foreign/);
+    await assert.rejects(resumeLease(dir,lease.token,'wrong-owner','new-thread'),/exact stopped owner/);
+    const recovered=await resumeLease(dir,lease.token,'old-thread','new-thread');
+    assert.equal(recovered.task,'16.32');assert.equal(recovered.fingerprint,lease.fingerprint);
+    assert.equal(recovered.resumed_from,'old-thread');
+    await assert.rejects(release(dir,lease.token),/Foreign/);
+    await release(dir,recovered.token);
+    const next=await claim(dir,'16.33',fingerprint({task:'16.33'}));
+    await release(dir,next.token);
+  } finally {
+    const path=resolve(dir);assert.equal(dirname(path),resolve(tmpdir()));assert.ok(basename(path).startsWith('shutaf-dispatch-'));
+    await rm(path,{recursive:true,force:true});
+  }
+});
+
+test('a resumed owner keeps its partial work; different selection cannot steal it',()=>{
+  const lease={task:'16.32',thread_id:'thread',token:'token'};
+  const good=dispatchDecision({control:{enabled:true,mode:'build'},lease,ownThread:'thread',dirty:true,next:{task:'16.32',brief:{task:'16.32'}}});
+  assert.equal(good.action,'resume');assert.equal(good.lease_token,'token');
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},lease,ownThread:'thread',dirty:true,next:{task:'16.33'}}).action,'blocked');
+  lease.fingerprint=fingerprint({task:'16.32',instructions:'original'});
+  assert.equal(dispatchDecision({control:{enabled:true,mode:'build'},lease,ownThread:'thread',next:{task:'16.32',brief:{task:'16.32',instructions:'changed'}}}).action,'blocked');
 });

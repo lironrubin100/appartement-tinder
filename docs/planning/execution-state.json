@@ -304,6 +304,108 @@
   },
   "checklist_continuation": {
     "plan": "implementation_plan.md",
-    "stage": "A"
+    "stage": "A",
+    "stage_acceptance": {
+      "A": {
+        "status": "pending"
+      },
+      "B": {
+        "status": "pending"
+      }
+    }
+  },
+  "atomic_dispatch": {
+    "children": {
+      "16.1": [
+        "16.31",
+        "16.32",
+        "16.33",
+        "16.34",
+        "16.35",
+        "16.36"
+      ]
+    },
+    "steps": {
+      "16.31": {
+        "depends_on": [],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md",
+        "block": {
+          "reason": "Private Auth-admin key is not configured; four-demo recovery is already approved.",
+          "revisit_when": "Owner configures the private key locally and the blocker is explicitly rechecked; never print the value."
+        }
+      },
+      "16.32": {
+        "depends_on": [],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "16.33": {
+        "depends_on": [],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "16.34": {
+        "depends_on": [
+          "16.31",
+          "16.32"
+        ],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "16.35": {
+        "depends_on": [
+          "16.31",
+          "16.33"
+        ],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "16.36": {
+        "depends_on": [
+          "16.34",
+          "16.35"
+        ],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "16.1": {
+        "depends_on": [
+          "16.31",
+          "16.32",
+          "16.33",
+          "16.34",
+          "16.35",
+          "16.36"
+        ],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "4.4": {
+        "depends_on": [
+          "0.9"
+        ],
+        "block": {
+          "reason": "Existing room44 owner retains ordinary-client acceptance; dedicated QA provisioning and repeatable scenario setup are unresolved.",
+          "revisit_when": "Owning handoff records an authorized reusable scenario and exact ordinary-client target; coordinate before resuming."
+        }
+      },
+      "0.7": {
+        "depends_on": []
+      },
+      "0.8": {
+        "depends_on": [
+          "0.7"
+        ]
+      },
+      "0.9": {
+        "depends_on": [
+          "0.8"
+        ]
+      }
+    }
+  },
+  "workflow_mode": "plan",
+  "automation_control": {
+    "enabled": false,
+    "cadence_minutes": 10,
+    "unit": "one-approved-atomic-task",
+    "model": "gpt-6-luna",
+    "reasoning_effort": "medium",
+    "reason": "Owner requests audit/planning only; no product execution during this work.",
+    "automation_id": "shutaf-next-approved-task"
   }
 }

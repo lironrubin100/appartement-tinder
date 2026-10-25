@@ -13,14 +13,14 @@ State: technical/moderation defaults, poster invitations, ordinary pilot signup 
 
 ## Where each fact lives
 
-For an autonomous next-feature request start with [START_NEXT_WORK](START_NEXT_WORK.md); the read-only selector `node scripts/next-work.mjs --json` chooses from actual recorded progress. Keep detailed evidence in owning workstreams.
+For planning or execution start with [START_NEXT_WORK](START_NEXT_WORK.md). The selector derives one card from the maintained checklist and recorded state; execution preflight respects the current mode and owner. Keep detailed evidence in owning workstreams.
 
 | Question | Authoritative location |
 | --- | --- |
 | What has the owner approved? | DECISIONS.md; OPEN/RESEARCH are not approved answers |
 | What is the pilot intended to prove and include? | PILOT_SCOPE.md; proposed allocations explicitly labeled |
 | What exactly does a domain do? | specs/ linked below; subordinate to DECISIONS.md |
-| Which independently deliverable slice do I execute? | SLICES.md; consume only execution-ready entries |
+| Which atomic task do I execute? | Selected checklist card from next-work; SLICES.md is the domain catalog, not a second queue |
 | What was actually run and where? | Per-workstream handoff + evidence; PROJECT_STATUS.md is navigation |
 | What are the business hypotheses? | BUSINESS_MODEL.md; approved behavior also gets a canonical decision row |
 | Why are old prompts not sufficient? | PLANNING_READINESS_AUDIT.md and LEGACY_SLICE_MAP.md |
@@ -76,7 +76,7 @@ E7 follow-up resolved: share listing card in chat; each member saves independent
 - Cross-cutting privacy, RTL/LTR, errors and mobile behavior belong to each slice; a later quality pass does not excuse missing basics.
 - No execution-ready label with blocking OPEN choices, unresolved domain examples or unidentified backend.
 - No existing capability is rebuilt just because status is unverified: inspect evidence and close the specific gap.
-- Work is local/uncommitted until publication is explicitly authorized; this package does not deploy or migrate anything.
+- Publication follows current standing authorization in AGENTS; this historical planning package grants no additional deployment/migration authority.
 
 Structural check: `node scripts/check-planning.mjs`. After an authorized canonical decision edit, refresh its generated coverage with `node scripts/check-planning.mjs --write-decisions` (new IDs need explicit owner-slice assignment in the coverage manifest first). Generated dates/counts describe this planning snapshot, not feature verification.
 

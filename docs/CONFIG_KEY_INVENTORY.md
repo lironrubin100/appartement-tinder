@@ -16,3 +16,9 @@ QA helper update, 25 October 2026: existing QA_FIXTURE_COUNT/PREFIX/MANIFEST/DIR
 - SUPABASE_PROJECT_REF: explicit fixed recovery target npbduvjnqnbydolmdpsc; read only by web/scripts/recover-demo-access.mjs from ignored web/.qa/demo-recovery/admin.env.
 - SUPABASE_SECRET_KEY: server-only Supabase Auth-admin key, supplied locally in that same ignored file. Never app_config, NEXT_PUBLIC, browser code, tracked source or tool output. No value/default is stored in this registry; no hosted configuration change was made.
 - This is operator-only tooling for the owner's four approved synthetic identities. Exact target/identity preflight, private credential checkpoints and ordinary sign-in are required. It neither authorizes new accounts nor grants general data reset. No new product app_config key.
+
+### Repository workflow controls — 25 October 2026
+
+`docs/planning/execution-state.json` stores `workflow_mode` (plan/build; currently plan) and `automation_control.enabled` (currently false). Both Build and enabled=true are necessary for a claim. The control's cadence_minutes, model, reasoning_effort and automation_id describe the app schedule; editing metadata does not reconfigure or enable that schedule. Current app schedule: shutaf-next-approved-task, ten minutes, gpt-6-luna/medium, PAUSED. `unit` is one approved atomic task; `reason` explains the pause. These are operator controls, not product app_config or authorization for hosted writes.
+
+Ignored `web/.qa/automation/state.json` holds a future usage cooldown (`not_before`); `lease.json` holds exact task/fingerprint/thread/token ownership. No automatic lease expiry. Existing CODEX_THREAD_ID identifies the calling chat; no new secret or hosted environment setting. Commands and recovery gates are maintained in START_NEXT_WORK, not duplicated here.

@@ -1,5 +1,7 @@
 # Initial bounded execution packets
 
+Historical packet contracts; current execution/authorization and fixtures come from START_NEXT_WORK/EXECUTION_PROTOCOL/TESTING, not this document.
+
 17 October 2026. [Work order](WORK_PLAN.md), [protocol](EXECUTION_PROTOCOL.md), [slice envelopes](SLICES.md). Machine-readable readiness in [packets.json](planning/packets.json). Ready means local task contract settled, never runtime acceptance. Whole-slice readiness is separate: no blanket readiness promotion from these three packets.
 
 ## SL00.1 — Establish the reproducible isolated baseline
@@ -11,7 +13,7 @@
 - Scope: inspect existing test helpers and target guards; find local runtime availability; run available static/PGlite checks. Do not create hosted resources, mutate shared config or replay live migrations.
 - Commands from web: `npm run test:db`; `npm exec --no -- tsc --noEmit`; `npm run build`; use `npm exec --no -- eslint <affected-files>` only for changed files or established baseline targets. Record absent dependencies/tooling as absent; no surprise paid install. Build environment failure is not successful build.
 - Guard: browser/DB mutation only after fixture helper confirms isolated intended target. An environment variable name or Preview URL is not sufficient. Existing acceptance helper may target shared backend: inspect before invocation.
-- Fixtures: for static/PGlite none hosted. Local runtime may seed named synthetic ownerA/ownerB/residentA/residentB/outsider; document exact IDs and delete owned Storage before DB/auth, audit zero.
+- Fixtures: for static/PGlite none hosted. Local runtime may seed named synthetic ownerA/ownerB/residentA/residentB/outsider; document exact IDs and restore exact run-owned scenario state under TESTING; retain reusable identities and owner demos.
 - Deliver: docs/workstreams/<work-id>.md with source/backend/migration baseline, exact command exit/results, existing failure list and runtime gaps. Required artifact for next packets is baseline record, not every provider working.
 - Stop: unexpected target/migration drift; preserve report and proceed only with independent read/static work. No application feature changes in this packet.
 
@@ -32,7 +34,7 @@
 - Anchors: web/src/app/chats and ChatThread, inbox/message/read RPC callers, conversation membership/read fields and Realtime hooks. Search actual function names before drafting migration; preserve working history cutoff/authorization.
 - Fixture: A/B accepted conversation plus outsider X; seed visible sequence 10, then B sends 11, A sends 12. A read marker10 -> unread1; own12 does not add to A count; rendering/focusing through12 -> unread0. B counts only A's12 above its own marker. Include a group with post-join cutoff and preserve membership model.
 - Scenarios: other recipient live+reload persistence; own send; monotonic read updates from two tabs; stale read update cannot undo newer marker; reconnect retrieves missed message once; duplicate request key one message; typing/receipts never counted; outsider and pre-join denial; block denies reads/previews/Realtime data.
-- Verification: targeted SQL/PGlite test if supported plus actual two-browser ordinary-account delivery/read/reconnect, HE/EN badge rendering and cleaned fixtures. A socket-connected event or hidden badge is not acceptance.
+- Verification: targeted SQL/PGlite test if supported plus actual two-browser ordinary-account delivery/read/reconnect, HE/EN badge rendering and guarded run-state cleanup with retained reusable identities. A socket-connected event or hidden badge is not acceptance.
 - Deliver: current bug state and source/target, narrow code/migration if needed, scenario results and handoff. Typing UI, broad inbox restyle and leave workflow changes are separate later packets unless required to preserve this contract.
 
 ## Preparing subsequent packets

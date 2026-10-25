@@ -170,7 +170,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 - State: source-confirmed during the requested UX review, 22 October; no new browser reproduction in this review. `MyListingsPage` renders `OwnerListingCard` without a `manageHref`; the card defaults to the localized My Listings URL. A Manage listing link on that same page therefore opens no new management context.
 - Expected: links describe the action they actually perform; retain the owner-detail CTA into the dashboard. Until scoped editing exists, omit the redundant card link within the dashboard or target an existing meaningful section. Do not invent an edit route.
-- Next: finish the requested UX review before further UI changes; preserve task order and D16. See `docs/handoffs/2026-10-22-next-prompt.md`.
+- Follow-up: the requested UX review/release is recorded in [the owning checkpoint](workstreams/2026-10-22-owner-ux-continuation.md). The former next-chat prompt is archived in Git `6955c7f:docs/handoffs/2026-10-22-next-prompt.md`; it is not current dispatch.
 
 
 ### LISTING-DRAFT-CLOSE-002 — Escape bypasses acknowledged save; reopened form suppresses later autosave

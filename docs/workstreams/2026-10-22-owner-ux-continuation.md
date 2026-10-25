@@ -1,6 +1,6 @@
 # Owner UX continuation — 22 October 2026
 
-- Outcome: complete the bounded UX review in `docs/handoffs/2026-10-22-next-prompt.md`; do not start task 2.19 or implement the future inquiry inbox.
+- Outcome: complete the bounded UX review in `Git 6955c7f:docs/handoffs/2026-10-22-next-prompt.md`; do not start task 2.19 or implement the future inquiry inbox.
 - Owner: current continuation chat; existing `6b9e`, `codex/implementation-plan`, base b4a4e64. No new checkout. Shared primary has unrelated dirty files; preserve them.
 - Reconciliation: b4a4e64 already committed/pushed the original unverified ComposeForm patch to its branch, while remote master is e9f3bcc. It is not yet a verified production release.
 - Decisions: D2/D3/D4/D16/B10/F4/I4/I6/I7/I10/I21. Existing device-local draft storage stays device-local; cloud adapter/media/import and full inbox remain later tasks.

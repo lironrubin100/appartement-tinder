@@ -1,14 +1,20 @@
-# Select or resume approved work
+# One entrypoint, two working modes
 
-Use this entrypoint for next-feature/continue requests. Product rules are in [DECISIONS](../DECISIONS.md); execution rules are in [EXECUTION_PROTOCOL](EXECUTION_PROTOCOL.md). Historical prompts/playbooks are not startup instructions.
+[AGENTS](../AGENTS.md) owns authorization; [DECISIONS](../DECISIONS.md) owns product rules. [EXECUTION_PROTOCOL](EXECUTION_PROTOCOL.md) defines Plan versus Build. Current mode is recorded in planning/execution-state.json; an explicit owner request changes it. “Continue” keeps the current mode.
 
-1. Read primary [PROJECT_STATUS](../PROJECT_STATUS.md), one owning checkpoint, HEAD and local changes. Confirm ownership; reuse the existing suitable checkout.
-2. Run node scripts/check-planning.mjs, then node scripts/next-work.mjs --json. The selector reads existing plan/ledger; it does not claim work, waive prerequisites or mark anything complete.
-3. Read only its task/work card, named decisions/contracts and affected source. Reconcile existing behavior/evidence before implementing missing work.
-4. Execute and verify the bounded outcome under EXECUTION_PROTOCOL. Update existing records; rerun the selector for the next authorized item. Owner 25 October continuation needs no per-task permission.
+## Plan
 
-The [implementation checklist](../implementation_plan.md) keeps stable task IDs and physical Stage A order. The current bounded owner-management dispatch still requires its packet evidence before the next milestone. After it, Stage A selection remains in checklist order; missing prerequisite evidence is reported against that selected task instead of silently returning to another queue. Demo acceptance is not full-MVP packet verification.
+For ideas, feature changes, audit and work ordering: inspect the relevant existing decision/task and reconcile the proposed delta in place. Read only unhandled Instinct notes when present. Update canonical decisions only from explicit owner answers; ideas/research stay notes. Preserve stable task IDs/evidence. Run node scripts/check-planning.mjs and node scripts/next-work.mjs --check. Do not implement product code, reset accounts or enable a product runner as a side effect of planning.
 
-An explicit ready owner-priority override may select a bounded checklist subset ahead of the normal queue, with scope and handoff; it never verifies its parent packet. Owner 25 October promoted representative demo content after workflow/QA preparation. Do not steal another executor's current task or skip a failed assertion.
+## Build
 
-Planning readiness lives in planning/packets.json; packet progress/evidence and dispatch metadata live in planning/execution-state.json; detailed evidence stays in the owning workstream. Choose only approved ready work. Continue independent approved work around a concrete blocker only when its actual prerequisites and ownership allow it.
+1. Run node scripts/next-work.mjs --preflight. Paused/wait/busy/blocked means no new writer. Unchanged blocks are not an invitation to repeat an audit.
+2. If eligible, read fresh get_usage_limits. With exhausted ordinary allowance, save --defer-until=<reset Unix seconds> and wait for a later scheduled run. Unknown allowance is not zero usage; never buy credits or consume a reset automatically.
+3. Use only the returned brief. Claim its exact task/fingerprint with --claim=<ID> --fingerprint=<hash>. Keep its token privately, read its owning checkpoint and named contracts; do not read the whole checklist/business/history library. Stage C never runs automatically.
+4. Complete one bounded outcome, run its acceptance, update existing records and release your token with --release=<token>. A manual continuing executor may select the next approved outcome; a scheduled run ends after one task so its next context stays focused.
+
+node scripts/next-work.mjs --brief previews the selected card; --task=<ID> inspects one card; --check validates every card/dependency. These are read-only, not product execution.
+
+For a usage-interrupted run, preserve partial work and checkpoint before releasing where possible. A remaining lease names its owner thread. Check that owner with wait_threads before recovering it; only a fresh non-running result permits --resume=<lease-token> --owner-stopped=<exact-thread-ID>. Never expire a lease by time or overwrite unrelated dirty work. If the tool cannot establish ownership, stop with that concrete dependency.
+
+The single checklist is implementation_plan.md; packet/runtime state stays in planning/execution-state.json. A-stage journey acceptance is required before B; B acceptance never authorizes C. Scheduler prompt contains no feature instructions: all scope and checks come from this selection. A schedule retries periodically; no documented exact “quota reset” event or zero-token wakeup is promised. Local runs require the computer/app/project available. The existing schedule remains paused until the owner explicitly enters Build and enables it.

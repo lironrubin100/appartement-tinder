@@ -2,6 +2,14 @@
 
 This is the maintained procedure for approved Shutaf work. [AGENTS](../AGENTS.md) owns standing authorization and guardrails; [DECISIONS](../DECISIONS.md) owns product behavior.25 October 2026 owner update supersedes historical per-micro-task permission gates: continue the approved queue, stop for a blocker/new decision/critical action. An explicit current single-task request remains bounded.
 
+## Plan and Build
+
+Plan is the current audit/feature-discussion mode. Inspect affected existing rules/tasks and source narrowly; update in place, preserve closed decisions and completion evidence, add a bounded task only for approved missing behavior. Do not create a document for each thought. Product code/data and the scheduled product runner stay untouched. An explicit new owner answer may revise canonical policy; an idea or research note cannot. Instinct's raw notes are input, not implementation proof.
+
+Build executes one selected atomic card. It may update its own acceptance/state/blocker and owning checkpoint, but cannot expand product scope, rewrite priority/policy or create a new planning structure. A necessary change outside the card returns to Plan with the precise missing choice. The owner does not need to choose routine IDs or repeat settled answers. Record the current mode in execution-state.json; a neutral continuation does not switch modes.
+
+Scheduled Build runs take one card per fresh context. Entry, usage cooldown, claim/recovery and release commands are maintained only in START_NEXT_WORK. If all cards in a milestone are checked, reconcile its actual combined evidence before advancing. The configured light model performs execution; Plan prepares the work and resolves real ambiguities. No model is treated as incapable of error: acceptance and scope checks remain mandatory.
+
 ## Start and work card
 
 Use [START_NEXT_WORK](START_NEXT_WORK.md) and the selector. Check primary status, owning checkpoint, HEAD/diff, target and current owner. Read the selected task/packet and only required decision/contract sections. Existing code or a pending ledger alone does not prove a gap; reconcile narrowly.

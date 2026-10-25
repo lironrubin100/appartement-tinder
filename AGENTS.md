@@ -6,8 +6,9 @@ Web-first roommate/apartment marketplace: Next.js, Supabase; Expo is later.
 
 - DECISIONS.md owns approved product/architecture rules. PRD, ARCHITECTURE and domain specs are downstream. Preserve settled rules; ask about an actual contradiction/new product choice.
 - Read primary PROJECT_STATUS.md and the latest checkpoint of the owning workstream, then check HEAD/local changes. The primary is the first entry of git worktree list --porcelain.
-- Execute through docs/START_NEXT_WORK.md and docs/EXECUTION_PROTOCOL.md. Read only the selected task, named decision rows, relevant contract sections and affected source. Do not reload the planning library or repeat a project audit for ordinary work.
-- Phone planning writes only docs/BUSINESS_MODEL.md under its planning-agent boundary. On a named CHANGE/PR handoff, reconcile that entry into canonical decisions and the existing execution plan; no automatic priority change or whole-project re-audit.
+- Two modes: Plan changes existing decisions/tasks/docs only; Build implements the selected card. Ideas/feature discussion default to Plan; explicit implement/fix/run requests select Build. “Continue” preserves the current recorded mode. Start through docs/START_NEXT_WORK.md; consult only relevant sections of docs/EXECUTION_PROTOCOL.md. Read the selected task, named decision rows, relevant contract sections and affected source. Do not reload the planning library or repeat a project audit for ordinary work.
+- Instinct currently reads only. Its future owner-approved writing surface is docs/BUSINESS_MODEL.md. Treat incoming ideas/research as notes; route explicit decisions/reported problems once under Plan, without asking the owner to manage task IDs. No automatic idea-to-code or priority change.
+- Coordination uses the repository-local project-orchestrator skill; ordinary Build needs no orchestration skill. It follows these same Plan/Build rules, without a second instruction system.
 - Residents start on Discover (Map preference allowed); listers start on My Listings. One resident profile supports Individuals/Groups. D1/B10 separate property-poster intake. Native public apartment links are allowed under E8; no external listing/communication ecosystem under D0.
 
 ## Owner authorization
