@@ -1,6 +1,6 @@
 # Decision coverage snapshot
 
-Generated 2026-10-21 from DECISIONS.md. Navigation only; DECISIONS.md remains authoritative. Primary slice owns preparation/closure, not approval. Deferred placement does not silently defer a DECIDED v1 capability.
+Generated 2026-10-25 from DECISIONS.md. Navigation only; DECISIONS.md remains authoritative. Primary slice owns preparation/closure, not approval. Deferred placement does not silently defer a DECIDED v1 capability.
 
 142 rows: 130 DECIDED variants, 5 OPEN, 7 RESEARCH. Unresolved rows are not all new owner questions; many concern technical choices or later releases.
 

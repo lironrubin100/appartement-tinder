@@ -431,6 +431,26 @@
         ],
         "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
+      "9.12": {
+        "depends_on": ["9.1"],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "9.13": {
+        "depends_on": ["9.12"],
+        "block": {
+          "reason": "D12 linking authority remains unresolved; rental inquiry acceptance is not attachment permission.",
+          "revisit_when": "Owner-approved linking rule is recorded in D12 and the group contract."
+        },
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "9.14": {
+        "depends_on": ["9.5", "9.13"],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
+      "9.15": {
+        "depends_on": ["9.14", "6.12"],
+        "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
+      },
       "0.10": {
         "depends_on": [
           "0.7",

@@ -379,7 +379,8 @@
       "context_decisions": [],
       "contracts": [
         "docs/REMAINING_MVP_PACKETS.md",
-        "docs/specs/TECHNICAL_DEFAULTS.md"
+        "docs/specs/TECHNICAL_DEFAULTS.md",
+        "docs/specs/GROUP_LISTING_INQUIRIES.md"
       ],
       "live_gate": "Named isolated source/backend; execute packet-specific ordinary-client browser/SQL/provider tests and exact fixture cleanup; unavailable evidence recorded, never inferred",
       "release_gate": "Hosted migration/deployment authorization, current provider/plan/privacy/legal gates and actual acceptance remain independent"
