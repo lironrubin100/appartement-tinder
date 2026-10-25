@@ -15,6 +15,7 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 - Reported by owner, 25 October 2026, while discussing repeatable QA state. Browser reproduction pending; do not infer that all group exit is missing.
 - Source check: GroupActions renders Leave for a non-admin's own membership and calls remove_group_member. The migration rejects removal of the admin, and the UI provides no admin Leave control. This confirms a current admin limitation, not a newly approved transfer/disband policy.
 - Keep product lifecycle acceptance separate from test cleanup. QA needs guarded exact-run scenario teardown even when no normal product exit is available. No UI/schema change in this workflow scope; revisit against the existing group/lifecycle contract before proposing a fix.
+- Canonical work: existing tasks9.9/9.10 (transfer contract, then exit UI/ordinary acceptance). No duplicate exit task or change to their Stage B priority. QA repeatability is0.7–0.9, not this product fix.
 
 ## DISCOVER-LISTER-LIVE-001 — Live discovery functions exclude listers
 
@@ -202,3 +203,4 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 - Reported/reproduced by current production screenshot on 23 October: EN accepted chat has localized address card, header and composer, but its stored acceptance system-message body is Hebrew. No private message body was rewritten. Both authorized actors still get the actual exact-address card; this is a separate translation follow-up, not failed address authorization.
 - Next: localize known system events at the presentation boundary using a stable event contract, preserving ordinary user messages and immutable historical content. Do not bulk rewrite stored chat bodies. Current bounded release does not claim complete older-screen translation.
+- Canonical work: task8.12; depends on8.3 and Stage B eligibility. No implementation/acceptance is claimed by this planning link.

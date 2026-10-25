@@ -656,7 +656,7 @@ J1–J7/J10–J14, TAXONOMY ו־TECHNICAL_DEFAULTS. אין שינוי בערכי
 
 - [ ] **משימה 0.5: הגדרות טיפוסיות וגבולות חשיפה**
   - **קבצים לעריכה/יצירה:** `web/src/lib/contracts/config.ts`, `docs/CONFIG_KEY_INVENTORY.md`, `scripts/test-contracts.mjs`.
-  - **הוראות טכניות ברורות:** מפה ערכי runtime מול constants; אמת type/range/fallback/public allowlist לפי החוזה. תעד כל key חדש; secrets נשארים environment בלבד.
+  - **הוראות טכניות ברורות:** מפה ערכי runtime מול constants; אמת type/range/fallback/public allowlist לפי החוזה. מקור נוסף: רשומת App Config ב־PROJECT_STATUS וענף f62b3aa של e21c; בדוק מה כבר שולב ותאם בעלות לפני שינוי כדי לא לשחזר עבודה קיימת או לדרוס את inventory. תעד כל key חדש; secrets נשארים environment בלבד. אין כאן הרשאה למיזוג גורף של ענף ישן או להפעלת מיגרציות.
   - **קריטריון קבלה:** בדיקה מוכיחה ש־key לא מוכר נשאר private, וערך שגוי מטופל לפי fallback מאושר. לא שונו ערכי config משותפים ב־QA.
 
 - [ ] **משימה 0.6: חוזה cursor ושגיאות**
@@ -844,6 +844,11 @@ F1/F2/F5/F8; קיים מימוש sequence/read שיש לשמר.
   - **קריטריון קבלה:** socket ישן אינו מספק תוכן חדש אסור; אין קבלה על סמך unsubscribe ב־UI בלבד. תוצאת hosted/local נרשמת בנפרד.
 
 
+- [ ] **משימה 8.12: תרגום הודעות מערכת מוכרות בצ׳אט**
+  - **קבצים לעריכה/יצירה:** `web/src/app/(main)/chats/[conversationId]/ChatThread.tsx`, `web/e2e/chat-system-locale.spec.ts`.
+  - **הוראות טכניות ברורות:** מקור CHAT-SYSTEM-LOCALE-001 ברשומת התקלות. אחרי 8.3, התאם הצגת אירוע אישור פנייה מוכר ל־HE/EN בגבול התצוגה, עם kind=system ומזהה אירוע יציב או allowlist מדויק לתבנית legacy מוכרת. אין זיהוי באמצעות substring של טקסט רגיל, אין תרגום הודעות משתמשים או כתיבה להיסטוריה. ערך לא מוכר נשמר ב־fallback הקיים; אל תשנה הרשאות/כרטיס כתובת או SQL.
+  - **קריטריון קבלה:** בדיקת שרשור ב־HE/EN וב־390px/desktop מציגה את אירוע האישור המוכר בשפת המסך גם אחרי reload. הודעת משתמש עם אותו טקסט נשמרת כפי שנכתבה, system לא מוכר נשמר, וכרטיס הכתובת נשאר מוגבל לבעלים/פונה שאושר. מקור/יעד ותוצאות הבדיקה נרשמים; תיקון אינו מוצג כאילו כבר בוצע.
+
 ### SL06 — אמינות פניות והזמנה הפוכה
 
 משלימים לאחר שפנייה אישית וקבוצתית כבר ניתנות להצגה. POSTER_OUTREACH ו־GROUP_LISTING_INQUIRIES.
@@ -900,8 +905,8 @@ E3/E9/H1. הסכמה פה אחד לפנייה לבעלים נשארת נפרדת
 
 - [ ] **משימה 9.10: ממשק העברת ניהול ועזיבה**
   - **קבצים לעריכה/יצירה:** `web/src/components/groups/AdminTransfer.tsx`, `web/src/components/groups/GroupActions.tsx`.
-  - **הוראות טכניות ברורות:** חבר שליחה/אישור/דחייה של transfer; admin ordinary departure דורש transfer שהושלם. last member archive לפי החוזה.
-  - **קריטריון קבלה:** admin לא יוצא ומשאיר קבוצה ללא מנהל; transfer מאושר מאפשר עזיבה; אין מינוי successor ללא הסכמה.
+  - **הוראות טכניות ברורות:** מקור GROUP-LEAVE-ADMIN-001 ברשומת התקלות; אחרי 9.9 חבר שליחה/אישור/דחייה של transfer; admin ordinary departure דורש transfer שהושלם. last member archive לפי החוזה. שחזר תחילה את ההבדל בין Leave הקיים לחבר רגיל לבין admin; אין בנייה מחדש של יציאה שכבר קיימת ואין שימוש בה כתחליף לניקוי QA.
+  - **קריטריון קבלה:** בדיקת ordinary actors מאמתת שחבר רגיל יכול לעזוב לפי החוזה, admin לא יוצא ומשאיר קבוצה ללא מנהל, transfer מאושר מאפשר עזיבה, ואין מינוי successor ללא הסכמה. אמת reload/גישה לאחר היציאה ו־outsider denial ורשום יעד/תאריך; לפני כן התקלה נשארת reported/source-confirmed.
 
 - [ ] **משימה 9.11: תקציב פרטי וקבוצה מוסתרת**
   - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021000025_group_visibility_private_preferences.sql`, `supabase/tests/plan_group_privacy.sql`, `scripts/test-resident-sql.mjs`.

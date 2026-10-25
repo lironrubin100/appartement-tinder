@@ -395,17 +395,29 @@
         "depends_on": [
           "0.8"
         ]
+      },
+      "8.12": {
+        "depends_on": [
+          "8.3"
+        ],
+        "source": "docs/KNOWN_ISSUES.md#chat-system-locale-001--english-chat-displays-the-legacy-hebrew-inquiry-system-message"
+      },
+      "9.10": {
+        "depends_on": [
+          "9.9"
+        ],
+        "source": "docs/KNOWN_ISSUES.md#group-leave-admin-001--group-exit-feels-unavailable"
       }
     }
   },
-  "workflow_mode": "plan",
+  "workflow_mode": "build",
   "automation_control": {
-    "enabled": false,
+    "enabled": true,
     "cadence_minutes": 10,
     "unit": "one-approved-atomic-task",
-    "model": "gpt-6-luna",
+    "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner requests audit/planning only; no product execution during this work.",
+    "reason": "Owner 25 October authorizes continuous approved-queue Build, one new local Terra executor per task, and publication of the eight pending workflow/planning files after explanation. Manager reviews acceptance and immediately dispatches the next task; ten-minute heartbeat is recovery only. Preserve claim/usage/data gates; Stage C remains deferred.",
     "automation_id": "shutaf-next-approved-task"
   }
 }
