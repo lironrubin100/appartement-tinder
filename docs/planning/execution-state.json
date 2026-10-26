@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25",
+  "updated_at": "2026-10-26",
   "meaning": "Progress only, not product authority. Initially pending means not reconciled by this plan, not missing implementation.",
   "priority": [
     "SL04.2",
@@ -300,7 +300,9 @@
     "issue": "QA-FIXTURE-REUSE",
     "handoff": "docs/workstreams/implementation-plan-SL00.md",
     "scope": "Owner requests complete reusable QA accounts/photos and scenario fixtures for focused executors, plus reversible removal of incomplete legacy demos from discovery. Reuse exact-three room44 pool manifest, preserve three unmarked owner accounts and four completed retained demos. One new Terra executor per card; no cohort creation per run.",
-    "status": "ready"
+    "status": "complete",
+    "completed_at": "2026-10-26",
+    "outcome": "Same three prepared QA actors, two accepted ordinary group/browser/cleanup runs, guarded legacy/Synthetic visibility retirement, and post-cleanup leased handoff smoke accepted. Resume the approved feature queue; no whole-packet/stage verification implied."
   },
   "checklist_continuation": {
     "plan": "implementation_plan.md",
@@ -384,12 +386,9 @@
       },
       "4.4": {
         "depends_on": [
-          "0.9"
-        ],
-        "block": {
-          "reason": "Existing room44 owner retains ordinary-client acceptance; dedicated QA provisioning and repeatable scenario setup are unresolved.",
-          "revisit_when": "Owning handoff records an authorized reusable scenario and exact ordinary-client target; coordinate before resuming."
-        }
+          "0.9",
+          "0.10"
+        ]
       },
       "0.7": {
         "depends_on": [],

@@ -40,6 +40,23 @@ Call `cleanupScenario({journal,run,save,executeSql,removeMedia})` under the same
 
 `removeMedia` is an idempotent ordinary-owner Storage removal of the journaled exact path only, after the DB transaction; it must reject any conflicting owner/reference. Media failure keeps the full journal in failed state for exact retry. `saveScenario` replaces the journal atomically. A failed, active or cleaning journal blocks `qa-fixtures.mjs run` before ordinary sign-in/child execution; only a verified clean journal permits the next scenario. The isolated tests exercise real base-schema FK cascades, two same-account group/chat runs, outside members/participants/invitees, unknown dependencies, missing create receipts, a lost cleanup response after commit and interrupted ordinary-media cleanup. They do not prove live Storage/Auth/Realtime cleanup or the full inquiry scenario; record those separately in0.9.
 
+## Current prepared pool — next executor
+
+26October acceptance: reuse the existing primary `.qa/room44-pool/accounts.json` and run.json. Named roles are owner, accepted_requester and pending_requester; read their mapping privately, never assume indexed nine-account fixtures or copy credentials into a prompt. Baseline is ready: complete canonical resident profiles/private preferences/disclosure plus distinct tracked fictional portraits. Use the selected task's ordinary role sessions; no new cohort, prepare, password reset or setup rerun is needed for normal continuation.
+
+From web:
+
+~~~powershell
+$env:QA_FIXTURE_MANIFEST='.qa/room44-pool/accounts.json'
+$env:QA_FIXTURE_DIRECTORY='.qa/room44-pool'
+node scripts/qa-fixtures.mjs ensure
+node scripts/qa-fixtures.mjs run -- node node_modules/@playwright/test/cli.js test e2e/<selected-spec>.spec.ts --workers=1
+~~~
+
+`run` holds shared actor leases and refuses an uncleared journal. Tests requiring another role/count or pristine onboarding/deletion need the explicit narrow exception below; do not silently mint accounts. Real group reuse uses maintained qa-reuse.spec.ts and the connector checkpoint protocol above. Its accepted two ordinary group/admission/browser/guarded-cleanup iterations remain in private qa-reuse-receipts.json with identical actors, profiles and credentials; they are not apartment-owner inquiry or Realtime acceptance. Setup/browser, profile/API/hash, full-scenario cleanup and legacy-retirement visibility receipts each prove their own boundary.0.10 post-cleanup smoke entered through run, rejected in-memory target drift and a competing actor lease, repeated ordinary baseline reads/sign-in twice on all3 actors, matched the preserved hashes and left scenario.json clean. It created0 identities/scenario roots; the two full live scenarios are the existing0.9 evidence, not a claimed repeat during this read-only handoff.
+
+Recovery remains exact-ID/nonce/target guarded: retain the failed journal/receipts, verify the prior executor stopped, reconcile lost create/commit responses, use reviewed run-only SQL plus ordinary owner Storage removal, then prove baseline before reusing. Never reset the whole cohort or adopt retained demo actors. Incomplete Synthetic/partial fixtures classified for retirement are now absent from the public feed; old data remains available for recovery. The next approved feature can use this pool now.
+
 ## Dedicated reusable pool
 
 Existing controls: QA_FIXTURE_MANIFEST and QA_FIXTURE_DIRECTORY select a private ignored cohort; QA_FIXTURE_PREFIX controls marked emails. Use a separate directory/manifest for the dedicated pool. QA_FIXTURE_COUNT remains supported for legacy/pristine runs. The dedicated reusable pool is exactly three named roles: owner, accepted_requester, pending_requester. Its ignored run manifest maps those roles to stable IDs and carries the private canonical-profile baseline: completed resident state, name/bio, adult DOB, facts, private preferences, disclosure, and a tracked fictional 1024×1536 portrait's source/provenance/SHA-256/owner-path template. The exact IDs and credentials remain only in that ignored manifest.
