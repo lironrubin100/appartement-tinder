@@ -253,7 +253,7 @@
   - **קריטריון קבלה:** סגירה/פתיחה של חדר נשמרות לאחר reload; room אחר אינו משתנה.
 
 - [ ] **משימה 4.17: פעולת שרת לעצירת וחידוש פניות**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261022000005_listing_inquiry_intake.sql`, `supabase/tests/plan_listing_inquiry_intake.sql`, `scripts/test-resident-sql.mjs`.
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261026133952_listing_inquiry_intake.sql`, `supabase/tests/plan_listing_inquiry_intake.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** הפרד intake מזמינות חדרים. עדכן send/accept checks; stop אינו מוחק accepted; pending אינם נעשים ניתנים לאישור מחדש רק בגלל reopen, לפי D18. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** intake אינו משנה חדרים; בעצירה אין פניות חדשות; שיחה מאושרת נשארת; pending הישן דורש reconfirm.
 

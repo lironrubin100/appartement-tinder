@@ -390,6 +390,10 @@
           "0.10"
         ]
       },
+      "4.17": {
+        "depends_on": ["4.4"],
+        "handoff": "docs/workstreams/implementation-plan-SL04.md"
+      },
       "0.7": {
         "depends_on": [],
         "handoff": "docs/workstreams/implementation-plan-SL00.md"

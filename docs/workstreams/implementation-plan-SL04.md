@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Task4.17 scope correction — append-only migration
+
+The planned20261022000005 intake file does not exist; live history already ends20261024140758. To preserve J11 append-only history and apply intake checks after the room RPC definitions, the same approved card now names20261026133952_listing_inquiry_intake.sql (26October UTC observation). Added its real4.4 dependency for the existing pending-reconfirmation column. No product decision/scope expansion or hosted action; claim the revised card before implementation.
+
 ## Task4.5 — room controls released and production accepted — 26October2026
 
 App sourcefded402c9c122cd222f287ee3c26723b9d222fcf pushed normally to master; Vercel productiondpl_24yT6UfZCCUgwLV5VxsXvj1Dbtsz confirmed READY with that exact githubCommitSha and canonical alias https://appartement-tinder.vercel.app. No migration/config/media/Auth change. Final source passes optimized build including TypeScript, focused lint and whitespace. Earlier four local Chrome cases proved the same UI/action close/reopen/reload, unchanged other room and real aborted-request retry. A subsequent nested room ordering fix passed an independent ordinary close/reopen ordering check and final build; full final-source production coverage follows below.
