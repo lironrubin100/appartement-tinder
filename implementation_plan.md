@@ -247,7 +247,7 @@
   - **קריטריון קבלה:** חדר אחד נסגר והשני נשאר זמין; count/range נכונים; reopen אינו מאשר pending ישן.
   - **מצב 24 באוקטובר 2026:** המיגרציה החיה `20261024140758_room_availability_controls` הוחלה לאחר אישור מפורש; ה־PGlite SQL/RLS עבר, וה־RPC קיים. הוכנו תשעה חשבונות QA חדשים ומבודדים, אך כלי חיבור המסד דחה את SQL ה־provisioning ב־`INVALID_ARGUMENT` לפני כל כתיבה; לכן בדיקת לקוח רגיל טרם הושלמה. לפי הוראת הבעלים ה־source משתלב ומתפרסם עם פער הראיה המתועד הזה; המשימה נשארת פתוחה עד בדיקת owner/foreign/guest רגילה.
 
-- [ ] **משימה 4.5: פקדי זמינות חדרים**
+- [x] **משימה 4.5: פקדי זמינות חדרים**
   - **קבצים לעריכה/יצירה:** `web/src/components/listings/RoomAvailabilityControls.tsx`, `web/src/app/(main)/my-listings/actions.ts`, `web/src/app/(main)/my-listings/MyListingsPage.tsx`.
   - **הוראות טכניות ברורות:** חבר פקד לכל חדר ל־4.4; אמת תגובת שרת. אין פקד intake במשימה זו, ואין שינוי group/chat.
   - **קריטריון קבלה:** סגירה/פתיחה של חדר נשמרות לאחר reload; room אחר אינו משתנה.
