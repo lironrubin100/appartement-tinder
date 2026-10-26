@@ -1,6 +1,6 @@
 # Git branch and worktree inventory
 
-Generated: 26 Oct 2026, 10:37 (Asia/Jerusalem); 2026-10-26T08:37:58.525Z.
+Generated: 26 Oct 2026, 10:55 (Asia/Jerusalem); 2026-10-26T08:55:54.064Z.
 
 Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at bbf536c; this script does not fetch or infer deployment state.
 
@@ -10,7 +10,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Branch | HEAD | Local changes | HEAD in master? | Git lock |
 | --- | --- | --- | --- | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | master | bbf536c2 | 6 tracked; 1 untracked entries | Yes | No |
+| C:/Users/User/Desktop/appartement tinder | master | 90884b1f | 8 tracked; 0 untracked entries | Yes | No |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | codex/implementation-plan | a66f12a3 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | codex/standing-agent-authorization | f571b785 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | codex/next-step-reporting | cf39486d | Could not read | Unknown | No |
@@ -41,7 +41,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 | codex/sl01-lister-safe-browsing | f4d1d4a | None | Yes |
 | codex/standing-agent-authorization | f571b78 | origin/codex/standing-agent-authorization | No |
 | codex/streamline-execution | 4eca5c7 | origin/codex/streamline-execution | Yes |
-| master | bbf536c | origin/master | Yes |
+| master | 90884b1 | origin/master | Yes |
 | onboarding-flow-impl | 71cec18 | None | No |
 | worktree-map-completeness | fe35d6f | None | No |
 
@@ -49,7 +49,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Last commit description |
 | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | feat(qa): journal and guard run-owned scenario cleanup |
+| C:/Users/User/Desktop/appartement tinder | fix(settings): separate route exports from shared server content |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | Check this checkout directly |

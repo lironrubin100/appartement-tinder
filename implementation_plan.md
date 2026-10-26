@@ -42,12 +42,12 @@
   - **הוראות טכניות ברורות:** אחרי 0.7 הוסף journal פרטי לנתוני run שנוצרו: group/listing/inquiry/conversation/media IDs בלבד. תחת lease, cleanup מחזיר baseline רק למשאבי ה־run, עם guard שכל owner/member/invitee/requester/participant הוא QA המורשה ושאין peer/cascade לא ידוע. אין reset לפרופילים/סיסמאות או delete של accounts/Storage metadata. כשל משמר journal וחוסם rerun עד recovery; אין public reset endpoint. בכרטיס זה בדיקות מבודדות בלבד; הקבלה החיה בשתי ריצות שייכת ל־0.9 אחרי הכנת המאגר המלא ב־0.11.
   - **קריטריון קבלה:** בדיקה מבודדת של create→cleanup→create על אותם IDs עוברת; outside participant או ID שאינו של ה־run מונעים את כל הניקוי. כשל באמצע נשמר ומשוחזר באופן מדויק; החשבונות/הפרופילים והדמו אינם נמחקים.
 
-- [ ] **משימה 0.9: קבלת שתי הרצות קבוצות ופניות על אותם חשבונות**
+- [x] **משימה 0.9: קבלת שתי הרצות קבוצות ופניות על אותם חשבונות**
   - **קבצים לעריכה/יצירה:** `web/e2e/qa-reuse.spec.ts`, `web/scripts/test-qa-fixtures.mjs`, `docs/TESTING.md`, `docs/workstreams/implementation-plan-SL00.md`.
   - **הוראות טכניות ברורות:** אחרי 0.8 ו־0.11, ב־backend מבודד מזוהה או npbduvjnqnbydolmdpsc תחת אישור הבעלים25באוקטובר למאגר הסינתטי המדויק, הרץ פעמיים עם ordinary actors: יצירת קבוצה, פנייה/אישור, guard teardown ואז baseline. אין תלות ביכולת משתמש admin לצאת מקבוצה ואין שימוש בדמו כתשתית QA mutable. בדוק גם interruption/recovery; עצור על הרשאה/מפתח חסרים במקום ליצור cohort נוסף. רשום מיפוי role→ID וקבלות קיימות כדי שהמבצע הבא יקבל manifest ופקודה, בלי ליצור fixtures מחדש.
   - **קריטריון קבלה:** שתי הרצות אמיתיות מסתיימות על אותו סט actor IDs; כל run data הוסר/שוחזר במדויק, אין שאריות לא צפויות, profiles/passwords נשמרו ו־outsider נדחה. mock/PGlite אינם מוצגים כקבלה זו.
 
-- [ ] **משימה 0.13: תיקון חתימת עמוד ההגדרות החוסמת אימות טיפוסים**
+- [x] **משימה 0.13: תיקון חתימת עמוד ההגדרות החוסמת אימות טיפוסים**
   - **קבצים לעריכה/יצירה:** `web/src/app/(main)/settings/page.tsx`, `web/src/app/(main)/settings/SettingsContent.tsx`, `web/src/app/en/(main)/settings/page.tsx`, `web/src/app/(main)/settings/LanguageStatus.tsx`, `web/src/app/(main)/settings/PrivacySummary.tsx`, `web/src/app/(main)/settings/DeleteAccountNotice.tsx`.
   - **הוראות טכניות ברורות:** תקלה SETTINGS-PAGE-TYPE-001 שאומתה במהלך0.9: הפרד תוכן משותף של Settings מרכיב ברירת המחדל של route. עמודי HE/EN יישארו wrappers בעלי חתימת Next תקינה; localeOverride יישאר prop פנימי בלבד. קרא page convention של גרסת Next המותקנת. בדיקת הפיקסלים מצאה גם שלושה panels בעברית בתוך EN; העבר locale לפי I16/I18 לתצוגת השפה, סיכום הפרטיות והודעת המחיקה, ותקן את קישור עריכת הפרופיל לשפה הנוכחית. שמור auth וכל הפעולות/העיצוב; תצוגת שפה אינה כפתור החלפה חדש, והודעת מחיקה אינה מימוש מחיקה. אין שינוי DB/config או מדיניות.
   - **קריטריון קבלה:** TypeScript, lint ממוקד ו־build עוברים; משתמש QA רגיל פותח Settings ב־HE/EN ובטלפון/מחשב, עם כותרת ופקדים בשפה הנכונה אחרי reload. אין שינוי העדפה או פעולת מחיקה. לאחר התיקון חוזרים לקבלת0.9, בלי לסמן את מסעות המוצר האחרים כמאומתים.

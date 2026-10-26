@@ -47,7 +47,7 @@ export default async function SettingsContent({
         </header>
 
         <div className="space-y-5">
-          <LanguageStatus />
+        <LanguageStatus locale={locale} />
 
           <section aria-labelledby="preferences-heading" className="overflow-hidden rounded-shutaf-lg border border-card-border bg-white">
             <div className="flex items-center gap-3 px-4 py-4">
@@ -75,7 +75,7 @@ export default async function SettingsContent({
 
           <section aria-labelledby="privacy-heading" className="overflow-hidden rounded-shutaf-lg border border-card-border bg-white">
             <h2 id="privacy-heading" className="sr-only">{t('פרטיות', 'Privacy')}</h2>
-            <PrivacySummary />
+          <PrivacySummary locale={locale} />
           </section>
 
           {profile.mode === 'resident' && (
@@ -104,7 +104,7 @@ export default async function SettingsContent({
                   <span className="text-muted-text" aria-hidden="true">‹</span>
                 </button>
               </form>
-              <DeleteAccountNotice />
+          <DeleteAccountNotice locale={locale} />
             </div>
           </section>
         </div>

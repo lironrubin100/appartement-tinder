@@ -11,6 +11,7 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 - Reproduced26October2026 during0.9 validation on sourcebbf536c: tsc --noEmit fails in .next/types/app/(main)/settings/page.ts because the route's default SettingsPage accepts an optional localeOverride-only object instead of valid page props. Both the Hebrew route and its English wrapper currently share that default component. The new QA test's own type error was separately corrected; this remaining error is pre-existing application source.
 - Bounded validation follow-up0.13: separate shared Settings content from the route default exports, retain locale/auth behavior and exact rendered controls, then verify TypeScript/lint/build and ordinary HE/EN phone/desktop Settings navigation. No settings policy, schema or preference changes.
+- Fixed and locally verified26October in0.13: valid route wrappers with shared server SettingsContent, locale passed into the three previously Hebrew-only panels and locale-preserving profile link. TypeScript/focused lint and production build passed under normal network/filesystem execution; four real Chrome HE/EN390/1280 Settings/dialog/reload cases passed with no preference or deletion action. Production publication is recorded separately in the SL00 checkpoint.
 
 ## DEMO-CONTENT-PHOTOS-001 — Demo people and apartments need complete, representative profiles with visible photos
 
