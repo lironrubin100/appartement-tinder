@@ -8,6 +8,69 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { setupPoolActors } from './qa-pool.mjs';
+import { classifyLegacyImage, legacyInventorySql, planLegacyRetirement, legacyRetirementSql } from './qa-fixtures.mjs';
+import { PGlite } from '@electric-sql/pglite';
+
+test('retirement uses decoded image evidence and preserves unknown, retained and unclassified records',()=>{
+  assert.equal(classifyLegacyImage({width:1,height:1,bytes:1024,channels:[{stdev:5}]}).state,'invalid');
+  assert.equal(classifyLegacyImage({width:1024,height:1536,bytes:4096,channels:[{stdev:0}]}).reason,'flat-color-placeholder');
+  assert.equal(classifyLegacyImage({width:1024,height:1536,bytes:4096,channels:[{stdev:25}]}).state,'valid');
+  assert.throws(()=>classifyLegacyImage({width:1024,height:1536,bytes:4096}),/evidence/);
+  const id=n=>`90000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
+  const profile=(n,extra={})=>({id:id(n),mode:'resident',onboarded:true,ready:true,photo_url:`https://example.invalid/${n}`,protected:false,fingerprint:'a'.repeat(64),...extra});
+  const inventory={target:'npbduvjnqnbydolmdpsc',synthetic_count:7,unclassified_accounts:1,profiles:[profile(1,{ready:false}),profile(2),profile(3),profile(4,{protected:true,ready:false}),profile(5,{ready:false}),profile(6,{mode:'lister',ready:false}),profile(7,{id:'de100001-0000-4000-8000-000000000001',ready:false})],apartments:[{id:id(8),owner_id:id(9),source:'user',status:'active',ready:false,photos:[],protected:false,fingerprint:'b'.repeat(64)}]};
+  const plan=planLegacyRetirement(inventory,{preservedIds:[id(5)],images:{'https://example.invalid/2':{state:'invalid'},'https://example.invalid/3':{state:'unknown'}}});
+  assert.deepEqual(plan.actions.map(a=>a.id),[id(1),id(2)]);
+  assert.ok(plan.exclusions.some(a=>a.id===id(3)&&a.reason==='image-unverified'));
+  assert.ok(plan.exclusions.some(a=>a.id===id(8)&&a.reason==='unclassified-owner'));
+  assert.throws(()=>legacyRetirementSql({...plan,actions:[{...plan.actions[0],after:true}]}),/differs/);
+  assert.match(legacyRetirementSql(plan),/statement_timeout='5s'/);
+  assert.doesNotMatch(legacyRetirementSql(plan),/delete from|truncate|drop table/i);
+});
+
+test('isolated retirement changes only visibility, rolls back, rejects drift/relationships and repeats without changes',async()=>{
+  const db=new PGlite();
+  const target='npbduvjnqnbydolmdpsc';
+  const resident='90000000-0000-4000-8000-000000000001';
+  const other='90000000-0000-4000-8000-000000000002';
+  const listing='90000000-0000-4000-8000-000000000003';
+  const chat='90000000-0000-4000-8000-000000000004';
+  const execute=async sql=>{try{await db.exec(sql);}catch(error){await db.exec('rollback');throw error;}};
+  const inventory=async()=> (await db.query(legacyInventorySql(target))).rows[0].inventory;
+  try{
+    await db.exec('create schema auth; create table auth.users(id uuid primary key,email text);');
+    await db.exec(await readFile(new URL('../../supabase/schema.sql',import.meta.url),'utf8'));
+    // Canonical columns used by this visibility guard; no hosted migrations run here.
+    await db.exec("alter table public.profiles drop constraint profiles_mode_check; alter table public.profile_private add column full_name text; create table public.profile_lifestyle(profile_id uuid primary key references public.profiles,facts jsonb);");
+    await db.query("insert into auth.users values($1,'qa-retirement@example.invalid'),($2,'owner@example.invalid')",[resident,other]);
+    for(const id of [resident,other])await db.query("insert into public.profiles(id,name,mode,onboarded,bio,photo_url) values($1,'Synthetic baseline','resident',true,'Retained body','https://example.invalid/photo.png')",[id]);
+    await db.query("insert into public.apartments(id,lister_id,source,title,lat,lng,price,bedrooms,description) values($1,$2,'user','Incomplete synthetic listing',0,0,1000,2,'Keep every field')",[listing,resident]);
+    const before=await inventory();
+    const plan=planLegacyRetirement(before);
+    assert.equal(plan.actions.length,2);
+    assert.equal(before.unclassified_accounts,1);
+    assert.equal(before.profiles.length,1,'personal account does not leave the database');
+    await execute(legacyRetirementSql(plan));
+    assert.equal((await db.query('select onboarded from profiles where id=$1',[resident])).rows[0].onboarded,false);
+    assert.equal((await db.query('select status from apartments where id=$1',[listing])).rows[0].status,'paused');
+    assert.equal(planLegacyRetirement(await inventory()).actions.length,0,'second dry-run is idempotent');
+    await execute(legacyRetirementSql(plan,{rollback:true}));
+    assert.deepEqual(await inventory(),before,'full scoped rows including fingerprints restored');
+    await db.query("update profiles set bio='Changed since snapshot' where id=$1",[resident]);
+    await assert.rejects(execute(legacyRetirementSql(plan)),/drift/);
+    assert.equal((await db.query('select status from apartments where id=$1',[listing])).rows[0].status,'active','no partial listing update');
+    await db.query("update profiles set bio='Retained body' where id=$1",[resident]);
+    await db.query('insert into conversations(id) values($1)',[chat]);
+    for(const id of [resident,other])await db.query('insert into conversation_members(conversation_id,user_id) values($1,$2)',[chat,id]);
+    await assert.rejects(execute(legacyRetirementSql(plan)),/drift/);
+    assert.equal(planLegacyRetirement(await inventory()).actions.length,0,'personal-linked fixture is protected');
+    assert.equal(Number((await db.query('select count(*) n from auth.users')).rows[0].n),2);
+    assert.equal(Number((await db.query('select count(*) n from conversation_members')).rows[0].n),2);
+    await db.query('delete from conversation_members where conversation_id=$1',[chat]);
+    await execute(legacyRetirementSql(plan));
+    assert.equal(planLegacyRetirement(await inventory()).actions.length,0);
+  }finally{await db.close();}
+});
 
 test('setup rejects identity collisions and existing credential failures before creating any actor', async () => {
   const target = 'https://npbduvjnqnbydolmdpsc.supabase.co';

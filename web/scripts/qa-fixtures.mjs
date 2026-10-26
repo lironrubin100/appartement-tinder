@@ -1,7 +1,7 @@
 // Local fixture preparation only. Database SQL must be applied through an authorized connector.
 import { randomUUID } from 'node:crypto';
 import { readFile, writeFile, mkdir, access, unlink } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { spawn, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -12,6 +12,110 @@ const at = name => new URL(name, root);
 const exists = async name => { try { await access(at(name)); return true; } catch { return false; } };
 const command = process.argv[2];
 const quote = value => `'${value.replaceAll("'", "''")}'`;
+
+// Retirement changes only existing visibility fields. Identity/history/media are retained.
+const retirementUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const retainedDemoIds = [1,2,3,4].map(n => `de100001-0000-4000-8000-${String(n).padStart(12,'0')}`);
+const retainedQaIds = ['408a2c76-e4d3-481a-9a69-859ae96d0ff3','eebcda4b-d5c5-4618-82fe-e9fddfe72dcb','1a89df55-b80d-426b-a068-d2527cf07610'];
+const knownSeedIds = [1,2,3,4].map(n => `10000000-0000-4000-8000-${String(n).padStart(12,'0')}`);
+function exactIds(ids) {
+  if (!Array.isArray(ids) || ids.some(id => !retirementUuid.test(id)) || new Set(ids).size !== ids.length) throw Error('Invalid exact retirement IDs.');
+  return ids;
+}
+export function classifyLegacyImage({ width, height, bytes, channels }) {
+  if (![width,height,bytes].every(n => Number.isFinite(n) && n > 0) || !Array.isArray(channels) || !channels.length || channels.some(c => !Number.isFinite(c.stdev))) throw Error('Missing decoded image evidence.');
+  if (width < 64 || height < 64 || bytes < 256) return {state:'invalid',reason:'tiny-placeholder'};
+  if (channels.every(c => c.stdev < 0.5)) return {state:'invalid',reason:'flat-color-placeholder'};
+  return {state:'valid'};
+}
+export function legacyInventorySql(target, preservedIds = [], scope) {
+  if (!/^[a-z]{20}$/.test(target)) throw Error('Invalid retirement target.');
+  const preserved = [...new Set([...retainedDemoIds,...retainedQaIds,...exactIds(preservedIds)])];
+  const list = ids => ids.map(quote).join(',');
+  const profiles = scope ? exactIds(scope.profiles) : [];
+  const apartments = scope ? exactIds(scope.apartments) : [];
+  const scopedList = ids => ids.length ? list(ids) : 'null::uuid';
+  const profileScope = scope ? `where p.id in(${scopedList(profiles)}) or exists(select 1 from public.apartments owned where owned.id in(${scopedList(apartments)}) and owned.lister_id=p.id)` : '';
+  const projectedProfileScope = scope ? `where t.id in(${scopedList(profiles)})` : '';
+  const apartmentScope = scope ? `and a.id in(${scopedList(apartments)})` : '';
+  return `with synthetic as(select id from auth.users where email ~ '^(qa-|demo-).+@example\\.invalid$'),
+preserved as(select id from auth.users where id not in(select id from synthetic) or id in(${list(preserved)})),
+test_profiles as(select p.id,p.mode,p.onboarded,p.photo_url,
+coalesce(nullif(btrim(p.name),'') is not null and nullif(btrim(p.bio),'') is not null and nullif(btrim(pp.full_name),'') is not null and pp.birth_date <= (current_date-interval '18 years')::date and l.facts ?& array['cleanliness','sleep_schedule','guests','smoking'],false) as ready,
+encode(sha256(convert_to((to_jsonb(p)-'onboarded'-'updated_at')::text,'UTF8')),'hex') as fingerprint,
+(p.id in(select id from preserved)
+or exists(select 1 from public.group_members a join public.group_members b using(group_id) where a.user_id=p.id and b.user_id in(select id from preserved))
+or exists(select 1 from public.conversation_members a join public.conversation_members b using(conversation_id) where a.user_id=p.id and b.user_id in(select id from preserved))
+or exists(select 1 from public.likes k where (k.from_user=p.id and k.to_user in(select id from preserved)) or (k.to_user=p.id and k.from_user in(select id from preserved)))
+or exists(select 1 from public.listing_inquiries i join public.apartments a on a.id=i.apartment_id where (a.lister_id=p.id and i.requester_id in(select id from preserved)) or(i.requester_id=p.id and a.lister_id in(select id from preserved)))) as protected
+from public.profiles p join synthetic s on s.id=p.id left join public.profile_private pp on pp.profile_id=p.id left join public.profile_lifestyle l on l.profile_id=p.id ${profileScope})
+select jsonb_build_object('target',${quote(target)},'synthetic_count',(select count(*) from synthetic),'unclassified_accounts',(select count(*) from auth.users where id not in(select id from synthetic)),
+'profiles',(select coalesce(jsonb_agg(to_jsonb(t) order by id),'[]'::jsonb) from test_profiles t ${projectedProfileScope}),
+'apartments',(select coalesce(jsonb_agg(jsonb_build_object('id',a.id,'owner_id',a.lister_id,'source',a.source,'status',a.status,'photos',a.photos,
+'ready',(nullif(btrim(a.title),'') is not null and nullif(btrim(a.description),'') is not null and a.bedrooms>0 and exists(select 1 from public.apartment_rooms r where r.apartment_id=a.id and r.monthly_price>0 and r.is_available)),
+'fingerprint',encode(sha256(convert_to((to_jsonb(a)-'status'-'updated_at'-'revision')::text,'UTF8')),'hex'),
+'protected',(a.id in(${list(preserved)}) or coalesce((select protected from test_profiles where id=a.lister_id),false) or exists(select 1 from public.listing_inquiries i where i.apartment_id=a.id and i.requester_id in(select id from preserved)) or exists(select 1 from public.saves s where s.apartment_id=a.id and s.user_id in(select id from preserved)))) order by a.id),'[]'::jsonb)
+from public.apartments a where (a.lister_id in(select id from synthetic) or(a.source='seed' and a.lister_id is null and a.id in(${list(knownSeedIds)}))) ${apartmentScope})) as inventory`;
+}
+
+export function planLegacyRetirement(inventory, { preservedIds = [], images = {} } = {}) {
+  if (!inventory || !/^[a-z]{20}$/.test(inventory.target) || !Array.isArray(inventory.profiles) || !Array.isArray(inventory.apartments)) throw Error('Invalid retirement inventory.');
+  const preserved = new Set([...retainedDemoIds,...retainedQaIds,...exactIds(preservedIds)]);
+  const profiles = new Set(inventory.profiles.map(p => p.id));
+  const actions = [], exclusions = [];
+  for (const [kind, rows] of [['profile',inventory.profiles],['apartment',inventory.apartments]]) for (const row of rows) {
+    exactIds([row.id]);
+    if (!/^[0-9a-f]{64}$/.test(row.fingerprint) || typeof row.protected !== 'boolean') throw Error('Incomplete snapshot/protection evidence.');
+    let reason;
+    if (row.protected || preserved.has(row.id) || preserved.has(row.owner_id)) reason = 'preserved-or-linked';
+    else if (kind === 'profile' && (!row.onboarded || row.mode !== 'resident')) reason = 'already-hidden-or-nonresident';
+    else if (kind === 'apartment' && row.status !== 'active') reason = 'already-hidden';
+    else if (kind === 'apartment' && !(profiles.has(row.owner_id) || (row.source === 'seed' && row.owner_id === null && knownSeedIds.includes(row.id)))) reason = 'unclassified-owner';
+    if (reason) { exclusions.push({kind,id:row.id,reason}); continue; }
+    const urls = kind === 'profile' ? (row.photo_url ? [row.photo_url] : []) : (row.photos ?? []);
+    if (!Array.isArray(urls) || urls.some(url => typeof url !== 'string')) throw Error('Malformed image inventory.');
+    const required = kind === 'profile' ? 1 : 3;
+    const valid = urls.filter(url => images[url]?.state === 'valid').length;
+    const unknown = urls.filter(url => !['valid','invalid'].includes(images[url]?.state)).length;
+    // Transport uncertainty cannot turn a complete fixture into a retirement candidate.
+    const partial = row.ready === false || urls.length < required || valid + unknown < required;
+    if (!partial) { exclusions.push({kind,id:row.id,reason:valid >= required ? 'complete' : 'image-unverified'}); continue; }
+    actions.push({kind,id:row.id,before:kind === 'profile' ? row.onboarded : row.status,after:kind === 'profile' ? false : 'paused',fingerprint:row.fingerprint,reason:row.ready === false ? 'incomplete-baseline' : 'invalid-or-missing-images'});
+  }
+  return {version:1,target:inventory.target,preservedIds:[...preserved].sort(),snapshot:structuredClone(inventory),images:structuredClone(images),actions,exclusions};
+}
+
+export function legacyRetirementSql(plan, { rollback = false } = {}) {
+  const checked = planLegacyRetirement(plan.snapshot,{preservedIds:plan.preservedIds,images:plan.images});
+  if (JSON.stringify(checked.actions) !== JSON.stringify(plan.actions)) throw Error('Retirement plan differs from its classified snapshot.');
+  const expected = structuredClone(plan.snapshot);
+  // Unknown/unmarked identities are protected server-side. Limit explicit IDs to
+  // this inventory; newly provisioned actors change the guarded Auth counts.
+  const knownIds = new Set([...expected.profiles,...expected.apartments].map(row=>row.id));
+  const livePreserved = plan.preservedIds.filter(id=>knownIds.has(id));
+  const scope = {profiles:plan.actions.filter(a=>a.kind==='profile').map(a=>a.id),apartments:plan.actions.filter(a=>a.kind==='apartment').map(a=>a.id)};
+  expected.profiles = expected.profiles.filter(row => scope.profiles.includes(row.id));
+  expected.apartments = expected.apartments.filter(row => scope.apartments.includes(row.id));
+  if (rollback) for (const action of plan.actions) {
+    const row = expected[action.kind === 'profile' ? 'profiles' : 'apartments'].find(row => row.id === action.id);
+    row[action.kind === 'profile' ? 'onboarded' : 'status'] = action.after;
+  }
+  const changes = plan.actions.map(action => {
+    const profile = action.kind === 'profile';
+    const value = rollback ? action.before : action.after;
+    return `update public.${profile ? 'profiles' : 'apartments'} set ${profile ? 'onboarded' : 'status'}=${typeof value === 'boolean' ? value : quote(value)} where id=${quote(action.id)};`;
+  }).join('\n');
+  return `begin;
+set local lock_timeout='3s';
+set local statement_timeout='5s';
+lock table auth.users, public.profiles, public.profile_private, public.profile_lifestyle, public.apartments, public.apartment_rooms, public.group_members, public.conversation_members, public.likes, public.listing_inquiries, public.saves in share row exclusive mode;
+do $retirement$ declare current_inventory jsonb; begin
+select inventory into current_inventory from (${legacyInventorySql(plan.target,livePreserved,scope)}) scoped;
+if current_inventory is distinct from ${quote(JSON.stringify(expected))}::jsonb then raise exception 'Retirement snapshot/ownership drift; nothing changed'; end if;
+${changes}
+end $retirement$;
+commit;`;
+}
 const fixtureCount = Number(process.env.QA_FIXTURE_COUNT ?? '9');
 const fixturePrefix = process.env.QA_FIXTURE_PREFIX ?? 'qa-resident';
 const fixtureManifest = process.env.QA_FIXTURE_MANIFEST ?? '.env.qa.local';
@@ -98,7 +202,19 @@ async function settings() {
 }
 
 async function main() {
-if (command === 'prepare') {
+if (command === 'legacy-plan') {
+  // Read-only offline dry-run. The connector, not this CLI, owns any hosted apply.
+  const directory = '.qa/legacy-retirement';
+  for (const name of ['inventory.json','images.json','preserve.json']) execFileSync('git',['check-ignore','--quiet',`${directory}/${name}`],{cwd:fileURLToPath(root)});
+  const inventory = JSON.parse(await readFile(at(`${directory}/inventory.json`),'utf8'));
+  const images = JSON.parse(await readFile(at(`${directory}/images.json`),'utf8'));
+  const preserved = JSON.parse(await readFile(at(`${directory}/preserve.json`),'utf8'));
+  const plan = planLegacyRetirement(inventory,{preservedIds:preserved.ids,images});
+  await writeFile(at(`${directory}/manifest.json`),JSON.stringify(plan,null,2),{mode:0o600});
+  await writeFile(at(`${directory}/apply.sql`),legacyRetirementSql(plan),{mode:0o600});
+  await writeFile(at(`${directory}/rollback.sql`),legacyRetirementSql(plan,{rollback:true}),{mode:0o600});
+  console.log(JSON.stringify({dry_run:true,profiles:plan.actions.filter(a=>a.kind==='profile').length,apartments:plan.actions.filter(a=>a.kind==='apartment').length,excluded:plan.exclusions.length,remote_mutations:0}));
+} else if (command === 'prepare') {
   if (await exists(fixtureManifest)) throw new Error('An existing QA run needs cleanup; refusing to overwrite credentials.');
   const { url } = await settings();
   const reusable = process.argv.includes('--reusable');
@@ -242,6 +358,7 @@ commit;\n`;
   for (const name of [fixtureManifest, artifact('provision.sql'), artifact('prepare-cleanup.sql'), artifact('cleanup.sql'), artifact('verify.sql'), artifact('run.json')])
     if (await exists(name)) await unlink(at(name));
   console.log('Removed temporary credentials and this run\'s SQL files.');
-} else throw new Error('Usage: qa-fixtures.mjs prepare [--reusable --actors=owner,requester,outsider]|ensure|run -- node <test>|check|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
+} else throw new Error('Usage: qa-fixtures.mjs prepare [--reusable --actors=owner,requester,outsider]|ensure|run -- node <test>|check|legacy-plan|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
 }
-main().catch(error => { console.error(error.message); process.exitCode = 1; });
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url)
+  main().catch(error => { console.error(error.message); process.exitCode = 1; });
