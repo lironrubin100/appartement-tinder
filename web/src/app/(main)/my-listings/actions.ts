@@ -23,3 +23,42 @@ export async function markListingRented(id: string): Promise<{ error: string | n
 export async function loadOwnedListingForEdit(id: string, expectedAccountId?: string): Promise<ListingEditorResult> {
   return getOwnedListingEditModel(id, expectedAccountId);
 }
+
+type RoomAvailabilityResult = { error: 'INVALID_ROOM' | 'AUTH_REQUIRED' | 'FAILED' | null };
+type RoomAvailabilityRpc = {
+  rpc(name: 'set_owned_room_availability', args: { p_room_id: string; p_is_available: boolean }): PromiseLike<{ data: unknown; error: unknown }>;
+};
+
+function validRoomAvailabilityResponse(value: unknown, roomId: string, available: boolean): value is { listingId: string } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const summary = value as Record<string, unknown>;
+  const count = summary.availableRoomCount;
+  const integer = (v: unknown) => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0;
+  return typeof summary.listingId === 'string' && validListingId(summary.listingId)
+    && summary.roomId === roomId && summary.isAvailable === available
+    && integer(count) && integer(summary.revision) && integer(summary.pendingReconfirmationCount)
+    && (count === 0
+      ? summary.minRoomPrice === null && summary.maxRoomPrice === null
+      : integer(summary.minRoomPrice) && integer(summary.maxRoomPrice)
+        && (summary.minRoomPrice as number) > 0
+        && (summary.maxRoomPrice as number) >= (summary.minRoomPrice as number));
+}
+
+export async function setOwnedRoomAvailability(roomId: string, available: boolean): Promise<RoomAvailabilityResult> {
+  if (typeof roomId !== 'string' || !validListingId(roomId) || typeof available !== 'boolean') return { error: 'INVALID_ROOM' };
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'AUTH_REQUIRED' };
+  const id = roomId.toLowerCase();
+  // Narrow deployed RPC contract: the generated database type predates task4.4.
+  const { data, error } = await (supabase as unknown as RoomAvailabilityRpc).rpc('set_owned_room_availability', {
+    p_room_id: id, p_is_available: available,
+  });
+  if (error || !validRoomAvailabilityResponse(data, id, available)) return { error: 'FAILED' };
+  for (const prefix of ['', '/en']) {
+    revalidatePath(`${prefix}/my-listings`);
+    revalidatePath(`${prefix}/map`);
+    revalidatePath(`${prefix}/listings/${data.listingId}`);
+  }
+  return { error: null };
+}

@@ -8,6 +8,7 @@ import { RentedButton } from './RentedButton';
 import { localePrefix, type Locale } from '@/lib/listings/text';
 import { InquiryActionButtons } from '@/components/listings/InquiryActionButtons';
 import { OwnerListingCard } from '@/components/listings/OwnerListingCard';
+import { RoomAvailabilityControls } from '@/components/listings/RoomAvailabilityControls';
 
 export async function renderMyListings(locale: Locale, searchParams: Promise<DraftSearchParams> = Promise.resolve({})) {
   const t = (he: string, en: string) => (locale === 'en' ? en : he);
@@ -30,10 +31,12 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
   const { data: listings, error } = await supabase
     .from('apartments')
     .select(
-      'id, title, public_location_label, photos, status, created_at, apartment_rooms(monthly_price,is_available)'
+      'id, title, public_location_label, photos, status, created_at, apartment_rooms(id,label,monthly_price,is_available)'
     )
     .eq('lister_id', user.id)
     .eq('source', 'user')
+    .order('created_at', { referencedTable: 'apartment_rooms', ascending: true })
+    .order('id', { referencedTable: 'apartment_rooms', ascending: true })
     .order('created_at', { ascending: false });
   if (error) throw new Error('Could not load your listings');
   const listingIds = (listings ?? []).map((listing) => listing.id);
@@ -100,6 +103,7 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
                 {listing.status === 'active' && (
                   <RentedButton id={listing.id} locale={locale} />
                 )}
+                <RoomAvailabilityControls listingId={listing.id} rooms={listing.apartment_rooms ?? []} locale={locale} />
                 {(inquiriesByApartment[listing.id] ?? []).length > 0 && (
                   <div className="mt-3 rounded-shutaf-md bg-orange-soft p-3">
                     <p className="text-sm font-semibold text-ink">
