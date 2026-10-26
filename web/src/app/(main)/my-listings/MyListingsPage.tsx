@@ -9,6 +9,15 @@ import { localePrefix, type Locale } from '@/lib/listings/text';
 import { InquiryActionButtons } from '@/components/listings/InquiryActionButtons';
 import { OwnerListingCard } from '@/components/listings/OwnerListingCard';
 import { RoomAvailabilityControls } from '@/components/listings/RoomAvailabilityControls';
+import { ListingIntakeControl } from '@/components/listings/ListingIntakeControl';
+
+// Scoped deployed read contract until database types include the availability migrations.
+type OwnedListing = {
+  id: string; title: string; public_location_label: string | null; photos: string[] | null;
+  status: string; created_at: string; inquiries_open: boolean;
+  apartment_rooms: { id: string; label: string | null; monthly_price: number; is_available: boolean }[];
+};
+type PendingInquiry = { id: string; apartment_id: string; reconfirmation_required_at: string | null };
 
 export async function renderMyListings(locale: Locale, searchParams: Promise<DraftSearchParams> = Promise.resolve({})) {
   const t = (he: string, en: string) => (locale === 'en' ? en : he);
@@ -31,27 +40,29 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
   const { data: listings, error } = await supabase
     .from('apartments')
     .select(
-      'id, title, public_location_label, photos, status, created_at, apartment_rooms(id,label,monthly_price,is_available)'
+      'id, title, public_location_label, photos, status, created_at, inquiries_open, apartment_rooms(id,label,monthly_price,is_available)'
     )
     .eq('lister_id', user.id)
     .eq('source', 'user')
     .order('created_at', { referencedTable: 'apartment_rooms', ascending: true })
     .order('id', { referencedTable: 'apartment_rooms', ascending: true })
-    .order('created_at', { ascending: false });
-  if (error) throw new Error('Could not load your listings');
+    .order('created_at', { ascending: false })
+    .overrideTypes<OwnedListing[], { merge: false }>();
+  if (error || listings?.some(listing => typeof listing.inquiries_open !== 'boolean')) throw new Error('Could not load your listings');
   const listingIds = (listings ?? []).map((listing) => listing.id);
   const { data: pendingInquiries, error: inquiryError } = listingIds.length
     ? await supabase
         .from('listing_inquiries')
-        .select('id, apartment_id')
+        .select('id, apartment_id, reconfirmation_required_at')
         .in('apartment_id', listingIds)
         .eq('status', 'pending')
+        .overrideTypes<PendingInquiry[], { merge: false }>()
     : { data: [], error: null };
-  if (inquiryError) throw new Error('Could not load listing inquiries');
+  if (inquiryError || pendingInquiries?.some(inquiry => inquiry.reconfirmation_required_at !== null && typeof inquiry.reconfirmation_required_at !== 'string')) throw new Error('Could not load listing inquiries');
   const inquiriesByApartment = (pendingInquiries ?? []).reduce<
-    Record<string, string[]>
+    Record<string, PendingInquiry[]>
   >((result, inquiry) => {
-    (result[inquiry.apartment_id] ??= []).push(inquiry.id);
+    (result[inquiry.apartment_id] ??= []).push(inquiry);
     return result;
   }, {});
 
@@ -104,15 +115,27 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
                   <RentedButton id={listing.id} locale={locale} />
                 )}
                 <RoomAvailabilityControls listingId={listing.id} rooms={listing.apartment_rooms ?? []} locale={locale} />
+                <ListingIntakeControl listingId={listing.id} open={listing.inquiries_open}
+                  listingAvailable={listing.status === 'active' && listing.apartment_rooms.some(room => room.is_available)} locale={locale} />
                 {(inquiriesByApartment[listing.id] ?? []).length > 0 && (
                   <div className="mt-3 rounded-shutaf-md bg-orange-soft p-3">
                     <p className="text-sm font-semibold text-ink">
                       {inquiriesByApartment[listing.id].length}{' '}
                       {t('פניות ממתינות', 'pending inquiries')}
                     </p>
-                    {inquiriesByApartment[listing.id].map((inquiryId) => (
-                      <InquiryActionButtons key={inquiryId} inquiryId={inquiryId} locale={locale} />
-                    ))}
+                    {inquiriesByApartment[listing.id].map((inquiry) =>
+                      listing.status === 'active' && listing.inquiries_open
+                      && listing.apartment_rooms.some(room => room.is_available)
+                      && inquiry.reconfirmation_required_at === null
+                        ? <InquiryActionButtons key={inquiry.id} inquiryId={inquiry.id} locale={locale} />
+                        : <p key={inquiry.id} className="mt-3 text-sm text-muted-text">
+                          {listing.status !== 'active' || !listing.apartment_rooms.some(room => room.is_available)
+                            ? t('המודעה אינה זמינה כעת. הפנייה הממתינה נשמרה.', 'The listing is currently unavailable. The pending inquiry is preserved.')
+                            : !listing.inquiries_open
+                              ? t('קבלת הפניות מושהית. הפנייה נשמרה ואינה זמינה לאישור כעת.', 'Inquiry intake is paused. The inquiry is preserved and cannot be accepted yet.')
+                              : t('ממתינים לאישור מחדש של הפונה לפני שאפשר יהיה לאשר את הפנייה.', 'Waiting for the requester to reconfirm before this inquiry can be accepted.')}
+                        </p>
+                    )}
                   </div>
                 )}
               </OwnerListingCard>

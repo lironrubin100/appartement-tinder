@@ -62,3 +62,35 @@ export async function setOwnedRoomAvailability(roomId: string, available: boolea
   }
   return { error: null };
 }
+
+type ListingIntakeResult = { error: 'INVALID_LISTING' | 'AUTH_REQUIRED' | 'FAILED' | null };
+type ListingIntakeRpc = {
+  rpc(name: 'set_owned_listing_intake', args: { p_listing_id: string; p_is_open: boolean }): PromiseLike<{ data: unknown; error: unknown }>;
+};
+
+function validListingIntakeResponse(value: unknown, listingId: string, open: boolean): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const summary = value as Record<string, unknown>;
+  const integer = (v: unknown) => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0;
+  return summary.listingId === listingId && summary.intakeOpen === open
+    && integer(summary.revision) && integer(summary.pendingReconfirmationCount);
+}
+
+export async function setOwnedListingIntake(listingId: string, open: boolean): Promise<ListingIntakeResult> {
+  if (typeof listingId !== 'string' || !validListingId(listingId) || typeof open !== 'boolean') return { error: 'INVALID_LISTING' };
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'AUTH_REQUIRED' };
+  const id = listingId.toLowerCase();
+  // Narrow deployed contract: generated types predate task4.17.
+  const { data, error } = await (supabase as unknown as ListingIntakeRpc).rpc('set_owned_listing_intake', {
+    p_listing_id: id, p_is_open: open,
+  });
+  if (error || !validListingIntakeResponse(data, id, open)) return { error: 'FAILED' };
+  for (const prefix of ['', '/en']) {
+    revalidatePath(`${prefix}/my-listings`);
+    revalidatePath(`${prefix}/map`);
+    revalidatePath(`${prefix}/listings/${id}`);
+  }
+  return { error: null };
+}
