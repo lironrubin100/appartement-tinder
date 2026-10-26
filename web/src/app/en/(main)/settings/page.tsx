@@ -1,5 +1,5 @@
-import SettingsPage from '../../../(main)/settings/page';
+import SettingsContent from '../../../(main)/settings/SettingsContent';
 
 export default function EnglishSettingsPage() {
-  return <SettingsPage localeOverride="en" />;
+  return <SettingsContent localeOverride="en" />;
 }

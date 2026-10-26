@@ -48,8 +48,8 @@
   - **קריטריון קבלה:** שתי הרצות אמיתיות מסתיימות על אותו סט actor IDs; כל run data הוסר/שוחזר במדויק, אין שאריות לא צפויות, profiles/passwords נשמרו ו־outsider נדחה. mock/PGlite אינם מוצגים כקבלה זו.
 
 - [ ] **משימה 0.13: תיקון חתימת עמוד ההגדרות החוסמת אימות טיפוסים**
-  - **קבצים לעריכה/יצירה:** `web/src/app/(main)/settings/page.tsx`, `web/src/app/(main)/settings/SettingsContent.tsx`, `web/src/app/en/(main)/settings/page.tsx`.
-  - **הוראות טכניות ברורות:** תקלה SETTINGS-PAGE-TYPE-001 שאומתה במהלך0.9: הפרד תוכן משותף של Settings מרכיב ברירת המחדל של route. עמודי HE/EN יישארו wrappers בעלי חתימת Next תקינה; localeOverride יישאר prop פנימי בלבד. קרא page convention של גרסת Next המותקנת. שמור auth, כותרות, כל הפקדים והעיצוב הקיימים; אין שינוי DB/config או מדיניות.
+  - **קבצים לעריכה/יצירה:** `web/src/app/(main)/settings/page.tsx`, `web/src/app/(main)/settings/SettingsContent.tsx`, `web/src/app/en/(main)/settings/page.tsx`, `web/src/app/(main)/settings/LanguageStatus.tsx`, `web/src/app/(main)/settings/PrivacySummary.tsx`, `web/src/app/(main)/settings/DeleteAccountNotice.tsx`.
+  - **הוראות טכניות ברורות:** תקלה SETTINGS-PAGE-TYPE-001 שאומתה במהלך0.9: הפרד תוכן משותף של Settings מרכיב ברירת המחדל של route. עמודי HE/EN יישארו wrappers בעלי חתימת Next תקינה; localeOverride יישאר prop פנימי בלבד. קרא page convention של גרסת Next המותקנת. בדיקת הפיקסלים מצאה גם שלושה panels בעברית בתוך EN; העבר locale לפי I16/I18 לתצוגת השפה, סיכום הפרטיות והודעת המחיקה, ותקן את קישור עריכת הפרופיל לשפה הנוכחית. שמור auth וכל הפעולות/העיצוב; תצוגת שפה אינה כפתור החלפה חדש, והודעת מחיקה אינה מימוש מחיקה. אין שינוי DB/config או מדיניות.
   - **קריטריון קבלה:** TypeScript, lint ממוקד ו־build עוברים; משתמש QA רגיל פותח Settings ב־HE/EN ובטלפון/מחשב, עם כותרת ופקדים בשפה הנכונה אחרי reload. אין שינוי העדפה או פעולת מחיקה. לאחר התיקון חוזרים לקבלת0.9, בלי לסמן את מסעות המוצר האחרים כמאומתים.
 
 - [x] **משימה 0.11: הכנת המאגר החי עם פרופילים מלאים ותמונות**
