@@ -14,6 +14,7 @@ declare
   accepted_id uuid;
   accepted_chat uuid;
   new_chat uuid;
+  inventory_pending uuid;
   rooms_before jsonb;
   result jsonb;
   denied boolean;
@@ -95,6 +96,20 @@ begin
   perform public.set_owned_listing_intake(listing_id,true);
   if (select jsonb_agg(to_jsonb(r) order by id) from public.apartment_rooms r where apartment_id=listing_id) is distinct from rooms_before then raise exception 'intake altered room contents';end if;
   if (select count(*) from public.conversation_members where conversation_id in(accepted_chat,new_chat))<>4 then raise exception 'accepted memberships changed';end if;
+  execute 'reset role';perform set_config('request.jwt.claim.sub',new_actor::text,true);execute 'set local role authenticated';
+  inventory_pending:=public.create_listing_inquiry(listing_id);
+  execute 'reset role';perform set_config('request.jwt.claim.sub',owner_id::text,true);execute 'set local role authenticated';
+  perform public.set_owned_room_availability(room_one,false);
+  perform public.set_owned_room_availability(room_two,false);
+  execute 'reset role';perform set_config('request.jwt.claim.sub',new_actor::text,true);execute 'set local role authenticated';
+  denied:=false;begin perform public.create_listing_inquiry(listing_id);
+  exception when others then if sqlerrm<>'listing is unavailable for contact' then raise;end if;denied:=true;end;
+  if not denied or not(select reconfirmation_required_at is not null from public.listing_inquiries where id=inventory_pending) then raise exception 'closed inventory reconfirmation was cleared';end if;
+  execute 'reset role';perform set_config('request.jwt.claim.sub',owner_id::text,true);execute 'set local role authenticated';
+  perform public.set_owned_room_availability(room_two,true);
+  denied:=false;begin perform public.accept_listing_inquiry(inventory_pending);
+  exception when others then if sqlerrm<>'inquiry requires reconfirmation' then raise;end if;denied:=true;end;
+  if not denied then raise exception 'inventory reopening enabled stale pending';end if;
   execute 'reset role';
 end;
 $test$;

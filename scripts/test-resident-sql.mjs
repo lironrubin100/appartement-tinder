@@ -44,7 +44,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023202753_open_listing_edit_draft.sql'),
   await read('supabase/migrations/20261024083041_listing_edit_draft_commit.sql'),
   await read('supabase/migrations/20261024140758_room_availability_controls.sql'),
-  await read('supabase/migrations/20261026143946_listing_inquiry_intake.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261026143946_listing_inquiry_intake.sql'),
+  await read('supabase/migrations/20261026174553_listing_inquiry_inventory_recheck.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 

@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Intake correction applied — controlled waiter regression pending
+
+Read-only final review found no remaining issue in the correction. It moves mutable room/block checks after the parent lock, leaving the already-applied intake migration unchanged. Full disposable chain passed with the added closed-inventory/reconfirmation negative case. Fresh target check confirmed50 migrations ending20261026143946 and59 accounts/62 apartments before applying only the reviewed function correction through the migration tool. Actual assigned version20261026174553 is now the canonical filename/runner/card reference; no duplicate or rewritten migration history. Controlled two-session final-room-close/send and reconfirmation coverage remains before4.17 closure.
+
 ## Task4.17 review checkpoint — snapshot race correction required
 
 Owner explicitly authorized subagents using project-orchestrator. Read-only review found INQUIRY-INVENTORY-RACE-001: checking child inventory in the parent lock statement can retain its earlier snapshot after waiting on final-room closure. The applied intake migration must remain immutable; same card adds an append-only correction and controlled blocked-send coverage. Separate read-only cleanup diagnosis found no current DB lock waits/open transactions and no obvious graph-loop defect. Parent recovered the prior failed journal under fresh leases, retained all guards and added local3s lock/15s statement limits; an isolated connector call succeeded. Scoped before/after QA roots match,59 accounts/62 apartments and journal clean. Earlier ordinary intake lifecycle plus stop/send race passed, but4.17 remains unchecked for this review correction. No new actors or broad relationship export.
