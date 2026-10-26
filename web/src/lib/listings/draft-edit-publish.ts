@@ -20,6 +20,7 @@ import {
   validateListingPhotos,
 } from "./edit-publication-model";
 import { photoDigest, stageListingPhoto } from "./publication-media";
+import { cleanupListingPhotos } from "./photo-cleanup";
 import type {
   DraftPublishInput,
   DraftPublishResult,
@@ -139,13 +140,26 @@ async function run(
     )
       return fail("STATE_UNAVAILABLE");
     const args = { p_draft_id: draft.id, p_expected_revision: draft.revision };
+    const finish = async (value: unknown): Promise<DraftPublishResult> => {
+      const result = completion(value, draft);
+      if (result.ok) {
+        // The commit and its durable cleanup candidates already succeeded.
+        // Storage failure must not turn a saved edit into an uncertain publish.
+        try { await cleanupListingPhotos(client, input.expectedAccountId); } catch { /* Retry record remains server-owned. */ }
+        for (const path of [
+          "/my-listings", "/en/my-listings", "/map", "/en/map",
+          `/listings/${draft.sourceListingId}`, `/en/listings/${draft.sourceListingId}`,
+        ]) revalidatePath(path);
+      }
+      return result;
+    };
     const reconcile = async (): Promise<DraftPublishResult> => {
       const r = await client.rpc("commit_listing_draft_edit", {
         ...args,
         p_reconcile_only: true,
       });
       if (!(await actor())) return fail("AUTH_REQUIRED");
-      return r.error ? rpcError(r.error.message) : completion(r.data, draft);
+      return r.error ? rpcError(r.error.message) : finish(r.data);
     };
     if (draft.publicationStartedAt || draft.state === "completed") {
       const previous = await reconcile();
@@ -261,18 +275,7 @@ async function run(
       const recovered = await reconcile();
       return recovered.ok ? recovered : rpcError(committed.error.message);
     }
-    const result = completion(committed.data, draft);
-    if (result.ok)
-      for (const path of [
-        "/my-listings",
-        "/en/my-listings",
-        "/map",
-        "/en/map",
-        `/listings/${draft.sourceListingId}`,
-        `/en/listings/${draft.sourceListingId}`,
-      ])
-        revalidatePath(path);
-    return result;
+    return finish(committed.data);
   } catch {
     return fail("PUBLICATION_UNCERTAIN", true);
   }
