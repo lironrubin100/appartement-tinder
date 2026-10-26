@@ -2,6 +2,16 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20 October 2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 
+## CHAT-MULTILINE-001 — Cannot compose a message with line breaks
+
+- Owner reported26October2026 in this chat: the chat composer cannot insert a new line. Source-confirmed: ChatThread.tsx renders a single-line input, while the existing message renderer already uses whitespace-pre-wrap. No browser fix/acceptance is claimed by this record.
+- Routed once to existing task8.1; preserve its RPC/idempotency/draft/error scope. Provide multiline composition with a deliberate send action and documented keyboard behavior. Verify two-line Hebrew/English messages, phone/desktop typing, newline persistence for sender/recipient after reload, and retry preserving the draft. This is not image messages, message editing or a chat redesign.
+
+## SETTINGS-PAGE-TYPE-001 — Settings route default export violates Next page props
+
+- Reproduced26October2026 during0.9 validation on sourcebbf536c: tsc --noEmit fails in .next/types/app/(main)/settings/page.ts because the route's default SettingsPage accepts an optional localeOverride-only object instead of valid page props. Both the Hebrew route and its English wrapper currently share that default component. The new QA test's own type error was separately corrected; this remaining error is pre-existing application source.
+- Bounded validation follow-up0.13: separate shared Settings content from the route default exports, retain locale/auth behavior and exact rendered controls, then verify TypeScript/lint/build and ordinary HE/EN phone/desktop Settings navigation. No settings policy, schema or preference changes.
+
 ## DEMO-CONTENT-PHOTOS-001 — Demo people and apartments need complete, representative profiles with visible photos
 
 - Reported by owner, 25 October 2026. The owner wants many representative resident profiles and apartment listings with proper photos and completed relevant fields, so browsing and detail screens can be inspected as a realistic product. The current experience feels incomplete or not working correctly; this is a reported symptom, not a reproduced image-loading defect.

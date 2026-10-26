@@ -150,7 +150,7 @@ test('Stage A milestone transition preserves checklist order ahead of Google acc
   delete ledger.owner_priority_override;
   ledger.checklist_continuation={plan:'implementation_plan.md',stage:'A'};
   ledger.packets[ledger.micro_task_dispatch.packet].status='verified';
-  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9','0.10','0.11','0.12'].includes(t.id)});
+  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9','0.10','0.11','0.12','0.13'].includes(t.id)});
   const checklist=parseMicroTasks(text).map(advance), demo=parseDemonstrationTasks(text).map(advance);
   const next=chooseNext(packets,ledger,checklist,demo);
   assert.equal(next.task,'3.1');assert.equal(next.packet,'SL03.1');
@@ -184,7 +184,7 @@ test('explicit ready owner subset selects a real unchecked task without verifyin
 
 test('every real A/B/deferred task has a bounded card without a second backlog', async () => {
   const source=await loadTaskSource();
-  assert.equal(source.tasks.length,246);
+  assert.equal(source.tasks.length,247);
   assert.deepEqual(validateTaskCards(source.tasks,source.manifest,source.ledger),[]);
   for (const task of source.tasks) {
     const card=buildBrief(task,source.manifest,source.ledger,source.decisions);
@@ -224,8 +224,8 @@ test('a blocked login does not block independent assets or waive content depende
 test('owner QA priority prepares complete actors before live reuse and preserves unfinished demo work',async()=>{
   const source=await loadTaskSource();
   const next={action:'owner-priority',packet:null,task:'0.10'};
-  for (const id of ['0.7','0.11','0.8','0.9','0.12','0.10']) source.tasks.find(t=>t.id===id).done=false;
-  for (const id of ['0.7','0.11','0.8','0.9','0.12','0.10']) {
+  for (const id of ['0.7','0.11','0.8','0.13','0.9','0.12','0.10']) source.tasks.find(t=>t.id===id).done=false;
+  for (const id of ['0.7','0.11','0.8','0.13','0.9','0.12','0.10']) {
     const selected=atomicSelection(next,source.tasks,source.ledger);
     assert.equal(selected.task,id);
     assert.notEqual(selected.action,'blocked');

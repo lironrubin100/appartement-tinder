@@ -328,6 +328,7 @@
         "0.7",
         "0.11",
         "0.8",
+        "0.13",
         "0.9",
         "0.12"
       ]
@@ -400,10 +401,15 @@
         ],
         "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
+      "0.13": {
+        "depends_on": [],
+        "handoff": "docs/workstreams/implementation-plan-SL00.md"
+      },
       "0.9": {
         "depends_on": [
           "0.8",
-          "0.11"
+          "0.11",
+          "0.13"
         ],
         "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
