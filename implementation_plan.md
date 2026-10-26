@@ -241,7 +241,7 @@
   - **הוראות טכניות ברורות:** רק שמירת שינויים מפעילה RPC 4.2; autosave שומר draft בלבד. השתמש במתאם התמונות והאימות המשותף; conflict אינו מוחק קלט ודורש רענון/השוואה. סיום טיוטה רק אחרי receipt update מאומת.
   - **קריטריון קבלה:** טיוטת מחיר אינה משנה public; שמירה מפורשת כן; טאב ישן אינו דורס. תמונות/חדרים נשמרים באותה פעולת update.
 
-- [ ] **משימה 4.4: פעולת שרת לשינוי זמינות חדר**
+- [x] **משימה 4.4: פעולת שרת לשינוי זמינות חדר**
   - **קבצים לעריכה/יצירה:** `supabase/migrations/20261024140758_room_availability_controls.sql`, `supabase/tests/plan_room_availability.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** יישם רק owner RPC לשינוי זמינות חדר. inventory נפרד מ־intake, וסגירת כל החדרים מסמנת pending כטעון אישור מחדש לפי D18; accepted נשמר. intake עצמאי ב־4.17. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** חדר אחד נסגר והשני נשאר זמין; count/range נכונים; reopen אינו מאשר pending ישן.
