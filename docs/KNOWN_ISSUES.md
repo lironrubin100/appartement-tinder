@@ -2,6 +2,18 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20 October 2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 
+## LISTING-REOPEN-001 — Owner cannot undo a rented listing
+
+- Owner reported26October2026 in this chat. Source-confirmed: markListingRented only changes active to taken, and MyListingsPage renders RentedButton only for active listings. Opening rooms/intake does not restore listing status. No reverse-action browser acceptance is claimed.
+- D16/D18 and LIFECYCLE_AND_PRIVACY's Reopen transition already separate listing status, inventory, intake and occupancy. Route once to4.20/4.21, before the existing owner-path acceptance; this is an explicit undo-rented operation, not expiry renewal or a new rental-period feature. Preserve identity, room/intake settings, accepted chats/address grants and restrictions; pending requests require explicit requester reconfirmation.
+- Source gap to cover atomically: the legacy taken write currently increments revision but does not mark pending requests for reconfirmation. Merely reversing status would revive stale requests. Server checks and ordinary owner/foreign/guest/direct-write tests precede UI acceptance. Current4.18 scope and immediate next4.7 priority remain unchanged.
+
+## LISTING-OWNER-SEARCH-CUE-001 — Own listing looks like an ordinary search result
+
+- Owner reported26October2026 that appearing in their own search is acceptable, but ownership is unclear. Source-confirmed: discovery/ListingCard has no ownership cue and MapClient renders ordinary cards/contact modal actions for the owner too. Existing4.11 detail-page management and4.12 self-inquiry denial do not certify search presentation.
+- Route once to existing3.2 map/card work: derive ownership from the authenticated session's own-listing query, render localized Your listing/Manage on that result and modal, retain the same listing in search, and keep other listings unchanged. Do not add publisher identity/private fields to the public projection or treat a client badge as authorization.
+- Verify resident/nonresident owners versus another viewer, HE/EN390/desktop, refresh and card/modal/detail consistency. No fix or new queue override is claimed by this Plan intake.
+
 ## CHAT-MULTILINE-001 — Cannot compose a message with line breaks
 
 - Owner reported26October2026 in this chat: the chat composer cannot insert a new line. Source-confirmed: ChatThread.tsx renders a single-line input, while the existing message renderer already uses whitespace-pre-wrap. No browser fix/acceptance is claimed by this record.

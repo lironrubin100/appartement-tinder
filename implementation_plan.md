@@ -257,7 +257,7 @@
   - **הוראות טכניות ברורות:** הפרד intake מזמינות חדרים. עדכן send/accept checks; stop אינו מוחק accepted; pending אינם נעשים ניתנים לאישור מחדש רק בגלל reopen, לפי D18. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** intake אינו משנה חדרים; בעצירה אין פניות חדשות; שיחה מאושרת נשארת; pending הישן דורש reconfirm.
 
-- [ ] **משימה 4.18: פקד קבלת פניות במסך הניהול**
+- [x] **משימה 4.18: פקד קבלת פניות במסך הניהול**
   - **קבצים לעריכה/יצירה:** `web/src/components/listings/ListingIntakeControl.tsx`, `web/src/app/(main)/my-listings/actions.ts`, `web/src/app/(main)/my-listings/MyListingsPage.tsx`.
   - **הוראות טכניות ברורות:** חבר פקד intake בנפרד מחדרים והושכרה; הצג רק תוצאה מאומתת של שרת. שמור rented action הקיים ומצב pending unavailable.
   - **קריטריון קבלה:** עצירה וחידוש נשמרים ב־reload ללא שינוי חדרים/שיחות; כשל אינו מציג הצלחה.
@@ -332,6 +332,16 @@
   - **הוראות טכניות ברורות:** הוסף views למודעות/טיוטות/פניות עם query state פנימי בטוח. מכרטיס דירה בחר את אותו inbox עם listing filter; אין רשימה שנייה.
   - **קריטריון קבלה:** דירה א מסננת רק א; כל הדירות מציג גם ב; אישור פותח שיחת הדירה הנכונה.
 
+- [ ] **משימה 4.20: החזרת מודעה שהושכרה — מעבר שרת מוגן**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261027000000_owner_listing_status.sql`, `supabase/tests/plan_listing_status_transitions.sql`, `scripts/test-resident-sql.mjs`.
+  - **הוראות טכניות ברורות:** תקן LISTING-REOPEN-001 לפי D16/D18 וחוזה Reopen: מעבר מפורש taken לפעילות לבעל המודעה בלבד, עם נעילת הורה ובדיקת מגבלות. שמור זהות, חדרים/intake, שיחות והרשאות כתובת; אל תחדש תפוגה או תעקוף הגבלת בודק. מעבר ל־taken מסמן pending לאישור מחדש אטומית, כולל מסלול הכתיבה הישן; פתיחה לא מנקה את הסימון. עדכן revision פעם אחת על שינוי והגן גם על direct write. שמור תאימות למסך שפורסם עד4.21; שם המיגרציה הסופי חייב להיות append-only אחרי live history הטרי.
+  - **קריטריון קבלה:** שרשרת SQL ולקוח רגיל owner/foreign/guest מאמתים taken→active, retry ללא שינוי כפול, חדרים/intake/chat/address ללא שינוי, pending לא ניתן לאישור עד reconfirmation, והגבלות/תפוגה אינן נמחקות. אין מחיקה או סימון מגורים אוטומטי.
+
+- [ ] **משימה 4.21: החזרה לפעילות מתוך המודעות שלי**
+  - **קבצים לעריכה/יצירה:** `web/src/app/(main)/my-listings/actions.ts`, `web/src/app/(main)/my-listings/RentedButton.tsx`, `web/src/app/(main)/my-listings/MyListingsPage.tsx`.
+  - **הוראות טכניות ברורות:** חבר את4.20 לפעולת החזרה לפעילות במודעה taken לצד פעולת הסימון כהושכרה. הצג מצב שרת מאומת ו־pending/error/retry בשתי שפות, ללא פתיחת חדר/intake מרומזת. הסבר אם עדיין אין חדר פנוי או קבלת הפניות מושהית; פניות ישנות נשארות unavailable עד אישור הפונה. אל תוסיף חידוש תקופה או הסרת מגבלות.
+  - **קריטריון קבלה:** HE/EN390/desktop: סימון כהושכרה והחזרה לפעילות נשמרים ברענון, אותה מודעה וחדרים/chat/address נשמרים, כשל אינו מציג הצלחה; פונה ישן צריך reconfirmation ובעלים אחר אינו יכול לשנות.
+
 - [ ] **משימה 2.33: בדיקת טיוטות בין מכשירים**
   - **קבצים לעריכה/יצירה:** `web/e2e/listing-drafts.spec.ts`.
   - **הוראות טכניות ברורות:** בדוק שני browser contexts באותו חשבון: שתי טיוטות עם תמונות, המשך/ייבוא, פרסום אחת ושמירת השנייה; חשבון אחר אינו רואה. השתמש ב־TESTING, fixtures מדויקים ויעד מזוהה.
@@ -339,7 +349,7 @@
 
 - [ ] **משימה 4.8: קבלת מסלול עריכה**
   - **קבצים לעריכה/יצירה:** `web/e2e/listing-edit.spec.ts`.
-  - **הוראות טכניות ברורות:** בדוק שני בעלים, שני טאבים, draft edit פרטי עד שמירה מפורשת, חדרים, intake reopen, accepted chat ו־pending reconfirm. HE/EN בטלפון/מחשב.
+  - **הוראות טכניות ברורות:** בדוק שני בעלים, שני טאבים, draft edit פרטי עד שמירה מפורשת, חדרים, intake reopen, taken→active מ־4.20/4.21, accepted chat ו־pending reconfirm. HE/EN בטלפון/מחשב.
   - **קריטריון קבלה:** npx playwright test e2e/listing-edit.spec.ts --workers=1 עובר; שיחת accepted נשארת; draft אינו מפרסם אוטומטית.
 
 - [ ] **משימה 6.29: בדיקת מסלול בעלים ופניות**
@@ -403,9 +413,9 @@
   - **קריטריון קבלה:** לקוח רגיל מוצא דירת fixture פעילה ואינו מקבל שדה כתובת מדויקת; דירה ללא חדר זמין אינה בתוצאה.
 
 - [ ] **משימה 3.2: בחירת pin וכרטיס תואמים**
-  - **קבצים לעריכה/יצירה:** `web/src/app/(main)/map/MapClient.tsx`, `web/src/components/map/LeafletMap.tsx`.
-  - **הוראות טכניות ברורות:** חבר בחירת מזהה דירה אחד בין pin לכרטיס; הצג loading/error/retry כששליפה נכשלת. השתמש במפה הקיימת ללא restyle.
-  - **קריטריון קבלה:** לחיצה על pin פותחת את אותה דירה ברשימה ובפרטים; streets/pins נראים בדפדפן. אין קבלה על סמך HTTP 200 של tile בלבד.
+  - **קבצים לעריכה/יצירה:** `web/src/app/(main)/map/MapClient.tsx`, `web/src/components/map/LeafletMap.tsx`, `web/src/components/discovery/ListingCard.tsx`.
+  - **הוראות טכניות ברורות:** חבר בחירת מזהה דירה אחד בין pin לכרטיס; הצג loading/error/retry כששליפה נכשלת. טפל גם ב־LISTING-OWNER-SEARCH-CUE-001: שליפת מזהי דירות בבעלות session נוכחי בלבד וסימון המודעה שלך/ניהול בכרטיס ובמודל; הדירה נשארת בחיפוש. אל תרחיב public projection בפרטי מפרסם. השתמש במפה הקיימת ללא restyle.
+  - **קריטריון קבלה:** לחיצה על pin פותחת את אותה דירה ברשימה ובפרטים; streets/pins נראים בדפדפן. בעלים resident/lister רואה סימון וקישור ניהול, צופה אחר רואה כרטיס רגיל; HE/EN390/desktop ורענון. אין קבלה על סמך HTTP 200 של tile בלבד ואין שינוי בהרשאות פנייה עצמית.
 
 - [ ] **משימה 3.3: פרטי דירה וחדרים**
   - **קבצים לעריכה/יצירה:** `web/src/components/listings/PublicListing.tsx`, `web/src/lib/listings/public.ts`.

@@ -185,7 +185,7 @@ test('explicit ready owner subset selects a real unchecked task without verifyin
 
 test('every real A/B/deferred task has a bounded card without a second backlog', async () => {
   const source=await loadTaskSource();
-  assert.equal(source.tasks.length,247);
+  assert.equal(source.tasks.length,249);
   assert.deepEqual(validateTaskCards(source.tasks,source.manifest,source.ledger),[]);
   for (const task of source.tasks) {
     const card=buildBrief(task,source.manifest,source.ledger,source.decisions);
