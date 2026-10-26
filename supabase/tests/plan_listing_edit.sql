@@ -21,11 +21,7 @@ declare
  before_parent jsonb; after_parent jsonb; objects_before jsonb; denied boolean; message text;
  path text; forbidden text;
 begin
- insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms,available_from,description,photos)
- values(lid,v_owner,'user','Original home','PRIVATE ATOMIC ADDRESS',31.25,34.79,2100,2,'2026-12-01','Original description',
- array[prefix || lid::text || '/1.jpg',prefix || lid::text || '/2.jpg',prefix || v_owner::text || '/legacy.jpg']);
- insert into public.apartment_rooms(id,apartment_id,label,monthly_price,available_from,is_available)
- values(r1,lid,'Available',2100,'2026-12-01',true),(r2,lid,'Unavailable retained',2600,'2026-12-03',false);
+ -- Stage owned objects before attaching canonical public photo references.
  insert into storage.objects(id,bucket_id,name,owner_id)
  values(gen_random_uuid(),'apartment-photos',lid::text || '/1.jpg',v_owner::text),
  (gen_random_uuid(),'apartment-photos',lid::text || '/2.jpg',v_owner::text),
@@ -34,6 +30,11 @@ begin
  (gen_random_uuid(),'apartment-photos',fault_key::text || '/1.jpg',v_owner::text),
  (gen_random_uuid(),'apartment-photos','42000000-0000-4000-8000-000000000050/1.jpg',v_other::text),
  (gen_random_uuid(),'apartment-photos','42000000-0000-4000-8000-000000000051/1.jpg',v_owner::text);
+ insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms,available_from,description,photos)
+ values(lid,v_owner,'user','Original home','PRIVATE ATOMIC ADDRESS',31.25,34.79,2100,2,'2026-12-01','Original description',
+ array[prefix || lid::text || '/1.jpg',prefix || lid::text || '/2.jpg',prefix || v_owner::text || '/legacy.jpg']);
+ insert into public.apartment_rooms(id,apartment_id,label,monthly_price,available_from,is_available)
+ values(r1,lid,'Available',2100,'2026-12-01',true),(r2,lid,'Unavailable retained',2600,'2026-12-03',false);
  perform set_config('request.jwt.claim.sub',v_owner::text,true);execute 'set local role authenticated';
  model:=public.get_owned_listing_editor(lid)-array['id','ownerId','revision','status','location'];
  select to_jsonb(a) into before_parent from public.apartments a where id=lid;

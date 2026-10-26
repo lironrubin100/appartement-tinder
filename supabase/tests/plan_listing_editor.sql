@@ -12,12 +12,12 @@ declare
   snapshot jsonb;
   denied boolean := false;
 begin
-  insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms,bills_included,available_from,description,photos)
-  values(listing_id,v_owner,'user','Owner editor fixture','PRIVATE EDITOR ADDRESS',31.25,34.79,2100,2,true,'2026-12-01','Full owner model',array[prefix || listing_id::text || '/1.jpg',prefix || legacy_path]),
-        (other_listing,outsider_id,'user','Foreign fixture','FOREIGN PRIVATE ADDRESS',31.26,34.8,2000,1,false,'2026-12-02','Foreign model','{}');
   insert into storage.objects(id,bucket_id,name,owner_id)
   values('41000000-0000-4000-8000-000000000005','apartment-photos',listing_id::text || '/1.jpg',v_owner::text),
         ('41000000-0000-4000-8000-000000000006','apartment-photos',legacy_path,v_owner::text);
+  insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms,bills_included,available_from,description,photos)
+  values(listing_id,v_owner,'user','Owner editor fixture','PRIVATE EDITOR ADDRESS',31.25,34.79,2100,2,true,'2026-12-01','Full owner model',array[prefix || listing_id::text || '/1.jpg',prefix || legacy_path]),
+        (other_listing,outsider_id,'user','Foreign fixture','FOREIGN PRIVATE ADDRESS',31.26,34.8,2000,1,false,'2026-12-02','Foreign model','{}');
   insert into public.apartment_rooms(id,apartment_id,label,monthly_price,available_from,is_available,created_at)
   values(room_b,listing_id,'Unavailable retained',2600,'2026-12-03',false,'2026-10-23T00:00:00Z'),
         (room_a,listing_id,'Available room',2100,'2026-12-02',true,'2026-10-23T00:00:00Z');
@@ -36,7 +36,8 @@ begin
     or public.get_owned_listing_editor('41000000-0000-4000-8000-000000000099') is not null
   then raise exception 'foreign or missing listing leaked a payload'; end if;
   execute 'reset role';
-  -- An associated URL alone cannot prove ownership of somebody else's object.
+  -- Local postgres-only corruption after valid attachment: an associated URL
+  -- alone cannot prove ownership of somebody else's object.
   update storage.objects set owner_id=outsider_id::text where name=legacy_path and bucket_id='apartment-photos';
   execute 'set local role authenticated';
   snapshot := public.get_owned_listing_editor(listing_id);

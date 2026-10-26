@@ -62,10 +62,26 @@ test('one bounded reservation removes independent publication and actor-owned le
   assert.deepEqual(await cleanupListingPhotos(empty.client, actor), { removed: 0, pending: false });
 });
 
+test('nested legacy metadata shares a cleanup batch with publication objects without inferring ownership from names', async () => {
+  const items = [item(1), { objectId: id(2), objectPath: `${actor}/older-listing/gallery/photo..original.jpg` },
+    { objectId: id(3), objectPath: 'legacy-import/home_1998/image.001' },
+    { objectId: id(4), objectPath: `${outsider}/legacy.png` },
+    { objectId: id(5), objectPath: `folder/${'a'.repeat(377)}` }];
+  // The legacy path bound is shared with existing published references.
+  assert.equal(items[4].objectPath.length, 384);
+  const h = harness({ items });
+  assert.deepEqual(await cleanupListingPhotos(h.client, actor), { removed: 5, pending: false });
+  assert.deepEqual(h.calls.filter(c => c.name === 'remove').map(c => c.paths), items.map(i => [i.objectPath]));
+  assert.deepEqual(h.calls.filter(c => c.name === 'finish_listing_photo_cleanup').map(c => c.args.p_object_id), items.map(i => i.objectId));
+});
+
 test('malformed or mixed unsafe reservations stop the whole batch before any Storage operation', async () => {
   const invalidPaths = ['https://example.invalid/photo.jpg', `${actor}/../secret.jpg`, `${actor}/photo.jpg?token=private`,
-    `${actor}/photo.jpg#fragment`, `${actor}/%2e%2e.jpg`, `${actor}/nested/photo.jpg`, `${actor}/back\\slash.jpg`,
-    `${outsider}/legacy.png`, `${id(101)}/9.jpg`, `${actor}/photo.svg`, `${actor}/line\nbreak.jpg`];
+    `${actor}/photo.jpg#fragment`, `${actor}/%2e%2e.jpg`, `${actor}/back\\slash.jpg`,
+    `${actor}/./photo.jpg`, `${actor}/.`, `${actor}/..`, `${actor}//photo.jpg`, `${actor}/trailing/`,
+    `/leading/photo.jpg`, 'photo.jpg', `${actor}/line\nbreak.jpg`, `${actor}/photo.jpg\n`,
+    `${actor}/photo.jpg\r`, `${actor}/photo\t.jpg`, `${actor}/photo\u0000.jpg`, `${actor}/photo\u007f.jpg`,
+    `folder/${'a'.repeat(378)}`];
   const payloads = [null, {}, { projectionVersion: 2, items: [], hasMore: false }, { projectionVersion: 1, items: null, hasMore: false },
     { projectionVersion: 1, items: [] }, { projectionVersion: 1, items: [], hasMore: 'false' },
     { projectionVersion: 1, items: Array.from({ length: 9 }, (_, n) => item(n + 1)), hasMore: false },

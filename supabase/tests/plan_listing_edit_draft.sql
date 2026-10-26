@@ -13,14 +13,15 @@ declare
   prefix constant text:='https://npbduvjnqnbydolmdpsc.supabase.co/storage/v1/object/public/apartment-photos/';
   d public.listing_drafts; again public.listing_drafts; before_public jsonb; before_rooms jsonb; saved jsonb; caught boolean;
 begin
+  -- Stage owned objects before attaching canonical public photo references.
+  insert into storage.objects(id,bucket_id,name,owner_id)
+  select ('41500000-0000-4000-8000-'||lpad((20+i)::text,12,'0'))::uuid,'apartment-photos',listing::text||'/'||i||'.jpg',actor::text from generate_series(1,3) i;
   insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms,bills_included,is_sublet,available_from,description,photos)
   values(listing,actor,'user','Private edit source','PRIVATE SEED ADDRESS',31.25,34.79,2100,2,true,true,'2026-12-01','Source description',array[prefix||listing::text||'/1.jpg',prefix||listing::text||'/2.jpg',prefix||listing::text||'/3.jpg']),
         (broken,actor,'user','Fault injection private edit','PRIVATE FAULT ADDRESS',31.25,34.79,2100,1,false,false,'2026-12-01',null,array[prefix||listing::text||'/1.jpg']);
   insert into public.apartment_rooms(id,apartment_id,label,monthly_price,available_from,is_available,created_at)
   values('41500000-0000-4000-8000-000000000011',listing,'Preserved available',2100,'2026-12-02',true,'2026-10-23T00:00:00Z'),
         ('41500000-0000-4000-8000-000000000012',listing,null,2600,'2026-12-03',false,'2026-10-23T00:00:00Z');
-  insert into storage.objects(id,bucket_id,name,owner_id)
-  select ('41500000-0000-4000-8000-'||lpad((20+i)::text,12,'0'))::uuid,'apartment-photos',listing::text||'/'||i||'.jpg',actor::text from generate_series(1,3) i;
   select to_jsonb(a) into before_public from public.apartments a where id=listing;
   select jsonb_agg(to_jsonb(r) order by id) into before_rooms from public.apartment_rooms r where apartment_id=listing;
   perform set_config('request.jwt.claim.sub',actor::text,true); execute 'set local role authenticated';
@@ -58,7 +59,8 @@ begin
   if not caught then raise exception 'closed request resurrected'; end if;
   again:=public.open_listing_edit_draft(listing,gen_random_uuid());
   if again.id=d.id or again.source_revision<>1 or again.fields->>'title'<>'Private edit source' then raise exception 'new edit did not start from current version'; end if;
-  -- Foreign Storage ownership invalidates initialization and leaves no row.
+  -- Local postgres-only corruption after valid attachment: foreign Storage
+  -- ownership invalidates initialization and leaves no row.
   execute 'reset role';
   update public.listing_drafts set state='completed' where id=again.id;
   update storage.objects set owner_id=foreign_actor::text where name=listing::text||'/1.jpg';

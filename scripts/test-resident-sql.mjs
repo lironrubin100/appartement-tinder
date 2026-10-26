@@ -23,6 +23,7 @@ let foundation = await read('supabase/migrations/20261013000100_chat_inbox_found
 foundation = foundation.slice(0, foundation.indexOf('-- Postgres Changes')) + 'commit;';
 for (const sql of [foundation,
   await read('supabase/migrations/20261014205238_listing_inquiry_conversations.sql'),
+  await read('supabase/migrations/20261014211718_listing_photo_ownership.sql'),
   await read('supabase/migrations/20261013213103_profile_passes_and_like_validation.sql'),
   await read('supabase/migrations/20261015084833_resident_journeys.sql'),
   await read('supabase/migrations/20261015084841_group_conversations.sql'),
@@ -46,7 +47,7 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261024140758_room_availability_controls.sql'),
   await read('supabase/migrations/20261026143946_listing_inquiry_intake.sql'),
   await read('supabase/migrations/20261026174553_listing_inquiry_inventory_recheck.sql'),
-  await read('supabase/migrations/20261027000001_listing_photo_cleanup.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261026224849_listing_photo_cleanup.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -82,6 +83,8 @@ await db.exec(await read('supabase/tests/plan_listing_edit_commit.sql'));
 console.log('PASS: frozen edit snapshot, atomic public update/completion, exact receipt replay, rollback, cancellation and explicit source refresh.');
 await db.exec(await read('supabase/tests/plan_listing_editor.sql'));
 console.log('PASS: one-snapshot owner-only editor model, rooms/media ownership and private location boundary.');
+await db.exec(await read('supabase/tests/plan_listing_photo_cleanup.sql'));
+console.log('PASS: durable owned photo cleanup, live-reference preservation, reservations, retry/absence proof, private authorization and immutable path tombstones.');
 await db.exec(await read('supabase/tests/plan_listing_drafts.sql'));
 console.log('PASS: private draft owner, outsider, anonymous and edit-source isolation.');
 // D2/B2: a completed resident can publish without a phone; a nonresident cannot.
@@ -170,6 +173,9 @@ const cancelledId = '10000000-0000-4000-8000-000000000005';
 const referencedId = '10000000-0000-4000-8000-000000000006';
 await db.exec('reset role');
 await db.exec('begin');
+// Valid setup stages metadata before attaching its canonical public reference.
+await db.query('insert into storage.objects(id,bucket_id,name,owner_id) values($1,$2,$3,$4)',
+  ['30000000-0000-4000-8000-000000000006', 'apartment-photos', `${referencedId}/1.jpg`, ids[0]]);
 await db.query('update public.apartments set photos=$1 where id=$2', [[`${basePhotoUrl}${referencedId}/1.jpg`], listingId]);
 await as(0);
 await rejected('select public.cancel_listing_publication($1)', [referencedId]);

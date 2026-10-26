@@ -13,17 +13,18 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const record = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
-function decodeReservation(value: unknown, actor: string): { items: CleanupItem[]; hasMore: boolean } | null {
+function decodeReservation(value: unknown): { items: CleanupItem[]; hasMore: boolean } | null {
   if (!record(value) || value.projectionVersion !== 1 || typeof value.hasMore !== 'boolean'
     || !Array.isArray(value.items) || value.items.length > 8) return null;
   const ids = new Set<string>(), paths = new Set<string>(), items: CleanupItem[] = [];
   for (const item of value.items) {
     if (!record(item) || typeof item.objectId !== 'string' || !uuid.test(item.objectId)
       || typeof item.objectPath !== 'string') return null;
-    const [prefix, filename, extra] = item.objectPath.split('/');
-    const published = uuid.test(prefix ?? '') && /^[1-8]\.jpg$/.test(filename ?? '');
-    const legacy = prefix === actor && /^[a-z0-9][a-z0-9._-]{0,199}\.(?:jpe?g|png|webp|avif|gif)$/i.test(filename ?? '');
-    if (extra !== undefined || item.objectPath.includes('..') || !(published || legacy)
+    // Match existing published references, including nested legacy objects.
+    // The reservation and Storage policy establish ownership, not the prefix.
+    if (item.objectPath.length > 384 || !/^(?:[a-zA-Z0-9_-]+\/)+[a-zA-Z0-9_.-]+$/.test(item.objectPath)
+      || /[\u0000-\u001f\u007f]/.test(item.objectPath)
+      || item.objectPath.split('/').some(part => part === '.' || part === '..')
       || ids.has(item.objectId.toLowerCase()) || paths.has(item.objectPath)) return null;
     ids.add(item.objectId.toLowerCase()); paths.add(item.objectPath);
     items.push({ objectId: item.objectId, objectPath: item.objectPath });
@@ -57,7 +58,7 @@ export async function cleanupListingPhotos(
     if (!uuid.test(expectedAccountId)) return { removed, pending: true };
     const reserved = await checked(() => rpc('reserve_listing_photo_cleanup', { p_limit: 8 }));
     if (!reserved.actorMatches || !reserved.result || reserved.result.error !== null) return { removed, pending: true };
-    const reservation = decodeReservation(reserved.result.data, expectedAccountId);
+    const reservation = decodeReservation(reserved.result.data);
     if (!reservation) return { removed, pending: true };
     pending = reservation.hasMore;
     for (const item of reservation.items) {

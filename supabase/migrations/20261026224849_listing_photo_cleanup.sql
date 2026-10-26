@@ -62,6 +62,9 @@ language plpgsql security definer set search_path='' as $$
 declare paths text[]:='{}'; previous text[]:='{}'; actor uuid;
  prefix constant text:='https://npbduvjnqnbydolmdpsc.supabase.co/storage/v1/object/public/apartment-photos/';
 begin
+ -- Serialize before choosing paths using metadata/reservations. A pre-lock
+ -- filtered path set could omit a tombstone committed by a concurrent cleanup.
+ if not listing_draft_private.try_photo_cleanup_lock() then raise exception 'INVALID_PHOTOS'; end if;
  if tg_table_name='apartments' then
   actor:=new.lister_id;
   if tg_op='UPDATE' then

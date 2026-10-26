@@ -12,13 +12,13 @@ declare
  digest jsonb:=jsonb_build_array(repeat('a',64),repeat('b',64),repeat('c',64),repeat('d',64));
  original_fields jsonb; caught boolean; old_key uuid;
 begin
+ insert into storage.objects(id,bucket_id,name,owner_id)
+ select gen_random_uuid(),'apartment-photos',listing::text||'/'||i||'.jpg',actor::text from generate_series(1,3)i;
  insert into public.apartments(id,lister_id,source,title,address,lat,lng,price,bedrooms,bills_included,is_sublet,available_from,photos)
  values(listing,actor,'user','Edit commit source','PRIVATE COMMIT ADDRESS',31.25,34.79,2100,2,false,false,'2026-12-01',array[prefix||listing::text||'/1.jpg',prefix||listing::text||'/2.jpg',prefix||listing::text||'/3.jpg']);
  insert into public.apartment_rooms(id,apartment_id,label,monthly_price,available_from,is_available)
  values('41600000-0000-4000-8000-000000000011',listing,'Room one',2100,'2026-12-02',true),
  ('41600000-0000-4000-8000-000000000012',listing,'Room two',2600,'2026-12-03',false);
- insert into storage.objects(id,bucket_id,name,owner_id)
- select gen_random_uuid(),'apartment-photos',listing::text||'/'||i||'.jpg',actor::text from generate_series(1,3)i;
  perform set_config('request.jwt.claim.sub',actor::text,true); execute 'set local role authenticated';
  d:=public.open_listing_edit_draft(listing,gen_random_uuid());
  other:=public.create_listing_draft(gen_random_uuid());
