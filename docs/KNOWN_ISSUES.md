@@ -215,3 +215,8 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 - Reported/reproduced by current production screenshot on 23 October: EN accepted chat has localized address card, header and composer, but its stored acceptance system-message body is Hebrew. No private message body was rewritten. Both authorized actors still get the actual exact-address card; this is a separate translation follow-up, not failed address authorization.
 - Next: localize known system events at the presentation boundary using a stable event contract, preserving ordinary user messages and immutable historical content. Do not bulk rewrite stored chat bodies. Current bounded release does not claim complete older-screen translation.
 - Canonical work: task8.12; depends on8.3 and Stage B eligibility. No implementation/acceptance is claimed by this planning link.
+
+### INQUIRY-INVENTORY-RACE-001 — Waiting send may retain an older room snapshot
+
+- Focused read-only subagent review on26October found the room EXISTS check inside create_listing_inquiry's parent SELECT FOR UPDATE. A sender waiting behind final-room closure can retain the earlier child-table snapshot, insert a pending request or clear reconfirmation after closure. Intake-stop itself uses a parent-row predicate and is covered separately. This is a code-level finding; no controlled two-session reproduction was initially available.
+- Same owning task4.17: preserve the applied migration, append a correction that locks the parent first and rechecks mutable child availability afterward. Add controlled blocked-send coverage and verify the exact leased fixture is cleaned before closure. No new product rule or broader feature is introduced.

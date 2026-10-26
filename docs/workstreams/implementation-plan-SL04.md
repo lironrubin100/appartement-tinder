@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Task4.17 review checkpoint — snapshot race correction required
+
+Owner explicitly authorized subagents using project-orchestrator. Read-only review found INQUIRY-INVENTORY-RACE-001: checking child inventory in the parent lock statement can retain its earlier snapshot after waiting on final-room closure. The applied intake migration must remain immutable; same card adds an append-only correction and controlled blocked-send coverage. Separate read-only cleanup diagnosis found no current DB lock waits/open transactions and no obvious graph-loop defect. Parent recovered the prior failed journal under fresh leases, retained all guards and added local3s lock/15s statement limits; an isolated connector call succeeded. Scoped before/after QA roots match,59 accounts/62 apartments and journal clean. Earlier ordinary intake lifecycle plus stop/send race passed, but4.17 remains unchecked for this review correction. No new actors or broad relationship export.
+
 ## Task4.17 — intake migration applied; ordinary acceptance pending
 
 Implemented independent inquiries_open (default true), owner-only set_owned_listing_intake, send/accept intake guards and consistent parent-before-inquiry locks. Stop increments revision once and flags pending; reopening never clears reconfirmation. Accepted chat reuse/address access, room rows and listing status remain independent. Full disposable SQL chain passed, including foreign/anonymous/direct-write denial, unchanged room snapshots, stopped new sends, stale pending refusal, explicit reconfirmation and inventory not reopening intake.
