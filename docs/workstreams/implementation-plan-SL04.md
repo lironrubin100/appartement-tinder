@@ -1,5 +1,13 @@
 # Implementation plan SL04 — owner management
 
+## Task4.17 — intake migration applied; ordinary acceptance pending
+
+Implemented independent inquiries_open (default true), owner-only set_owned_listing_intake, send/accept intake guards and consistent parent-before-inquiry locks. Stop increments revision once and flags pending; reopening never clears reconfirmation. Accepted chat reuse/address access, room rows and listing status remain independent. Full disposable SQL chain passed, including foreign/anonymous/direct-write denial, unchanged room snapshots, stopped new sends, stale pending refusal, explicit reconfirmation and inventory not reopening intake.
+
+Immediately before shared apply, verified targetnpbduvjnqnbydolmdpsc,49 migrations ending20261024140758,59 Auth/profiles (56 marked test+3 owner-confirmed test accounts),62 apartments, existing pending marker/room RPC, absent intake RPC/column, no table-level UPDATE and retained status-only UPDATE. Current executor owned4.17; no competing migration owner. Under standing reviewed-feature shared-QA authorization and the owner's explicit DB/all-test-data statements, applied through the dedicated migration tool. It assigned version20261026143946; renamed the same SQL and runner/card reference to that actual append-only version, rather than creating duplicate history. Post-check:50 migrations, bool non-null column/RPC present, anon EXECUTE false/authenticated true, direct column UPDATE false/status UPDATE true,59 accounts/62 apartments. No accounts/rooms/chats deleted or new config/media introduced.
+
+4.17 remains unchecked until ordinary-client owner/foreign/guest and lifecycle acceptance with exact fixture cleanup. Lease released before mechanical version/fingerprint reconciliation; checkpoint and reclaim the renamed card before that acceptance. No frontend intake control or full-parent verification is claimed;4.18 follows only after API acceptance.
+
 ## Task4.17 scope correction — append-only migration
 
 The planned20261022000005 intake file does not exist; live history already ends20261024140758. To preserve J11 append-only history and apply intake checks after the room RPC definitions, the same approved card now names20261026133952_listing_inquiry_intake.sql (26October UTC observation). Added its real4.4 dependency for the existing pending-reconfirmation column. No product decision/scope expansion or hosted action; claim the revised card before implementation.

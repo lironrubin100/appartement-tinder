@@ -43,7 +43,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261023200459_versioned_listing_edit.sql'),
   await read('supabase/migrations/20261023202753_open_listing_edit_draft.sql'),
   await read('supabase/migrations/20261024083041_listing_edit_draft_commit.sql'),
-  await read('supabase/migrations/20261024140758_room_availability_controls.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261024140758_room_availability_controls.sql'),
+  await read('supabase/migrations/20261026143946_listing_inquiry_intake.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -67,6 +68,8 @@ await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
 await db.exec(await read('supabase/tests/plan_room_availability.sql'));
 console.log('PASS: owner-only room availability, public count/range, D18 pending reconfirmation and accepted-chat preservation.');
+await db.exec(await read('supabase/tests/plan_listing_inquiry_intake.sql'));
+console.log('PASS: owner-only intake independent from inventory, stopped send/accept, pending reconfirmation and accepted chat/address preservation.');
 await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
 console.log('PASS: reference-only card authority, retry collision, private history and no side effects.');
 await db.exec(await read('supabase/tests/plan_listing_edit.sql'));
