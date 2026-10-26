@@ -231,8 +231,8 @@
     "SL04.2": {
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
-      "worktree": "C:/Users/User/.codex/worktrees/room44/appartement tinder",
-      "outcome": "Tasks through4.16 retained. Existing live migration20261024140758;4.4 ordinary owner/foreign/guest/D18 acceptance complete26October.4.5 localized room controls released in fded402c9c122cd222f287ee3c26723b9d222fcf, productiondpl_24yT6UfZCCUgwLV5VxsXvj1Dbtsz READY. Types/lint/final build and final-source HE/EN390/1280 production close/reopen/reload/other-room preservation pass; local retry/order checks pass. Exact temporary fixtures cleaned after guarded transport recovery, pool journal clean. Next4.17 independent intake backend; full parent/MVP/Realtime acceptance remains open."
+      "worktree": "C:/Users/User/Desktop/appartement tinder",
+      "outcome": "4.4/4.5 room controls accepted and published as fded402.4.17 independent intake backend accepted26October: live append-only migrations20261026143946/20261026174553, full disposable SQL chain, ordinary permissions/lifecycle/stop-send race and two controlled blocked-reconfirmation cases pass. Exact temporary fixtures cleaned under actor leases; pool journal clean,59 Auth/profiles and62 apartments retained. Next4.18 localized My Listings intake control. Full parent/MVP/Realtime acceptance remains open."
     }
   },
   "micro_task_dispatch": {
@@ -392,6 +392,10 @@
       },
       "4.17": {
         "depends_on": ["4.4"],
+        "handoff": "docs/workstreams/implementation-plan-SL04.md"
+      },
+      "4.18": {
+        "depends_on": ["4.17", "4.5"],
         "handoff": "docs/workstreams/implementation-plan-SL04.md"
       },
       "0.7": {
