@@ -2,6 +2,12 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20 October 2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 
+## LISTING-PHOTO-CLEANUP-001 — Removed published photos have no durable safe cleanup path
+
+- Source-confirmed27October2026 during4.7 preparation: the planned helper/test files do not exist; editor.ts only reads/opens drafts, while actual edit commit/reconcile runs in draft-edit-publish.ts. Existing apartment-photo DELETE policy checks ownership but not live references; current edit receipts do not retain removed-photo candidates. No hosted deletion or failing-user-photo reproduction was performed in this review.
+- The existing4.7 card is reconciled to the actual adapter plus an append-only backend reservation/manifest and authoritative reference enforcement. A TypeScript scan followed by Storage.remove is insufficient against concurrent attachment. Preserve other listings, open drafts and frozen unresolved attempts; use exact owner/object identities, verified commit provenance, durable retry and Storage API only. Private-draft deletion remains a separate pipeline. This is a missing implementation/concurrency boundary, not a new product choice or priority override.
+- Task4.7 remains unchecked; execute SQL/helper tests and ordinary owner/foreign/auth-change/race/removal acceptance before closure. Do not delete from read/draft-initialization paths or roll back a successful edit after cleanup failure.
+
 ## LISTING-REOPEN-001 — Owner cannot undo a rented listing
 
 - Owner reported26October2026 in this chat. Source-confirmed: markListingRented only changes active to taken, and MyListingsPage renders RentedButton only for active listings. Opening rooms/intake does not restore listing status. No reverse-action browser acceptance is claimed.
