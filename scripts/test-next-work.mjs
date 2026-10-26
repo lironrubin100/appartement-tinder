@@ -106,7 +106,8 @@ test('integrated production checklist is atomic and agrees with owner dispatch',
   if(ledger.owner_priority_override?.status==='ready') {
     assert.equal(next.action,'owner-priority');
     assert.equal(next.parent_task ?? next.task,ledger.owner_priority_override.task);
-    if (next.parent_task) assert.ok(ledger.atomic_dispatch.children[next.parent_task].includes(next.task));
+    if (next.parent_task && next.parent_task !== next.task) assert.ok(ledger.atomic_dispatch.children[next.parent_task].includes(next.task));
+    else if (next.parent_task) assert.ok(ledger.atomic_dispatch.children[next.parent_task].every(id=>checklist.find(task=>task.id===id)?.done),'parent handoff requires all child outcomes accepted');
     assert.equal(next.packet,null);
     return;
   }

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { setupPoolActors } from './qa-pool.mjs';
-import { classifyLegacyImage, legacyInventorySql, planLegacyRetirement, legacyRetirementSql } from './qa-fixtures.mjs';
+import { classifyLegacyImage, legacyInventorySql, planLegacyRetirement, legacyRetirementSql, syntheticVisibilityInventorySql, planSyntheticVisibility, syntheticVisibilitySql } from './qa-fixtures.mjs';
 import { PGlite } from '@electric-sql/pglite';
 
 test('retirement uses decoded image evidence and preserves unknown, retained and unclassified records',()=>{
@@ -69,6 +69,34 @@ test('isolated retirement changes only visibility, rolls back, rejects drift/rel
     await db.query('delete from conversation_members where conversation_id=$1',[chat]);
     await execute(legacyRetirementSql(plan));
     assert.equal(planLegacyRetirement(await inventory()).actions.length,0);
+  }finally{await db.close();}
+});
+
+test('owner-marked Synthetic retirement preserves the QA pool, restores visibility and rejects marker drift',async()=>{
+  const db=new PGlite(),target='npbduvjnqnbydolmdpsc';
+  const qa='408a2c76-e4d3-481a-9a69-859ae96d0ff3',old='90000000-0000-4000-8000-000000000001',keeper='90000000-0000-4000-8000-000000000002';
+  const apt='90000000-0000-4000-8000-000000000003',seed='90000000-0000-4000-8000-000000000004';
+  const inventory=async()=>(await db.query(syntheticVisibilityInventorySql(target))).rows[0].inventory;
+  const execute=async sql=>{try{await db.exec(sql);}catch(error){await db.exec('rollback');throw error;}};
+  try{
+    await db.exec('create schema auth; create table auth.users(id uuid primary key,email text);');
+    await db.exec(await readFile(new URL('../../supabase/schema.sql',import.meta.url),'utf8'));
+    for(const id of [qa,old,keeper]){
+      await db.query('insert into auth.users values($1,$2)',[id,`qa-${id}@example.invalid`]);
+      await db.query("insert into profiles(id,name,bio,onboarded) values($1,$2,'Keep content',true)",[id,id===keeper?'Retained demo':'Synthetic old fixture']);
+    }
+    await db.query("insert into apartments(id,lister_id,source,title,lat,lng,price,bedrooms) values($1,$2,'user','Synthetic apartment',0,0,1000,2),($3,null,'seed','SYNTHETIC seeded fixture',0,0,1000,2)",[apt,old,seed]);
+    const before=await inventory();const plan=planSyntheticVisibility(before);
+    assert.equal(plan.actions.length,3);assert.ok(!plan.actions.some(a=>a.id===qa));
+    assert.ok(plan.actions.some(a=>a.id===seed),'explicit public marker authorizes ownerless old test seed');
+    assert.throws(()=>syntheticVisibilitySql({...plan,actions:[]}),/differs/);
+    await execute(syntheticVisibilitySql(plan));assert.equal(planSyntheticVisibility(await inventory()).actions.length,0);
+    assert.equal((await db.query('select onboarded from profiles where id=$1',[qa])).rows[0].onboarded,true);
+    await execute(syntheticVisibilitySql(plan,{rollback:true}));assert.deepEqual(await inventory(),before);
+    await db.query("update profiles set name='New normal profile' where id=$1",[old]);
+    await assert.rejects(execute(syntheticVisibilitySql(plan)),/drift/);
+    assert.equal((await db.query('select status from apartments where id=$1',[apt])).rows[0].status,'active');
+    assert.equal(Number((await db.query('select count(*) n from auth.users')).rows[0].n),3);
   }finally{await db.close();}
 });
 

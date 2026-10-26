@@ -117,6 +117,52 @@ end $retirement$;
 commit;`;
 }
 const fixtureCount = Number(process.env.QA_FIXTURE_COUNT ?? '9');
+export function syntheticVisibilityInventorySql(target) {
+  if (!/^[a-z]{20}$/.test(target)) throw Error('Invalid Synthetic retirement target.');
+  // Public marker/visibility and baseline-protection metadata only; no photos/private fields.
+  return `with pool(id) as(values('408a2c76-e4d3-481a-9a69-859ae96d0ff3'::uuid),('eebcda4b-d5c5-4618-82fe-e9fddfe72dcb'::uuid),('1a89df55-b80d-426b-a068-d2527cf07610'::uuid)),
+candidates as(select p.id,p.onboarded,p.mode,(p.id in(select id from pool)
+or exists(select 1 from public.group_members a join public.group_members b using(group_id) where a.user_id=p.id and b.user_id in(select id from pool))
+or exists(select 1 from public.conversation_members a join public.conversation_members b using(conversation_id) where a.user_id=p.id and b.user_id in(select id from pool))
+or exists(select 1 from public.likes k where (k.from_user=p.id and k.to_user in(select id from pool)) or(k.to_user=p.id and k.from_user in(select id from pool)))
+or exists(select 1 from public.listing_inquiries i join public.apartments a on a.id=i.apartment_id where(a.lister_id=p.id and i.requester_id in(select id from pool))or(i.requester_id=p.id and a.lister_id in(select id from pool)))) as protected
+from public.profiles p where lower(coalesce(p.name,'')||' '||coalesce(p.bio,'')) like '%synthetic%')
+select jsonb_build_object('target','${target}','auth_count',(select count(*) from auth.users),'profile_count',(select count(*) from public.profiles),'apartment_count',(select count(*) from public.apartments),
+'profiles',(select coalesce(jsonb_agg(to_jsonb(c) order by id),'[]'::jsonb) from candidates c),
+'apartments',(select coalesce(jsonb_agg(jsonb_build_object('id',a.id,'owner_id',a.lister_id,'status',a.status,'protected',coalesce((a.lister_id in(select id from pool) or coalesce((select protected from candidates c where c.id=a.lister_id),false) or exists(select 1 from public.listing_inquiries i where i.apartment_id=a.id and i.requester_id in(select id from pool)) or exists(select 1 from public.saves s where s.apartment_id=a.id and s.user_id in(select id from pool)) or exists(select 1 from public.groups g join public.group_members gm on gm.group_id=g.id where g.apartment_id=a.id and gm.user_id in(select id from pool))),false)) order by a.id),'[]'::jsonb) from public.apartments a where lower(coalesce(a.title,'')||' '||coalesce(a.description,'')) like '%synthetic%')) as inventory`;
+}
+export function planSyntheticVisibility(inventory) {
+  if (!inventory || !/^[a-z]{20}$/.test(inventory.target) || !['auth_count','profile_count','apartment_count'].every(key=>Number.isInteger(inventory[key])&&inventory[key]>=0) || !Array.isArray(inventory.profiles) || !Array.isArray(inventory.apartments)) throw Error('Invalid Synthetic visibility inventory.');
+  exactIds(inventory.profiles.map(p=>p.id)); exactIds(inventory.apartments.map(a=>a.id));
+  const actions=[],exclusions=[];
+  for (const [kind,rows] of [['profile',inventory.profiles],['apartment',inventory.apartments]]) for (const row of rows) {
+    if (typeof row.protected!=='boolean' || (kind==='profile' && typeof row.onboarded!=='boolean')) throw Error('Missing baseline protection.');
+    if (retainedQaIds.includes(row.id) || retainedQaIds.includes(row.owner_id) || row.protected) { exclusions.push({kind,id:row.id,reason:'qa-baseline-protected'}); continue; }
+    if ((kind==='profile' && !row.onboarded) || (kind==='apartment' && row.status!=='active')) { exclusions.push({kind,id:row.id,reason:'already-hidden'}); continue; }
+    actions.push({kind,id:row.id,before:kind==='profile'?row.onboarded:row.status,after:kind==='profile'?false:'paused',reason:'owner-classified-obsolete-Synthetic'});
+  }
+  return {version:1,target:inventory.target,snapshot:structuredClone(inventory),actions,exclusions};
+}
+export function syntheticVisibilitySql(plan,{rollback=false}={}) {
+  const checked=planSyntheticVisibility(plan.snapshot);
+  if (JSON.stringify(checked.actions)!==JSON.stringify(plan.actions)) throw Error('Synthetic plan differs from snapshot.');
+  const expected=structuredClone(plan.snapshot);
+  if (rollback) for(const action of plan.actions) expected[action.kind==='profile'?'profiles':'apartments'].find(row=>row.id===action.id)[action.kind==='profile'?'onboarded':'status']=action.after;
+  const updates=plan.actions.map(action=>{
+    const value=rollback?action.before:action.after;
+    return `update public.${action.kind==='profile'?'profiles':'apartments'} set ${action.kind==='profile'?'onboarded':'status'}=${typeof value==='boolean'?value:quote(value)} where id=${quote(action.id)};`;
+  }).join('\n');
+  return `begin;
+set local lock_timeout='3s';
+set local statement_timeout='5s';
+lock table auth.users,public.profiles,public.apartments,public.groups,public.group_members,public.conversation_members,public.likes,public.listing_inquiries,public.saves in share row exclusive mode;
+do $synthetic$ declare current_inventory jsonb; begin
+select inventory into current_inventory from (${syntheticVisibilityInventorySql(plan.target)}) checked;
+if current_inventory is distinct from ${quote(JSON.stringify(expected))}::jsonb then raise exception 'Synthetic visibility snapshot/ownership drift; nothing changed'; end if;
+${updates}
+end $synthetic$;
+commit;`;
+}
 const fixturePrefix = process.env.QA_FIXTURE_PREFIX ?? 'qa-resident';
 const fixtureManifest = process.env.QA_FIXTURE_MANIFEST ?? '.env.qa.local';
 const fixtureDirectory = process.env.QA_FIXTURE_DIRECTORY ?? '.qa';
@@ -213,6 +259,14 @@ if (command === 'legacy-plan') {
   await writeFile(at(`${directory}/manifest.json`),JSON.stringify(plan,null,2),{mode:0o600});
   await writeFile(at(`${directory}/apply.sql`),legacyRetirementSql(plan),{mode:0o600});
   await writeFile(at(`${directory}/rollback.sql`),legacyRetirementSql(plan,{rollback:true}),{mode:0o600});
+  console.log(JSON.stringify({dry_run:true,profiles:plan.actions.filter(a=>a.kind==='profile').length,apartments:plan.actions.filter(a=>a.kind==='apartment').length,excluded:plan.exclusions.length,remote_mutations:0}));
+} else if (command === 'synthetic-plan') {
+  const directory = '.qa/legacy-retirement';
+  execFileSync('git',['check-ignore','--quiet',`${directory}/synthetic-inventory.json`],{cwd:fileURLToPath(root)});
+  const plan=planSyntheticVisibility(JSON.parse(await readFile(at(`${directory}/synthetic-inventory.json`),'utf8')));
+  await writeFile(at(`${directory}/synthetic-manifest.json`),JSON.stringify(plan,null,2),{mode:0o600});
+  await writeFile(at(`${directory}/synthetic-apply.sql`),syntheticVisibilitySql(plan),{mode:0o600});
+  await writeFile(at(`${directory}/synthetic-rollback.sql`),syntheticVisibilitySql(plan,{rollback:true}),{mode:0o600});
   console.log(JSON.stringify({dry_run:true,profiles:plan.actions.filter(a=>a.kind==='profile').length,apartments:plan.actions.filter(a=>a.kind==='apartment').length,excluded:plan.exclusions.length,remote_mutations:0}));
 } else if (command === 'prepare') {
   if (await exists(fixtureManifest)) throw new Error('An existing QA run needs cleanup; refusing to overwrite credentials.');
@@ -358,7 +412,7 @@ commit;\n`;
   for (const name of [fixtureManifest, artifact('provision.sql'), artifact('prepare-cleanup.sql'), artifact('cleanup.sql'), artifact('verify.sql'), artifact('run.json')])
     if (await exists(name)) await unlink(at(name));
   console.log('Removed temporary credentials and this run\'s SQL files.');
-} else throw new Error('Usage: qa-fixtures.mjs prepare [--reusable --actors=owner,requester,outsider]|ensure|run -- node <test>|check|legacy-plan|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
+} else throw new Error('Usage: qa-fixtures.mjs prepare [--reusable --actors=owner,requester,outsider]|ensure|run -- node <test>|check|legacy-plan|synthetic-plan|prepare-cleanup --discard-fixtures|storage|forget --verified-clean');
 }
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url)
   main().catch(error => { console.error(error.message); process.exitCode = 1; });
