@@ -232,7 +232,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "Rooms4.4/4.5, intake4.17/4.18, photo cleanup4.7 and personal inquiries6.1/6.2 accepted. Existing owner-accept RPC20261026143946 preserved, live53 migrations ending20261027063143; focused/full SQL proves owner boundaries/exact conversation/idempotency/atomic injected-failure rollback. Ordinary concurrent accepts share one chat, requester-only address/participant messaging and outsider denial pass. Both6.1 recovery and6.2 exact cleanup verified, journal clean, original59/59/62 inventory and all root digests restored. No redundant migration/app change or new actors/media. Next6.22 opening-message UI. Reopen4.20/4.21, own-search cue3.2 and multiline8.1 remain queued; full parent/MVP/Realtime acceptance open."
+      "outcome": "Owner paused27October for a new-chat handoff; dispatch disabled and all task/actor leases released. Rooms4.4/4.5, intake4.17/4.18, cleanup4.7 and inquiries6.1/6.2 accepted.6.22 appbb653625c1e340f44a8ab7ac659a4badad1484d1 / READYdpl_FEeqJyLpnmkfDy5Y4wh6y8cngzPf; all8 local/production HE/EN390/1280 form/Unicode/error/actor-switch/lost-response cases pass.6.22 unchecked for remaining QA cleanup:6 inquiries deleted,2 remain with4 listings/4 rooms;59 Auth/profiles/66 apartments versus original62. Long SQL calls expire; last2 small deletes returned declined with isErrorfalse, not success. Exact paused-handoff.json and receipts preserved; old16-node narrow script is stale after partial cleanup. Resume only on owner request, recover remaining exact rows and baseline, then6.3 and owner inbox queue. Full parent/MVP/launch remain open."
     }
   },
   "micro_task_dispatch": {
@@ -488,12 +488,12 @@
   },
   "workflow_mode": "build",
   "automation_control": {
-    "enabled": true,
+    "enabled": false,
     "cadence_minutes": 10,
     "unit": "one-approved-atomic-task",
     "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner 25 October authorizes continuous approved-queue Build, one new local Terra executor per task, and publication of the eight pending workflow/planning files after explanation. Manager reviews acceptance and immediately dispatches the next task; ten-minute heartbeat is recovery only. Preserve claim/usage/data gates; Stage C remains deferred.",
+    "reason": "Owner27October explicitly paused further attempts and requested a new-chat handoff. Do not dispatch until owner resumes. Existing routine publication/DB/QA authorizations persist; same pool and exact partial cleanup must be recovered before next card. Stage C remains deferred.",
     "automation_id": "shutaf-next-approved-task"
   }
 }
