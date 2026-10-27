@@ -268,8 +268,8 @@
   - **קריטריון קבלה:** שרשרת SQL/בדיקות ההרצה עוברות, ובדיקת לקוח רגיל מוכיחה שתמונה שהוסרה באמת נמחקת דרך Storage API; תמונה משותפת/משויכת/בטיוטה או snapshot פעיל נשמרת. raced attach/reserve אינו משאיר reference שבור; כשל/תגובה אבודה משאירים edit מוצלח ורשומת retry מדויקת, ו־retry לאחר auth change או כבעלים אחר אינו מוחק דבר. fixture/media זמניים מנוקים תחת TESTING; קוד/SQL בלבד אינם קבלה חיה.
 
 - [ ] **משימה 6.1: יצירת פנייה אישית שנשמרת**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021000007_core_individual_inquiry.sql`, `supabase/tests/plan_core_inquiry.sql`, `scripts/test-resident-sql.mjs`.
-  - **הוראות טכניות ברורות:** התאם create_listing_inquiry באופן תואם לחתימה קיימת, עם intro אופציונלי עד 500 Unicode codepoints/default NULL. session requester, listing פעיל/intake פתוח, nonself, pending יחיד בהקשר אישי. אין chat/address לפני accept. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261027062703_core_individual_inquiry.sql`, `supabase/tests/plan_core_inquiry.sql`, `scripts/test-resident-sql.mjs`.
+  - **הוראות טכניות ברורות:** התאם create_listing_inquiry באופן תואם לחתימה קיימת, עם intro אופציונלי עד 500 Unicode codepoints/default NULL. שמור חתימת uuid קיימת כ־wrapper המעביר NULL ל־overload עם שני פרמטרים נדרשים כדי למנוע עמימות ב־PostgREST; legacy retry משמר intro קיים, וטקסט חדש שונה נדחה ללא שינוי reconfirmation. session requester, listing פעיל/intake פתוח, nonself, pending יחיד בהקשר אישי. שמור נעילת parent ובדיקת inventory/block נפרדת לאחריה. אין chat/address לפני accept. המיגרציה נוצרה ב־CLI אחרי history20261026224849 ותותאם לגרסת apply בפועל; אין שינוי היסטוריה קיימת. חבר SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** פנייה עם/בלי הודעה נראית לבעלים אחרי reload; חתימה ישנה עובדת; אין גישה מוקדמת לכתובת.
 
 - [ ] **משימה 6.2: אישור בעלים לפנייה אישית**

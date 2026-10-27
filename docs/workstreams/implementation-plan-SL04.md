@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Task6.1 — compatible expansion prepared — 27October2026
+
+Fresh selected card/usage/ownership inspection found a working one-argument inquiry RPC, no intro column and52 live migrations ending20261026224849,59/59/62 retained counts. Preserve current parent-first and post-lock inventory/block checks. Read-only review confirmed a legacy wrapper passing NULL to a two-required-argument overload avoids omitted-argument ambiguity while retaining old callers and reconfirmation. Changed non-NULL retry text must reject without mutating the original request. Released own claim before mechanical card reconciliation; installed CLI2.122.0 generated20261027062703 after help inspection because the planned22October filename is stale. Only an empty local scaffold exists; no hosted change or acceptance. Claim revised fingerprint, implement expansion/tests, then ordinary three-actor persistence/privacy/retry acceptance.
+
 ## Task4.7 — published and accepted — 27October2026
 
 Sourcecc7f9a1dc0588020867a74117089943b06a72c24 is integrated/pushed on master; exact productiondpl_AToP3zRddb44BgwifPVKv8eA7yRd READY with canonical alias appartement-tinder.vercel.app. Live append-only migration20261026224849 retains durable owner/object candidates and reservations; completed edit/reconcile invokes bounded Storage API cleanup. Shared listings, open drafts and frozen unresolved attempts remain protected; failed cleanup preserves the saved edit and durable retry. Final disposable SQL chain, seven helper tests, focused lint/types and optimized30-route build pass. Read-only review has no remaining P1/P2 findings.
