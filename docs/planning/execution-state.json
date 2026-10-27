@@ -229,10 +229,10 @@
       "status": "pending"
     },
     "SL04.2": {
-      "status": "in-progress",
+      "status": "verification-incomplete",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "Owner resumed27October;6.22 accepted after exact remaining2 inquiries/4 listings/4 rooms guarded cleanup under same3 leases. Independent59/59/62, exact actor baseline and all4 original global root-ID digests match; scenario clean, recovery exit0, actor leases released. Existing8 local/production form cases and appbb65362 / READYdpl_FEeqJyLpnmkfDy5Y4wh6y8cngzPf reused after unchanged source/schema/dependency proof. Next6.3 send/reload/guest-return acceptance, then existing owner inbox queue. Full parent/MVP/launch remain open."
+      "outcome": "6.22 accepted after exact leased cleanup and original59/59/62/four root-digest proof.6.3 production HE390/EN1280 send/reload/real guest-sign-in-return functional cases pass on unchangedbb65362; maintained test types/lint/discovery pass, full run exit1 at cleanup timeout. Three scoped connector writes returned Invalid/expiredrequestState; exact1 listing/1 room/2 pending inquiries remain,59/59/63. Runbe537571 blocked-handoff.json retained; scenario failed, all leases released. Owner reaffirmed SQL authorization; browser fallback requires owner GitHub sign-in. Recover exact closure/baseline and reconcile6.3 before6.23. No application/schema/config change; full parent/MVP/launch open."
     }
   },
   "micro_task_dispatch": {

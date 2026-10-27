@@ -2,6 +2,12 @@
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20 October 2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 
+## QA-SQL-CONNECTOR-001 — Guarded cleanup writes expire while reads work
+
+- Reproduced27–28October2026 on task6.3: full closure, closed-set closure and short exact pending-inquiry SQL each returned Invalid/expiredrequestState; independent reads prove the new run fixtures remain. The earlier6.22 exact cleanup succeeded in this chat and was independently verified. Transport errors and isError=false declines are not commit receipts.
+- Both6.3 production browser journeys passed; whole Playwright run failed waiting for verified cleanup. Preserve the same3 actors/exact journal and block fixture reuse. Current private recovery/remaining IDs and next step are in the owning SL04 checkpoint; no credentials in tracked records.
+- Owner reconfirmed SQL edit authorization throughout the task. Browser fallback reaches the correct project but requires owner GitHub sign-in after the dashboard session expired. This is a tool/session dependency, not established missing DB permission. Recover the reviewed exact closure and prove the original baseline before accepting6.3/continuing the inbox queue.
+
 ## LISTING-PHOTO-CLEANUP-001 — Removed published photos cleanup verified
 
 - Source-confirmed27October2026 during4.7 preparation: the planned helper/test files do not exist; editor.ts only reads/opens drafts, while actual edit commit/reconcile runs in draft-edit-publish.ts. Existing apartment-photo DELETE policy checks ownership but not live references; current edit receipts do not retain removed-photo candidates. No hosted deletion or failing-user-photo reproduction was performed in this review.
