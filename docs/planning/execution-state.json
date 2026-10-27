@@ -229,11 +229,9 @@
       "status": "pending"
     },
     "SL04.2": {
-      "status": "blocked",
+      "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "reason": "Task6.1 ordinary checks pass, but exact four-row QA teardown repeatedly returns connector Invalid/expiredrequestState across three goal turns. Read/no-op transactions work; actual guarded deletion remains unacknowledged. CLI Management API fallback has no access token. Task and actor leases released; no safe independent queued dispatch before fixture recovery.",
-      "revisit_when": "An authorized transactional connection can execute the preserved exact run120463dc cleanup; recheck target/ownership, lease the same actors, verify restored59/59/62 baseline and clean journal, then accept6.1 and continue6.2. Owner DB authorization is already sufficient; do not rerun the scenario or weaken dependency guards.",
       "outcome": "4.4/4.5 rooms,4.17/4.18 intake and4.7 photo cleanup accepted.6.1 backend96bc15d / exact READY productiondpl_GqpPv6Ki89Z8WybdFZ7RCYNJEqHK, live20261027063143; SQL and ordinary intro500/legacy/retry/reconfirmation/privacy checks pass.6.1 unchecked: connector Invalid/expiredrequestState blocks exact four-row fixture teardown, not missing owner permission; CLI fallback lacks access token. Main/recovery terminal and actor leases released; journal preserved,59/59/63 includes one temporary listing. Recover exact run120463dc and prove restored baseline before6.2. No scenario rerun/new actors. Reopen4.20/4.21, own-search cue3.2 and multiline8.1 remain queued; full parent/MVP/Realtime acceptance open."
     }
   },

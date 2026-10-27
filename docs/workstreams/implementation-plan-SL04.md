@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Task6.1 — owner resumed after computer became available — 27October2026
+
+Owner explains the computer was closed and explicitly requests retry. Goal is active again; fresh primary9d8b3b5 is clean, local command completes, exact journal remains failed with0 actor leases, live history still20261027063143 and the same1 listing/2 inquiries/1 room. Restore SL04.2 in-progress only to recover that existing fixture under the same task/actor ownership. No feature acceptance, new scenario or changed cleanup guard is implied. Finish atomic teardown and baseline proof before6.2; prior three-turn blocked audit remains historical below.
+
 ## Task6.1 — ordinary checks pass; fixture teardown transport blocked — 27October2026
 
 Blocked audit: same connector capability failure revalidated in three consecutive goal turns. Third pass confirmed clean primaryd1128a9, same selected6.1 fingerprint, no actor leases and unchanged live20261027063143/four-row fixture. A zero-row DELETE followed by ROLLBACK succeeded, so read/no-op reachability is not sufficient proof. Reclaimed6.1 and leased the same actors; the identical reviewed atomic teardown again returned Invalid/expiredrequestState. Independent read still shows1 listing/2 inquiries/1 room and59/59/63. Recovery reached its checkpoint and ended with its timeout; no successful cleanup acknowledgement. Both actor leases and task claim are now independently released. The unused owned local server was stopped in the prior pass; production was untouched. No scenario rerun/new actors, SDK deletion or new migration. SL04.2 and the full goal are blocked pending an operational transactional cleanup connection;6.1 remains unchecked and the exact journal is preserved. Resume the same guarded cleanup and prove restored baseline before6.2; another zero-change probe or owner permission restatement does not close this gap.
