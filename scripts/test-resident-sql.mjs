@@ -76,6 +76,8 @@ await db.exec(await read('supabase/tests/plan_listing_inquiry_intake.sql'));
 console.log('PASS: owner-only intake independent from inventory, stopped send/accept, pending reconfirmation and accepted chat/address preservation.');
 await db.exec(await read('supabase/tests/plan_core_inquiry.sql'));
 console.log('PASS: optional Unicode opening, legacy/same-text retry, immutable intro/reconfirmation, owner-only read and no preaccept chat/address.');
+await db.exec(await read('supabase/tests/plan_core_inquiry_accept.sql'));
+console.log('PASS: owner-only personal acceptance, exact conversation/members/system message, idempotent retry, atomic fault rollback and requester-only address.');
 await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
 console.log('PASS: reference-only card authority, retry collision, private history and no side effects.');
 await db.exec(await read('supabase/tests/plan_listing_edit.sql'));
