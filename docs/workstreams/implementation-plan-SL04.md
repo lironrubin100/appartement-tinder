@@ -1,6 +1,12 @@
 # Implementation plan SL04 — owner management
 
-## Owner pause / new-chat handoff — 27October2026
+## Task6.22 — resumed cleanup and acceptance complete — 27October2026
+
+Owner resumed Build from f916e63. Fresh shared-target reads confirmed the exact paused remainder,59 Auth/profiles,66 apartments and migration20261027063143. Under the same three actor leases, a new receipt-mapped closure proved four owned no-media listings/four rooms/two pending personal inquiries without conversations, rejected any unknown FK descendant across schemas/composite keys and private draft/edit/media references, and asserted the six previously removed inquiries absent. The single guarded transaction removed exactly2 inquiries/4 listings and their4 rooms. Independent privileged readback restored59/59/62, the exact actor baseline (only retained personal contact conversation), and all four original global root-ID digests. Recovery helper exit0, scenario clean, actor leases released; exact operation-bound SQL/proof/ACK retained privately in the existing run directory. No Auth/profile/media/group/chat removal, migration or application change.
+
+Both recorded product-file SHA256 values and the full app/schema/dependency diff against publishedbb65362 are unchanged. Reused all8 real local/production HE/EN390/1280 cases and existing type/lint/build/publication evidence; no redundant form run/new cohort.6.22 is checked. Next6.3 adds focused maintained send/reload/guest-sign-in-return acceptance; inquiry acceptance still grants neither group attachment nor occupancy. Full parent/MVP/launch remain open.
+
+## Historical owner pause / new-chat handoff — 27October2026
 
 Owner explicitly stopped further attempts and requested a handoff. Goal paused; automation_control.enabled=false, task6.22 claim released, actor leases0, recovery helper terminal and owned local server stopped. Do not resume product/DB attempts until the owner resumes. Primary app sourcebb653625c1e340f44a8ab7ac659a4badad1484d1 is pushed and exact productiondpl_FEeqJyLpnmkfDy5Y4wh6y8cngzPf was READY/canonical.6.1 and6.2 are checked;6.22 stays unchecked although all8 real local/production form cases passed. No new migration for6.2/6.22;53 live migrations end20261027063143.
 

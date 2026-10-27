@@ -232,7 +232,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "Owner paused27October for a new-chat handoff; dispatch disabled and all task/actor leases released. Rooms4.4/4.5, intake4.17/4.18, cleanup4.7 and inquiries6.1/6.2 accepted.6.22 appbb653625c1e340f44a8ab7ac659a4badad1484d1 / READYdpl_FEeqJyLpnmkfDy5Y4wh6y8cngzPf; all8 local/production HE/EN390/1280 form/Unicode/error/actor-switch/lost-response cases pass.6.22 unchecked for remaining QA cleanup:6 inquiries deleted,2 remain with4 listings/4 rooms;59 Auth/profiles/66 apartments versus original62. Long SQL calls expire; last2 small deletes returned declined with isErrorfalse, not success. Exact paused-handoff.json and receipts preserved; old16-node narrow script is stale after partial cleanup. Resume only on owner request, recover remaining exact rows and baseline, then6.3 and owner inbox queue. Full parent/MVP/launch remain open."
+      "outcome": "Owner resumed27October;6.22 accepted after exact remaining2 inquiries/4 listings/4 rooms guarded cleanup under same3 leases. Independent59/59/62, exact actor baseline and all4 original global root-ID digests match; scenario clean, recovery exit0, actor leases released. Existing8 local/production form cases and appbb65362 / READYdpl_FEeqJyLpnmkfDy5Y4wh6y8cngzPf reused after unchanged source/schema/dependency proof. Next6.3 send/reload/guest-return acceptance, then existing owner inbox queue. Full parent/MVP/launch remain open."
     }
   },
   "micro_task_dispatch": {
@@ -393,19 +393,29 @@
         ]
       },
       "4.17": {
-        "depends_on": ["4.4"],
+        "depends_on": [
+          "4.4"
+        ],
         "handoff": "docs/workstreams/implementation-plan-SL04.md"
       },
       "4.18": {
-        "depends_on": ["4.17", "4.5"],
+        "depends_on": [
+          "4.17",
+          "4.5"
+        ],
         "handoff": "docs/workstreams/implementation-plan-SL04.md"
       },
       "4.20": {
-        "depends_on": ["4.17"],
+        "depends_on": [
+          "4.17"
+        ],
         "handoff": "docs/workstreams/implementation-plan-SL04.md"
       },
       "4.21": {
-        "depends_on": ["4.20", "4.18"],
+        "depends_on": [
+          "4.20",
+          "4.18"
+        ],
         "handoff": "docs/workstreams/implementation-plan-SL04.md"
       },
       "0.7": {
@@ -455,11 +465,15 @@
         "handoff": "docs/workstreams/implementation-plan-SL00.md"
       },
       "9.12": {
-        "depends_on": ["9.1"],
+        "depends_on": [
+          "9.1"
+        ],
         "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
       },
       "9.13": {
-        "depends_on": ["9.12"],
+        "depends_on": [
+          "9.12"
+        ],
         "block": {
           "reason": "D12 linking authority remains unresolved; rental inquiry acceptance is not attachment permission.",
           "revisit_when": "Owner-approved linking rule is recorded in D12 and the group contract."
@@ -467,11 +481,17 @@
         "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
       },
       "9.14": {
-        "depends_on": ["9.5", "9.13"],
+        "depends_on": [
+          "9.5",
+          "9.13"
+        ],
         "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
       },
       "9.15": {
-        "depends_on": ["9.14", "6.12"],
+        "depends_on": [
+          "9.14",
+          "6.12"
+        ],
         "handoff": "docs/workstreams/2026-10-25-mvp-focus-audit.md"
       },
       "0.10": {

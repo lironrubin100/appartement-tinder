@@ -1,8 +1,8 @@
 # Git branch and worktree inventory
 
-Generated: 27 Oct 2026, 23:11 (Asia/Jerusalem); 2026-10-27T21:11:21.972Z.
+Generated: 27 Oct 2026, 23:41 (Asia/Jerusalem); 2026-10-27T21:41:46.977Z.
 
-Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at bb65362; this script does not fetch or infer deployment state.
+Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at f916e63; this script does not fetch or infer deployment state.
 
 This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STATUS.md](../PROJECT_STATUS.md) and its handoffs for acceptance evidence. A contained HEAD can still have unmerged local changes. Detached means the checkout has no branch name. A lock is a Git worktree lock, not proof a chat is currently running.
 
@@ -10,7 +10,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Branch | HEAD | Local changes | HEAD in master? | Git lock |
 | --- | --- | --- | --- | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | master | bb653625 | 3 tracked; 0 untracked entries | Yes | No |
+| C:/Users/User/Desktop/appartement tinder | master | c5d77c23 | 3 tracked; 0 untracked entries | Yes | No |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | codex/implementation-plan | a66f12a3 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | codex/standing-agent-authorization | f571b785 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | codex/next-step-reporting | cf39486d | Could not read | Unknown | No |
@@ -41,7 +41,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 | codex/sl01-lister-safe-browsing | f4d1d4a | None | Yes |
 | codex/standing-agent-authorization | f571b78 | origin/codex/standing-agent-authorization | No |
 | codex/streamline-execution | 4eca5c7 | origin/codex/streamline-execution | Yes |
-| master | bb65362 | origin/master | Yes |
+| master | c5d77c2 | origin/master | Yes |
 | onboarding-flow-impl | 71cec18 | None | No |
 | worktree-map-completeness | fe35d6f | None | No |
 
@@ -49,7 +49,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Last commit description |
 | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | Add optional inquiry message with actor-bound retry preservation |
+| C:/Users/User/Desktop/appartement tinder | Resume owner-authorized Build with exact inquiry cleanup first |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | Check this checkout directly |
