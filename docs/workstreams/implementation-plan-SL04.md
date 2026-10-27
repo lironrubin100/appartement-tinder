@@ -1,5 +1,11 @@
 # Implementation plan SL04 — owner management
 
+## Task6.1 — accepted after exact fixture recovery — 27October2026
+
+Owner resumed with the computer available. The connector then returned an actual SQL diagnostic: cleanup-only PL/pgSQL record n conflicted with a DELETE table alias. Transaction failed before deletion; independent read retained all four rows. Renamed only the two cleanup aliases in ignored recovery SQL, preserving all identity/FK/private-source/row-count guards. The same leased atomic transaction succeeded. Independent reads prove exact listing/inquiries/room absent and byte-equal original baseline:59 Auth/profiles/62 apartments, retained QA conversation, unchanged group/inquiry/listing/conversation digests, live20261027063143. Operation-bound acknowledgement completed recovery terminal0, journal clean and actor leases0. No scenario rerun/new accounts/photos, retained data deletion, admin REST workaround or new migration.
+
+6.1 is checked on its existing backend source96bc15d, full SQL chain and previously captured ordinary PostgREST acceptance plus this verified teardown. Optional500-codepoint intro/legacy routing/immutable retries/privacy passed; no introduction UI or whole parent acceptance is inferred. Source/deployment details remain below. Prior blocked status is resolved, full goal remains active. Next6.2 verifies owner acceptance creates one authorized conversation/address grant with requester self-accept denied; preserve existing working RPC rather than adding a redundant migration.
+
 ## Task6.1 — owner resumed after computer became available — 27October2026
 
 Owner explains the computer was closed and explicitly requests retry. Goal is active again; fresh primary9d8b3b5 is clean, local command completes, exact journal remains failed with0 actor leases, live history still20261027063143 and the same1 listing/2 inquiries/1 room. Restore SL04.2 in-progress only to recover that existing fixture under the same task/actor ownership. No feature acceptance, new scenario or changed cleanup guard is implied. Finish atomic teardown and baseline proof before6.2; prior three-turn blocked audit remains historical below.
