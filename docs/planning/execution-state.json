@@ -232,7 +232,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "4.4/4.5 room controls and4.17 backend accepted.4.18 intake controls published as44173dd, exact productiondpl_8sXY8vT6BdWdt7JJWECFEwa4Jh2v READY;4 local and4 production HE/EN390/1280 cases pass pause/resume/reload, unchanged rooms/status/chat/address and pending reconfirmation. Local real network retry/zero-room warning pass. Exact fixtures cleaned27October, journal clean,59 Auth/profiles and62 apartments retained. Next4.7 removed-photo references. Owner reports reopen/search cue routed to4.20/4.21 and3.2, still unimplemented; full parent/MVP/Realtime acceptance remains open."
+      "outcome": "4.4/4.5 rooms and4.17/4.18 intake accepted.4.7 photo cleanup published ascc7f9a1, exact READY productiondpl_AToP3zRddb44BgwifPVKv8eA7yRd and live20261026224849; SQL/helper/build, ordinary removal/shared-open-frozen preservation/retry/lost-ack/auth/controlled-race and loaded-gallery reload checks pass. Both exact fixture journals clean27October,12 temporary objects absent, jobs0 and59 Auth/profiles/62 apartments plus root digests restored. Next6.1 persisted personal inquiries. Reopen4.20/4.21, own-search cue3.2 and multiline8.1 remain queued; full parent/MVP/Realtime acceptance remains open."
     }
   },
   "micro_task_dispatch": {
