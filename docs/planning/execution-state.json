@@ -488,12 +488,12 @@
   },
   "workflow_mode": "build",
   "automation_control": {
-    "enabled": false,
+    "enabled": true,
     "cadence_minutes": 10,
     "unit": "one-approved-atomic-task",
     "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner27October explicitly paused further attempts and requested a new-chat handoff. Do not dispatch until owner resumes. Existing routine publication/DB/QA authorizations persist; same pool and exact partial cleanup must be recovered before next card. Stage C remains deferred.",
+    "reason": "Owner27October resumed Build in the primary checkout, starting with exact partial6.22 cleanup and baseline proof. Reuse the same three QA actors and unchanged-source evidence; existing publication/DB/QA authorization and ownership guards persist. Continue the approved queue; Stage C remains deferred.",
     "automation_id": "shutaf-next-approved-task"
   }
 }
