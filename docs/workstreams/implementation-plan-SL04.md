@@ -1,5 +1,13 @@
 # Implementation plan SL04 — owner management
 
+## Task6.28 — local Next acceptance passed, publication checkpoint — 28October2026
+
+Connected one aggregate OwnerInquiryInbox to the existing My Listings destination with allowlisted Listings/Drafts/Inquiries views. Each listing links to the same inbox with its owned property filter; inline pending-action lists replaced by one link and retained pending count. Foreign/unknown/duplicate filters fail with the same generic owner error. Actor/filter key resets client data; public/private source boundaries unchanged. Draft cursor-only URLs remain Drafts; existing pagination/retry links explicitly preserve view=drafts. Existing Production/Preview sensitive signing-key metadata verified without decryption; no hosted secret/config/schema change. Local test uses only an ephemeral process key.
+
+Final types/focused lint/optimized30-route build pass. Same3-actor run4550350e created2 temporary listings/rooms and4 inquiries. Initial actual local UI acceptance opened the correct conversation; its later test mistook an empty Next route-announcer alert for a product error. Read-only debug proved ordinary draft query and actual draft page/expired-cursor recovery succeed. Original child stopped at its cleanup wait, parent released leases; exact fixture recovered under fresh same3-actor lease. Corrected harness excludes only empty framework alerts and preserves/reuses that first verified acceptance. No app patch or new scenario/actors for this correction.
+
+Four real local Next Chrome HE/EN390/1280 journeys now pass property-A-only/all/B filtering, explicit seen, correct accepted chat/private address, decline without conversation, three-view navigation, expired draft recovery preserving view, foreign/duplicate filter denial, invalid-view fallback and no overflow. HE phone inbox/drafts pixels inspected. Existing fixtures/journal remain live at publication nonce3fb08971; publish exact app source, verify deployment/canonical alias, then run four production cases and exact guarded cleanup/original baseline proof.6.28 remains unchecked until that completion; full milestone/MVP open.
+
 ## Task6.28 technical scope reconciliation — 28October2026
 
 The approved three-view destination needs existing draft pagination/retry links to preserve view=drafts; these links are owned by ListingDraftSection, outside the original page-only card. Added only that file to6.28 scope for query-link compatibility. No policy/priority/new product scope or backend change. Existing cursor-only URLs continue selecting Drafts. Server parses an allowlist of views and a scalar owned-listing filter; no caller owner identity or external return URL. Reclaim revised fingerprint before implementation.

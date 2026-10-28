@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
 import { RentedButton } from './RentedButton';
 import { localePrefix, type Locale } from '@/lib/listings/text';
-import { InquiryActionButtons } from '@/components/listings/InquiryActionButtons';
+import { OwnerInquiryInbox } from '@/components/listings/OwnerInquiryInbox';
 import { OwnerListingCard } from '@/components/listings/OwnerListingCard';
 import { RoomAvailabilityControls } from '@/components/listings/RoomAvailabilityControls';
 import { ListingIntakeControl } from '@/components/listings/ListingIntakeControl';
@@ -17,9 +17,10 @@ type OwnedListing = {
   status: string; created_at: string; inquiries_open: boolean;
   apartment_rooms: { id: string; label: string | null; monthly_price: number; is_available: boolean }[];
 };
-type PendingInquiry = { id: string; apartment_id: string; reconfirmation_required_at: string | null };
+type DashboardSearchParams = DraftSearchParams & { view?: string | string[]; listing?: string | string[] };
+type PendingInquiry = { apartment_id: string };
 
-export async function renderMyListings(locale: Locale, searchParams: Promise<DraftSearchParams> = Promise.resolve({})) {
+export async function renderMyListings(locale: Locale, searchParams: Promise<DashboardSearchParams> = Promise.resolve({})) {
   const t = (he: string, en: string) => (locale === 'en' ? en : he);
   const supabase = await createServerClient({ noStore: true });
   const {
@@ -35,7 +36,9 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
   if (!profile) redirect('/onboarding');
 
   const params = await searchParams;
-  const draftResult = loadDashboardDrafts(params);
+  const view = typeof params.view === 'string' && ['listings', 'drafts', 'inquiries'].includes(params.view)
+    ? params.view : params.draftCursor !== undefined ? 'drafts' : 'listings';
+  const draftResult = view === 'drafts' ? loadDashboardDrafts(params) : null;
 
   const { data: listings, error } = await supabase
     .from('apartments')
@@ -50,21 +53,23 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
     .overrideTypes<OwnedListing[], { merge: false }>();
   if (error || listings?.some(listing => typeof listing.inquiries_open !== 'boolean')) throw new Error('Could not load your listings');
   const listingIds = (listings ?? []).map((listing) => listing.id);
-  const { data: pendingInquiries, error: inquiryError } = listingIds.length
+  const { data: pendingInquiries, error: inquiryError } = view === 'listings' && listingIds.length
     ? await supabase
         .from('listing_inquiries')
-        .select('id, apartment_id, reconfirmation_required_at')
+        .select('apartment_id')
         .in('apartment_id', listingIds)
         .eq('status', 'pending')
         .overrideTypes<PendingInquiry[], { merge: false }>()
     : { data: [], error: null };
-  if (inquiryError || pendingInquiries?.some(inquiry => inquiry.reconfirmation_required_at !== null && typeof inquiry.reconfirmation_required_at !== 'string')) throw new Error('Could not load listing inquiries');
-  const inquiriesByApartment = (pendingInquiries ?? []).reduce<
-    Record<string, PendingInquiry[]>
-  >((result, inquiry) => {
-    (result[inquiry.apartment_id] ??= []).push(inquiry);
-    return result;
+  if (inquiryError) throw new Error('Could not load listing inquiries');
+  const pendingCounts = (pendingInquiries ?? []).reduce<Record<string, number>>((counts, inquiry) => {
+    counts[inquiry.apartment_id] = (counts[inquiry.apartment_id] ?? 0) + 1;
+    return counts;
   }, {});
+  const listingFilter = typeof params.listing === 'string' && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(params.listing)
+    ? params.listing : undefined;
+  const invalidListingFilter = params.listing !== undefined && (!listingFilter || !listingIds.includes(listingFilter));
+  const dashboardPath = `${localePrefix(locale)}/my-listings`;
 
   return (
     <div className="mx-auto min-h-[calc(100vh-80px)] max-w-5xl bg-page-bg p-4 md:p-8">
@@ -74,7 +79,7 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
             {t('המודעות שלי', 'My listings')}
           </h1>
           <p className="mt-1 text-sm text-muted-text">
-            {t('ניהול המודעות והטיוטות שלך', 'Manage your listings and saved drafts')}
+            {t('ניהול המודעות, הטיוטות והפניות שלך', 'Manage your listings, drafts and inquiries')}
           </p>
         </div>
         <Link
@@ -85,7 +90,16 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
         </Link>
       </header>
 
-      <section aria-labelledby="published-listings-heading">
+      <nav aria-label={t('תצוגות ניהול', 'Management views')} className="mb-6 flex flex-wrap gap-3">
+        {([['listings', t('מודעות', 'Listings')], ['drafts', t('טיוטות', 'Drafts')], ['inquiries', t('פניות', 'Inquiries')]] as const).map(([key, label]) => (
+          <Link key={key} href={`${dashboardPath}?view=${key}${key === 'drafts' ? '#saved-drafts' : ''}`}
+            aria-current={view === key ? 'page' : undefined}
+            className={`inline-flex min-h-11 items-center rounded-xl border px-4 py-2 font-semibold text-ink ${view === key ? 'border-orange bg-orange-soft' : 'border-card-border bg-white'}`}>
+            {label}
+          </Link>
+        ))}
+      </nav>
+      {view === 'listings' && <section aria-labelledby="published-listings-heading">
         <h2 id="published-listings-heading" className="mb-3 text-lg font-semibold text-ink">
           {t('מודעות שפורסמו', 'Published listings')}
         </h2>
@@ -117,34 +131,17 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
                 <RoomAvailabilityControls listingId={listing.id} rooms={listing.apartment_rooms ?? []} locale={locale} />
                 <ListingIntakeControl listingId={listing.id} open={listing.inquiries_open}
                   listingAvailable={listing.status === 'active' && listing.apartment_rooms.some(room => room.is_available)} locale={locale} />
-                {(inquiriesByApartment[listing.id] ?? []).length > 0 && (
-                  <div className="mt-3 rounded-shutaf-md bg-orange-soft p-3">
-                    <p className="text-sm font-semibold text-ink">
-                      {inquiriesByApartment[listing.id].length}{' '}
-                      {t('פניות ממתינות', 'pending inquiries')}
-                    </p>
-                    {inquiriesByApartment[listing.id].map((inquiry) =>
-                      listing.status === 'active' && listing.inquiries_open
-                      && listing.apartment_rooms.some(room => room.is_available)
-                      && inquiry.reconfirmation_required_at === null
-                        ? <InquiryActionButtons key={inquiry.id} inquiryId={inquiry.id} locale={locale} />
-                        : <p key={inquiry.id} className="mt-3 text-sm text-muted-text">
-                          {listing.status !== 'active' || !listing.apartment_rooms.some(room => room.is_available)
-                            ? t('המודעה אינה זמינה כעת. הפנייה הממתינה נשמרה.', 'The listing is currently unavailable. The pending inquiry is preserved.')
-                            : !listing.inquiries_open
-                              ? t('קבלת הפניות מושהית. הפנייה נשמרה ואינה זמינה לאישור כעת.', 'Inquiry intake is paused. The inquiry is preserved and cannot be accepted yet.')
-                              : t('ממתינים לאישור מחדש של הפונה לפני שאפשר יהיה לאשר את הפנייה.', 'Waiting for the requester to reconfirm before this inquiry can be accepted.')}
-                        </p>
-                    )}
-                  </div>
-                )}
+                <Link href={`${dashboardPath}?view=inquiries&listing=${encodeURIComponent(listing.id)}`}
+                  className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-card-border px-3 py-2 text-sm font-semibold text-teal-hover">
+                  {t('צפייה בפניות', 'View inquiries')}{pendingCounts[listing.id] ? ` (${pendingCounts[listing.id]} ${t('ממתינות', 'pending')})` : ''}
+                </Link>
               </OwnerListingCard>
             </li>
           ))}
         </ul>
       )}
-      </section>
-      <section id="saved-drafts" aria-labelledby="saved-drafts-heading" className="mt-8">
+      </section>}
+      {view === 'drafts' && draftResult && <section id="saved-drafts" aria-labelledby="saved-drafts-heading" className="mt-8">
         <h2 id="saved-drafts-heading" className="text-lg font-semibold text-ink">{t('טיוטות שמורות', 'Saved drafts')}</h2>
         <p className="mb-3 mt-1 text-sm text-muted-text">{t('הטיוטות פרטיות וגלויות רק לך.', 'Drafts are private and visible only to you.')}</p>
         <PrivateDraftContent accountId={user.id} locale={locale}>
@@ -154,7 +151,15 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Dra
             <ListingDraftSection result={draftResult} locale={locale} paged={params.draftCursor !== undefined} />
           </Suspense>
         </PrivateDraftContent>
-      </section>
+      </section>}
+      {view === 'inquiries' && <section aria-labelledby="inquiries-heading">
+        <h2 id="inquiries-heading" className="mb-3 text-lg font-semibold text-ink">{t('פניות לדירות שלי', 'Inquiries for my apartments')}</h2>
+        {invalidListingFilter ? <div className="space-y-3 rounded-xl border border-card-border bg-white p-4">
+          <p role="alert" className="text-ink">{t('הדירה אינה זמינה לניהול בחשבון הזה.', 'This apartment is unavailable for this account.')}</p>
+          <Link href={`${dashboardPath}?view=inquiries`} className="inline-flex min-h-11 items-center text-teal-hover underline">{t('פניות לכל הדירות', 'Inquiries for all apartments')}</Link>
+        </div> : <OwnerInquiryInbox key={`${user.id}:${listingFilter ?? ''}`} locale={locale}
+          listings={(listings ?? []).map(({ id, title }) => ({ id, title }))} initialListingId={listingFilter} />}
+      </section>}
     </div>
   );
 }

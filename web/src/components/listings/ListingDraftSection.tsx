@@ -12,7 +12,7 @@ export async function ListingDraftSection({ result, locale, paged }: {
   result: Promise<DraftResult<DraftPage>>; locale: Locale; paged: boolean;
 }) {
   const drafts = await result, en = locale === 'en';
-  const first = localePrefix(locale) + '/my-listings#saved-drafts';
+  const first = localePrefix(locale) + '/my-listings?view=drafts#saved-drafts';
   if (!drafts.ok) {
     const stale = drafts.error.code === 'CURSOR_STALE';
     return <div role="alert" className="rounded-2xl border border-card-border bg-white p-6">
@@ -32,7 +32,7 @@ export async function ListingDraftSection({ result, locale, paged }: {
     {(paged || drafts.data.next_cursor) && <nav aria-label={en ? 'Draft pages' : 'עמודי טיוטות'} className="mt-4 flex flex-wrap gap-4">
       {paged && <a href={first} className="rounded-xl border border-card-border px-4 py-3 font-semibold text-teal">
         {en ? 'Latest drafts' : 'הטיוטות העדכניות'}</a>}
-      {drafts.data.next_cursor && <a href={localePrefix(locale) + '/my-listings?draftCursor=' + encodeURIComponent(drafts.data.next_cursor) + '#saved-drafts'}
+      {drafts.data.next_cursor && <a href={localePrefix(locale) + '/my-listings?view=drafts&draftCursor=' + encodeURIComponent(drafts.data.next_cursor) + '#saved-drafts'}
         className="rounded-xl border border-card-border px-4 py-3 font-semibold text-teal">
         {en ? 'Older drafts' : 'טיוטות קודמות'}</a>}
     </nav>}
