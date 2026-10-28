@@ -4,19 +4,39 @@ import { revalidatePath } from 'next/cache';
 import { validListingId } from '@/lib/listings/public';
 import { getOwnedListingEditModel, type ListingEditorResult } from '@/lib/listings/editor';
 
-export async function markListingRented(id: string): Promise<{ error: string | null }> {
-  if (!validListingId(id)) return { error: 'מודעה לא תקינה.' };
-  const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'יש להתחבר מחדש.' };
-  const { data, error } = await supabase.from('apartments').update({ status: 'taken' })
-    .eq('id', id).eq('lister_id', user.id).eq('source', 'user').eq('status', 'active').select('id').maybeSingle();
-  if (error || !data) return { error: 'לא הצלחנו לעדכן את המודעה. רעננו ונסו שוב.' };
-  revalidatePath('/my-listings');
-  revalidatePath('/map');
-  revalidatePath(`/listings/${id}`);
-  revalidatePath(`/en/listings/${id}`);
-  return { error: null };
+type StatusResult = { error: null; status: 'active' | 'taken'; revision: number }
+  | { error: 'INVALID_LISTING' | 'AUTH_REQUIRED' | 'STATE_UNAVAILABLE' | 'FAILED' };
+
+async function changeListingStatus(id: string, status: 'active' | 'taken'): Promise<StatusResult> {
+  if (typeof id !== 'string' || !validListingId(id)) return { error: 'INVALID_LISTING' };
+  try {
+    const supabase = await createServerClient({ noStore: true });
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return { error: 'AUTH_REQUIRED' };
+    const listingId = id.toLowerCase();
+    const client = supabase as unknown as {
+      rpc(name: 'set_owned_listing_status', args: { p_listing_id: string; p_status: 'active' | 'taken' }):
+        PromiseLike<{ data: unknown; error: { message: string } | null }>;
+    };
+    const { data, error } = await client.rpc('set_owned_listing_status', { p_listing_id: listingId, p_status: status });
+    if (error) return { error: error.message === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED'
+      : ['STATE_UNAVAILABLE', 'NOT_FOUND'].includes(error.message) ? 'STATE_UNAVAILABLE' : 'FAILED' };
+    if (!data || typeof data !== 'object' || Array.isArray(data)
+      || !('listingId' in data) || data.listingId !== listingId || !('status' in data) || data.status !== status
+      || !('revision' in data) || typeof data.revision !== 'number' || !Number.isInteger(data.revision) || data.revision < 0 || data.revision > 2147483647
+      || !('pendingReconfirmationCount' in data) || typeof data.pendingReconfirmationCount !== 'number'
+      || !Number.isSafeInteger(data.pendingReconfirmationCount) || data.pendingReconfirmationCount < 0) return { error: 'FAILED' };
+    for (const prefix of ['', '/en']) for (const path of ['/my-listings', '/map', '/listings', `/listings/${listingId}`]) revalidatePath(prefix + path);
+    return { error: null, status, revision: data.revision };
+  } catch { return { error: 'FAILED' }; }
+}
+
+export async function markListingRented(id: string): Promise<StatusResult> {
+  return changeListingStatus(id, 'taken');
+}
+
+export async function reopenListing(id: string): Promise<StatusResult> {
+  return changeListingStatus(id, 'active');
 }
 
 // Shared owner reader for the later private edit-draft and form callers.

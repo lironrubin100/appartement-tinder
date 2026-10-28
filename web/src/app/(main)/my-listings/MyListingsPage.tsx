@@ -125,8 +125,9 @@ export async function renderMyListings(locale: Locale, searchParams: Promise<Das
                 manageHref={`${localePrefix(locale)}/compose?listing=${listing.id}`}
                 viewHref={listing.status === 'active' ? `${localePrefix(locale)}/listings/${listing.id}` : undefined}
               >
-                {listing.status === 'active' && (
-                  <RentedButton id={listing.id} locale={locale} />
+                {(listing.status === 'active' || listing.status === 'taken') && (
+                  <RentedButton id={listing.id} locale={locale} status={listing.status}
+                    hasAvailableRooms={listing.apartment_rooms.some(room => room.is_available)} intakeOpen={listing.inquiries_open} />
                 )}
                 <RoomAvailabilityControls listingId={listing.id} rooms={listing.apartment_rooms ?? []} locale={locale} />
                 <ListingIntakeControl listingId={listing.id} open={listing.inquiries_open}
