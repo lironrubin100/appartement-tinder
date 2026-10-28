@@ -21,6 +21,8 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 - D16/D18 and LIFECYCLE_AND_PRIVACY's Reopen transition already separate listing status, inventory, intake and occupancy. Route once to4.20/4.21, before the existing owner-path acceptance; this is an explicit undo-rented operation, not expiry renewal or a new rental-period feature. Preserve identity, room/intake settings, accepted chats/address grants and restrictions; pending requests require explicit requester reconfirmation.
 - Source gap to cover atomically: the legacy taken write currently increments revision but does not mark pending requests for reconfirmation. Merely reversing status would revive stale requests. Server checks and ordinary owner/foreign/guest/direct-write tests precede UI acceptance. Current4.18 scope and immediate next4.7 priority remain unchanged.
 
+- 28October backend4.20 accepted: live20261028174705 protects owner RPC/legacy writes, D18 reconfirmation, expiry/restrictions and accepted history. Full SQL and ordinary3-actor QA/guarded cleanup pass; explicit reopen UI/browser acceptance remains4.21, so the owner-facing defect is not yet closed.
+
 ## LISTING-OWNER-SEARCH-CUE-001 — Own listing looks like an ordinary search result
 
 - Owner reported26October2026 that appearing in their own search is acceptable, but ownership is unclear. Source-confirmed: discovery/ListingCard has no ownership cue and MapClient renders ordinary cards/contact modal actions for the owner too. Existing4.11 detail-page management and4.12 self-inquiry denial do not certify search presentation.

@@ -332,8 +332,8 @@
   - **הוראות טכניות ברורות:** הוסף views למודעות/טיוטות/פניות עם query state פנימי בטוח. מכרטיס דירה בחר את אותו inbox עם listing filter; אין רשימה שנייה. עדכן רק את קישורי עימוד/רענון הטיוטות לשמור view=drafts בתוך אותו מסך.
   - **קריטריון קבלה:** דירה א מסננת רק א; כל הדירות מציג גם ב; אישור פותח שיחת הדירה הנכונה.
 
-- [ ] **משימה 4.20: החזרת מודעה שהושכרה — מעבר שרת מוגן**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261027000000_owner_listing_status.sql`, `supabase/tests/plan_listing_status_transitions.sql`, `scripts/test-resident-sql.mjs`.
+- [x] **משימה 4.20: החזרת מודעה שהושכרה — מעבר שרת מוגן**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261028174705_owner_listing_status.sql`, `supabase/tests/plan_listing_status_transitions.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** תקן LISTING-REOPEN-001 לפי D16/D18 וחוזה Reopen: מעבר מפורש taken לפעילות לבעל המודעה בלבד, עם נעילת הורה ובדיקת מגבלות. שמור זהות, חדרים/intake, שיחות והרשאות כתובת; אל תחדש תפוגה או תעקוף הגבלת בודק. מעבר ל־taken מסמן pending לאישור מחדש אטומית, כולל מסלול הכתיבה הישן; פתיחה לא מנקה את הסימון. עדכן revision פעם אחת על שינוי והגן גם על direct write. שמור תאימות למסך שפורסם עד4.21; שם המיגרציה הסופי חייב להיות append-only אחרי live history הטרי.
   - **קריטריון קבלה:** שרשרת SQL ולקוח רגיל owner/foreign/guest מאמתים taken→active, retry ללא שינוי כפול, חדרים/intake/chat/address ללא שינוי, pending לא ניתן לאישור עד reconfirmation, והגבלות/תפוגה אינן נמחקות. אין מחיקה או סימון מגורים אוטומטי.
 

@@ -51,7 +51,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261027063143_core_individual_inquiry.sql'),
   await read('supabase/migrations/20261028102629_owner_listing_inbox.sql'),
   await read('supabase/migrations/20261028103654_owner_inquiry_seen.sql'),
-  await read('supabase/migrations/20261028114557_inquiry_state_transitions.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261028114557_inquiry_state_transitions.sql'),
+  await read('supabase/migrations/20261028174705_owner_listing_status.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -85,6 +86,8 @@ await db.exec(await read('supabase/tests/plan_owner_listing_inbox.sql'));
 console.log('PASS: owner inbox listing/state filters, stable bounded keyset pages, safe requester projection, accepted membership and outsider/guest/block denial.');
 await db.exec(await read('supabase/tests/plan_owner_inquiry_seen.sql'));
 console.log('PASS: private owner-only seen marker, explicit idempotent view, per-card isolation, no inquiry/chat/unread mutation and guest/block/outsider denial.');
+await db.exec(await read('supabase/tests/plan_listing_status_transitions.sql'));
+console.log('PASS: protected owner status/legacy direct writes, exact revision retry, pending reconfirmation and accepted history/expiry/restriction preservation.');
 await db.exec(await read('supabase/tests/plan_inquiry_transitions.sql'));
 console.log('PASS: role-bound decline/withdraw/reconfirm, terminal idempotency, D18 intake guard and accepted history preservation.');
 await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
@@ -285,6 +288,9 @@ await as(8); await rejected('select public.accept_listing_inquiry($1)', [inquiry
 await as(7); await db.query("update public.apartments set status='taken' where id=$1", [apartment.id]);
 await rejected('select public.accept_listing_inquiry($1)', [inquiry.id]);
 await db.query("update public.apartments set status='active' where id=$1", [apartment.id]);
+await rejected('select public.accept_listing_inquiry($1)', [inquiry.id]);
+await as(6); await rpc("select public.transition_listing_inquiry($1,'reconfirm') result", [inquiry.id]);
+await as(7);
 const viewing = await rpc('select public.accept_listing_inquiry($1) id', [inquiry.id]);
 assert.equal((await rpc('select public.accept_listing_inquiry($1) id', [inquiry.id])).id, viewing.id);
 await as(6); assert.equal((await rpc('select address from public.listing_address_access where apartment_id=$1', [apartment.id])).address, 'Private exact address');
