@@ -23,6 +23,8 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 - 28October backend4.20 accepted: live20261028174705 protects owner RPC/legacy writes, D18 reconfirmation, expiry/restrictions and accepted history. Full SQL and ordinary3-actor QA/guarded cleanup pass; explicit reopen UI/browser acceptance remains4.21, so the owner-facing defect is not yet closed.
 
+- Fixed and production verified28October2026:4.21 exact7711a9d/READYdpl_J7Cx26nhCHzUgpuqBZccrSP8B5W1 adds explicit owner reopen, preserves settings/history/address and refuses expired/restricted rows.4 local+4 production HE/EN390/1280 real Next cases include both pre-commit abort/retry paths and refresh persistence.28 action boundaries/types/lint/build pass; exact QA cleanup/original baseline verified. This closes this defect only, not renewal/full owner milestone.
+
 ## LISTING-OWNER-SEARCH-CUE-001 — Own listing looks like an ordinary search result
 
 - Owner reported26October2026 that appearing in their own search is acceptable, but ownership is unclear. Source-confirmed: discovery/ListingCard has no ownership cue and MapClient renders ordinary cards/contact modal actions for the owner too. Existing4.11 detail-page management and4.12 self-inquiry denial do not certify search presentation.
