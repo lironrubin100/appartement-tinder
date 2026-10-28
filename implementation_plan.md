@@ -308,8 +308,8 @@
   - **קריטריון קבלה:** pending/accepted/declined/unavailable ללא הודעה או עם הודעה מוצגים; אין מידע פרטי.
 
 - [ ] **משימה 6.20: שינוי מצב פנייה לפי actor**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021000060_inquiry_state_transitions.sql`, `supabase/tests/plan_inquiry_transitions.sql`, `scripts/test-resident-sql.mjs`.
-  - **הוראות טכניות ברורות:** אמת RPC state transition לפניות אישיות, וקבוצתיות רק אם תשתיתן כבר קיימת; לאחר 6.6–6.10 משלימים תאימות קבוצתית בבדיקות 6.14: owner decline, requester withdraw/reconfirm לפי D18 והרכב תקף כשקיים context קבוצתי. אין החזרת accepted ל־pending או עקיפת סבב קבוצתי. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261021000060_inquiry_state_transitions.sql`, `supabase/tests/plan_inquiry_transitions.sql`, `scripts/test-resident-sql.mjs`, `web/src/lib/listings/owner-inbox.ts`, `web/src/components/listings/OwnerInquiryCard.tsx`.
+  - **הוראות טכניות ברורות:** אמת RPC state transition לפניות אישיות, וקבוצתיות רק אם תשתיתן כבר קיימת; לאחר 6.6–6.10 משלימים תאימות קבוצתית בבדיקות 6.14: owner decline, requester withdraw/reconfirm לפי D18 והרכב תקף כשקיים context קבוצתי. אין החזרת accepted ל־pending או עקיפת סבב קבוצתי. מצב withdrawn כבר מאושר ב־LIFECYCLE_AND_PRIVACY; הרחב באותו שינוי את הקורא ואת חוזה השירות/תווית הכרטיס למצב זה, בלי להסוות ביטול כ־declined ובלי שינוי מצבי הקבלה האחרים. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** decline/withdraw אינם יוצרים chat/grant; reopening קבוצתי דורש סבב הסכמה מחודש.
 
 - [ ] **משימה 6.4: אישור ודחיית פנייה בכרטיס הבעלים**

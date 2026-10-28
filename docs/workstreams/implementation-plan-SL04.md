@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Task6.20 prerequisite reconciliation — 28October2026
+
+LIFECYCLE_AND_PRIVACY already approves inquiry states pending/accepted/declined/withdrawn; current table and6.25/6.26 consumers cover the first three plus derived unavailable. Reconciled the existing6.20 scope to include the two consumer files so approved withdrawal is introduced with compatible validation/label rather than misreported as owner decline. New migration will extend the existing reader without changing its signature; legacy create/accept remain immutable. No new product state/policy, group scope or priority change. Parent-before-inquiry authorization and no accepted-to-pending transition remain mandatory. Hosted apply/ordinary acceptance still pending; this reconciliation alone changes no product data.
+
 ## Task6.26 — personal inquiry card accepted in component harness — 28October2026
 
 Added OwnerInquiryCard using existing avatar/badge/button tokens. It renders safe sender/fallback, localized listing link/time/state/new badge, optional introduction/legacy empty text and authorized accepted-chat link. Real disclosure opens details; optional explicit onView callback removes New only after matching successful acknowledgement, retains it on error and permits retry. In-flight guard and per-inquiry keyed body prevent duplicate/stale view state. Actions are a supplied slot; no dummy accept/decline controls or automatic list-load view side effect. Card-only text uses existing darker semantic tokens for contrast; no other UI changed.
