@@ -287,8 +287,8 @@
   - **הוראות טכניות ברורות:** אמת רק חיבור 6.22 ו־pending שנשמר בשרת אחרי reload ו־guest sign-in return לאותה דירה. אין מימוש UI/RPC נוסף כאן.
   - **קריטריון קבלה:** הרצת Playwright ממוקדת למסלול send/reload/return עוברת.
 
-- [ ] **משימה 6.23: קורא פניות מורשה לבעלים**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261022000006_owner_listing_inbox.sql`, `supabase/tests/plan_owner_listing_inbox.sql`, `scripts/test-resident-sql.mjs`.
+- [x] **משימה 6.23: קורא פניות מורשה לבעלים**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261028102629_owner_listing_inbox.sql`, `supabase/tests/plan_owner_listing_inbox.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** החזר פניות בבעלות caller עם listing id/title, state, time, optional intro, requester public projection ו־conversation id מאושר. סינון דירה/מצב ועימוד לפי TECHNICAL_DEFAULTS. בלי seen עד 6.24 ובלי הנחת טבלאות group עתידיות. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** בעל שתי דירות מסנן אחת; זר אינו מקבל מידע; public projection אינו כולל טלפון/DOB/העדפות פרטיות.
 
