@@ -49,7 +49,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261026174553_listing_inquiry_inventory_recheck.sql'),
   await read('supabase/migrations/20261026224849_listing_photo_cleanup.sql'),
   await read('supabase/migrations/20261027063143_core_individual_inquiry.sql'),
-  await read('supabase/migrations/20261028102629_owner_listing_inbox.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261028102629_owner_listing_inbox.sql'),
+  await read('supabase/migrations/20261028103654_owner_inquiry_seen.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -81,6 +82,8 @@ await db.exec(await read('supabase/tests/plan_core_inquiry_accept.sql'));
 console.log('PASS: owner-only personal acceptance, exact conversation/members/system message, idempotent retry, atomic fault rollback and requester-only address.');
 await db.exec(await read('supabase/tests/plan_owner_listing_inbox.sql'));
 console.log('PASS: owner inbox listing/state filters, stable bounded keyset pages, safe requester projection, accepted membership and outsider/guest/block denial.');
+await db.exec(await read('supabase/tests/plan_owner_inquiry_seen.sql'));
+console.log('PASS: private owner-only seen marker, explicit idempotent view, per-card isolation, no inquiry/chat/unread mutation and guest/block/outsider denial.');
 await db.exec(await read('supabase/tests/plan_core_listing_card.sql'));
 console.log('PASS: reference-only card authority, retry collision, private history and no side effects.');
 await db.exec(await read('supabase/tests/plan_listing_edit.sql'));

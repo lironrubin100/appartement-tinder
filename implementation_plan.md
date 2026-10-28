@@ -292,8 +292,8 @@
   - **הוראות טכניות ברורות:** החזר פניות בבעלות caller עם listing id/title, state, time, optional intro, requester public projection ו־conversation id מאושר. סינון דירה/מצב ועימוד לפי TECHNICAL_DEFAULTS. בלי seen עד 6.24 ובלי הנחת טבלאות group עתידיות. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** בעל שתי דירות מסנן אחת; זר אינו מקבל מידע; public projection אינו כולל טלפון/DOB/העדפות פרטיות.
 
-- [ ] **משימה 6.24: סימון פנייה שנצפתה**
-  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261022000007_owner_inquiry_seen.sql`, `supabase/tests/plan_owner_inquiry_seen.sql`, `scripts/test-resident-sql.mjs`.
+- [x] **משימה 6.24: סימון פנייה שנצפתה**
+  - **קבצים לעריכה/יצירה:** `supabase/migrations/20261028103654_owner_inquiry_seen.sql`, `supabase/tests/plan_owner_inquiry_seen.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** שמור viewed marker לבעלים והרחב הקורא בחיווי חדש. פתיחת פרטי הכרטיס בלבד מסמנת צפייה; idempotent. אין שינוי inquiry state או chat unread. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** פתיחה מסירה חדש בלבד; pending אינו מאושר; זר אינו מסמן עבור בעלים.
 
