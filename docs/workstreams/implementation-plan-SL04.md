@@ -1,5 +1,9 @@
 # Implementation plan SL04 — owner management
 
+## Task6.28 technical scope reconciliation — 28October2026
+
+The approved three-view destination needs existing draft pagination/retry links to preserve view=drafts; these links are owned by ListingDraftSection, outside the original page-only card. Added only that file to6.28 scope for query-link compatibility. No policy/priority/new product scope or backend change. Existing cursor-only URLs continue selecting Drafts. Server parses an allowlist of views and a scalar owned-listing filter; no caller owner identity or external return URL. Reclaim revised fingerprint before implementation.
+
 ## Task6.27 — aggregate inbox accepted in component harness — 28October2026
 
 Added OwnerInquiryInbox composing the existing reader, private-view marker, cards and accept/decline controls. Property and five-state filters reset result identity/cursor; request generation ignores late responses and first-page refresh supersedes older pagination. Bounded20-item requests, unique-ID page append, loading/unfiltered-empty/filtered-empty/permission/error/retry and expired-cursor restart are separate states. List load never marks seen. Successful decline updates/removes only its acknowledged card then refreshes; a refresh failure retains that known server result. No second Chats list, schema/config or new account work.
