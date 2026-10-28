@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { InquiryActionButtons } from './InquiryActionButtons';
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -23,6 +24,8 @@ export function OwnerInquiryCard(props: Props) {
 
 function InquiryCardBody({ inquiry, locale, onView, actions }: Props) {
   const en = locale === 'en';
+  const [declined, setDeclined] = useState(false);
+  const state = declined ? 'declined' : inquiry.state;
   const [open, setOpen] = useState(false);
   const [viewConfirmed, setViewConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -65,16 +68,16 @@ function InquiryCardBody({ inquiry, locale, onView, actions }: Props) {
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2" aria-label={en ? 'Inquiry status' : 'מצב הפנייה'}>
-        <Badge style={{ color: 'var(--color-ink)' }} variant={inquiry.state === 'accepted' ? 'success' : inquiry.state === 'declined' ? 'error' : 'default'}>{statuses[inquiry.state]}</Badge>
+        <Badge style={{ color: 'var(--color-ink)' }} variant={state === 'accepted' ? 'success' : state === 'declined' ? 'error' : 'default'}>{statuses[state]}</Badge>
         {isNew && <Badge style={{ color: 'var(--color-ink)' }}>{en ? 'New' : 'חדש'}</Badge>}
       </div>
-      {inquiry.state === 'unavailable' && <p className="mt-3 text-sm text-body-text">{en ? 'This inquiry is currently unavailable.' : 'הפנייה אינה זמינה כרגע.'}</p>}
+      {state === 'unavailable' && <p className="mt-3 text-sm text-body-text">{en ? 'This inquiry is currently unavailable.' : 'הפנייה אינה זמינה כרגע.'}</p>}
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <Button type="button" variant="secondary" size="sm" className="min-h-11" aria-expanded={open} aria-controls={detailsId}
           onClick={() => { const opening = !open; setOpen(opening); if (opening) void markViewed(); }}>
           {open ? en ? 'Hide inquiry details' : 'הסתרת פרטי הפנייה' : en ? 'View inquiry details' : 'פתיחת פרטי הפנייה'}
         </Button>
-        {inquiry.state === 'accepted' && inquiry.conversation_id && <Link href={localePath(`/chats/${inquiry.conversation_id}`, locale)} className="inline-flex min-h-11 items-center text-sm font-semibold text-teal-hover underline">{en ? 'Open conversation' : 'פתיחת השיחה'}</Link>}
+        {state === 'accepted' && inquiry.conversation_id && <Link href={localePath(`/chats/${inquiry.conversation_id}`, locale)} className="inline-flex min-h-11 items-center text-sm font-semibold text-teal-hover underline">{en ? 'Open conversation' : 'פתיחת השיחה'}</Link>}
       </div>
       {open && <div id={detailsId} role="region" aria-label={en ? 'Inquiry details' : 'פרטי הפנייה'} className="mt-4 space-y-3 border-t border-card-border pt-4">
         <p className="text-sm font-semibold text-ink">{en ? 'Opening message' : 'הודעת פתיחה'}</p>
@@ -84,7 +87,7 @@ function InquiryCardBody({ inquiry, locale, onView, actions }: Props) {
           <p role="alert" className="text-sm text-ink">{en ? 'Could not save the viewed state. You can retry.' : 'לא הצלחנו לשמור את סימון הצפייה. אפשר לנסות שוב.'}</p>
           <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={busy} onClick={() => void markViewed()}>{en ? 'Retry' : 'ניסיון חוזר'}</Button>
         </div>}
-        {actions && <div className="flex flex-wrap gap-3">{actions}</div>}
+        {actions ?? <InquiryActionButtons inquiryId={inquiry.id} locale={locale} state={state} onDeclined={() => setDeclined(true)} />}
       </div>}
     </article>
   );

@@ -312,7 +312,7 @@
   - **הוראות טכניות ברורות:** אמת RPC state transition לפניות אישיות, וקבוצתיות רק אם תשתיתן כבר קיימת; לאחר 6.6–6.10 משלימים תאימות קבוצתית בבדיקות 6.14: owner decline, requester withdraw/reconfirm לפי D18 והרכב תקף כשקיים context קבוצתי. אין החזרת accepted ל־pending או עקיפת סבב קבוצתי. מצב withdrawn כבר מאושר ב־LIFECYCLE_AND_PRIVACY; הרחב באותו שינוי את הקורא ואת חוזה השירות/תווית הכרטיס למצב זה, בלי להסוות ביטול כ־declined ובלי שינוי מצבי הקבלה האחרים. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה.
   - **קריטריון קבלה:** decline/withdraw אינם יוצרים chat/grant; reopening קבוצתי דורש סבב הסכמה מחודש.
 
-- [ ] **משימה 6.4: אישור ודחיית פנייה בכרטיס הבעלים**
+- [x] **משימה 6.4: אישור ודחיית פנייה בכרטיס הבעלים**
   - **קבצים לעריכה/יצירה:** `web/src/components/listings/InquiryActionButtons.tsx`, `web/src/components/listings/OwnerInquiryCard.tsx`, `web/src/lib/listings/inquiries.ts`.
   - **הוראות טכניות ברורות:** חבר לכרטיס הקיים accept ו־decline RPC מורשים. decline מה־6.20 המקודם; accepted מוביל conversationId שהשרת החזיר. אין רשימת pending שנייה ב־Chats.
   - **קריטריון קבלה:** בעלים מאשר פעם אחת ופותח שיחה; דחייה אינה יוצרת שיחה; error משאיר מצב שרת קודם.

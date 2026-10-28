@@ -50,12 +50,31 @@ export async function createListingInquiry(apartmentId: string, intro: string | 
 }
 
 export async function acceptListingInquiry(inquiryId: string): Promise<InquiryActionResult> {
-  const supabase = await createServerClient();
+  if (typeof inquiryId !== 'string' || !uuid.test(inquiryId)) return { ok: false, message: 'פנייה לא תקינה.' };
+  const supabase = await createServerClient({ noStore: true });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, message: 'כדי לאשר פנייה צריך להתחבר לחשבון.' };
   const { data: conversationId, error } = await supabase.rpc('accept_listing_inquiry', { p_inquiry_id: inquiryId });
-  if (error || !conversationId) return { ok: false, message: 'לא הצלחנו לאשר את הפנייה. נסו שוב בעוד רגע.' };
-  revalidatePath('/my-listings');
-  revalidatePath('/chats');
+  if (error || typeof conversationId !== 'string' || !uuid.test(conversationId)) return { ok: false, message: 'לא הצלחנו לאשר את הפנייה. נסו שוב בעוד רגע.' };
+  for (const path of ['/my-listings', '/en/my-listings', '/chats', '/en/chats']) revalidatePath(path);
   return { ok: true, conversationId };
+}
+
+export async function declineListingInquiry(inquiryId: string): Promise<InquiryActionResult> {
+  const failure: InquiryActionResult = { ok: false, message: 'לא הצלחנו לדחות את הפנייה. נסו שוב בעוד רגע.' };
+  if (typeof inquiryId !== 'string' || !uuid.test(inquiryId)) return failure;
+  const supabase = await createServerClient({ noStore: true });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return failure;
+  const client = supabase as unknown as {
+    rpc(name: 'transition_listing_inquiry', args: { p_inquiry_id: string; p_action: 'decline' }):
+      PromiseLike<{ data: unknown; error: unknown }>;
+  };
+  const { data, error } = await client.rpc('transition_listing_inquiry', { p_inquiry_id: inquiryId, p_action: 'decline' });
+  if (error || !data || typeof data !== 'object' || Array.isArray(data)
+    || !('inquiry_id' in data) || data.inquiry_id !== inquiryId
+    || !('status' in data) || data.status !== 'declined'
+    || !('conversation_id' in data) || data.conversation_id !== null) return failure;
+  for (const path of ['/my-listings', '/en/my-listings']) revalidatePath(path);
+  return { ok: true };
 }
