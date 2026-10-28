@@ -229,10 +229,10 @@
       "status": "pending"
     },
     "SL04.2": {
-      "status": "verification-incomplete",
+      "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL04.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "6.22 accepted.28October6.3 exact leased recovery succeeded after fresh remaining-state/target/history checks; independent0 fixture roots/rooms, original59/59/62, actor baseline and4 global root-ID digests match; helper exit0, journal clean, actor leases released. Existing unchanged-product HE390/EN1280 send/reload/guest-login-return functional cases pass; original Playwright exit1 at cleanup checkpoint remains,6.3 unchecked pending focused-run acceptance reconciliation before6.23. Plugin installed/enabled with low-risk default; no permission/reconnect change. Owner reported accidental approval decline; not proof of all earlier errors. No app/schema/config change; full parent/MVP/launch open."
+      "outcome": "6.22/6.3 accepted28October using existing unchanged-product browser cases plus independently verified exact leased cleanup/original59/59/62/actor baseline/four global digests.6.3 original Playwright exit1 at external cleanup checkpoint remains explicit; combined outcome accepted per owner evidence-reuse instruction, no redundant forms. Scenario clean. Next6.23 owner-only inbox reader; full parent/MVP/launch open."
     }
   },
   "micro_task_dispatch": {
