@@ -3,13 +3,13 @@
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { createServerClient } from '@/utils/supabase/server';
 
-export type OwnerInquiryState = 'pending' | 'accepted' | 'declined' | 'unavailable';
+export type OwnerInquiryState = 'pending' | 'accepted' | 'declined' | 'withdrawn' | 'unavailable';
 export type OwnerInquiryItem = {
   id: string;
   kind: 'individual';
   listing_id: string;
   listing_title: string;
-  status: 'pending' | 'accepted' | 'declined';
+  status: 'pending' | 'accepted' | 'declined' | 'withdrawn';
   state: OwnerInquiryState;
   created_at: string;
   intro: string | null;
@@ -30,7 +30,7 @@ type InboxRpcClient = {
 };
 type Cursor = { v: 1; source: 1; actor: string; query: string; expires: number; createdAt: string; id: string };
 const ttl = 30 * 60 * 1000;
-const states = ['pending', 'accepted', 'declined', 'unavailable'];
+const states = ['pending', 'accepted', 'declined', 'withdrawn', 'unavailable'];
 const isId = (value: unknown): value is string => typeof value === 'string' && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value);
 const record = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 const timestamp = (value: unknown): value is string => typeof value === 'string'
@@ -75,7 +75,7 @@ function readCursor(token: string, actor: string, query: string, key: string): C
 function decodeItem(value: unknown): OwnerInquiryItem {
   if (!record(value) || !onlyKeys(value, ['id', 'kind', 'listing_id', 'listing_title', 'status', 'state', 'created_at', 'intro', 'requester', 'conversation_id', 'is_new', 'viewed_at'])
     || !isId(value.id) || value.kind !== 'individual' || !isId(value.listing_id) || typeof value.listing_title !== 'string'
-    || typeof value.status !== 'string' || !['pending', 'accepted', 'declined'].includes(value.status)
+    || typeof value.status !== 'string' || !['pending', 'accepted', 'declined', 'withdrawn'].includes(value.status)
     || typeof value.state !== 'string' || !states.includes(value.state) || !timestamp(value.created_at)
     || !nullableText(value.intro) || typeof value.intro === 'string' && Array.from(value.intro).length > 500
     || !(value.conversation_id === null || isId(value.conversation_id)) || value.status !== 'accepted' && value.conversation_id !== null

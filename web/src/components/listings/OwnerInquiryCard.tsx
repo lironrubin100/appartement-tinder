@@ -35,6 +35,7 @@ function InquiryCardBody({ inquiry, locale, onView, actions }: Props) {
     pending: en ? 'Pending' : 'ממתינה',
     accepted: en ? 'Accepted' : 'אושרה',
     declined: en ? 'Declined' : 'נדחתה',
+    withdrawn: en ? 'Withdrawn by requester' : 'בוטלה על ידי הפונה',
     unavailable: en ? 'Unavailable' : 'לא זמינה',
   };
   const date = new Intl.DateTimeFormat(en ? 'en-GB' : 'he-IL', {
