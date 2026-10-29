@@ -148,8 +148,8 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 ## LISTING-COMPOSER-DRAFT-001 — Plus navigates away and composer state is transient
 
-- State: source-confirmed19October; not fixed. BottomNav links to /compose; ComposeForm stores photos/room prices/bedrooms in component state without persisted draft/origin. This falls short of I4 overlay over the current screen and SL02.1 draft-resume acceptance.
-- Next owner: SL02.1. Preserve origin and entered data/photos through close/reopen/reload as approved, with account-scoped private draft handling and an explicit discard path. Test HE/EN phone/desktop; do not label existing standalone composer as an implemented overlay.
+- State: bounded composer/overlay and cloud-draft behavior fixed and verified by tasks2.32/2.33, reconciled29October2026. The19October transient-state finding below is historical; this does not certify all of SL02.1.
+- Resolution:2.32/2.33 verify origin/overlay, acknowledged private cloud persistence and explicit discard. Historical19October follow-up is satisfied within this scope; remaining SL02.1 hardening stays in its own cards.
 
 ## PROFILE-TEXT-LENGTH-001 — Unicode text-length parity differs
 
@@ -159,11 +159,11 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 ## Owner management intake — 21 October 2026
 
-The following entries are tracked for SL04.2, not fixed by this planning update. Preserve earlier runtime evidence and synthetic demos.
+The original21October intake findings and dated intermediate evidence are retained below. The29October resolution states supersede their old next-task instructions; see the first-milestone evidence in [SL04](workstreams/implementation-plan-SL04.md). Retained demos are preserved.
 
 ### LISTING-OWNER-ENTRY-001 — Owner management entry is missing or difficult to reach
 
-- State: Owner-reported 21 October; not freshly browser-reproduced by this planning work. Source has apartments.lister_id authorization and /my-listings; absence of ownership in the database is not established.
+- State: fixed/verified by4.10 for resident and B10 empty-account Profile entry, with later owner-management journeys4.8/6.29 accepted29October2026. Original ownership-loss suspicion was not established; listing identities remain unchanged.
 - Task 4.9 reproduction, 21–22 October: production Chrome EN 390px with the dedicated synthetic resident and nonresident poster found no My Listings entry within the profile content for either. The lister has an additional My Listings link in its lister navigation; the resident does not. Direct `/en/my-listings` loaded the two resident-owned and one lister-owned active listings, matching ordinary-client `lister_id` queries. Source: `web/src/app/(main)/profile/page.tsx`, `web/src/app/(main)/layout.tsx`, and `web/src/app/(main)/my-listings/MyListingsPage.tsx`. Reproduced missing profile entry, not missing database ownership. HE and empty-account profile entry were not freshly checked.
 - Task 4.10, 22 October: fixed and verified in production source `6a58405268f636262790e4cf47ac050d12f1b078`, deployment `dpl_GFXazPt66EArRwCvncUKTihgyY4R` READY. Chrome HE/EN 390px on local and production passed for synthetic resident and lister with zero owned listings: each Profile link opened the localized empty management page. Resident five-destination navigation remained present. Existing owned-listing display was separately tested in 4.9; no broad dashboard acceptance is implied.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
@@ -171,7 +171,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 ### LISTING-SELF-CONTACT-001 — Poster sees a contact-owner action for their own apartment
 
-- State: Owner-reported 21 October; source-confirmed existing ListingContact owner branch, so the precise failing entry/identity requires reproduction. No claim that self-inquiry RPC currently permits a write.
+- State: owner CTA/order and independent server refusal fixed/verified by4.11/4.12 and reconfirmed by6.29,29October2026. Both owner types were tested in4.11/4.12. The original reported symptom was not independently reproduced; do not describe it as a demonstrated historical self-inquiry write.
 - Task 4.9, 21–22 October: not reproduced in the tested production EN 390px path: each synthetic owner opened an active own listing from My Listings and saw Manage your listing rather than a self-contact button. `web/src/components/listings/ListingContact.tsx` checks onboarding before ownership, so other states and entry paths remain unverified. Read-only live `create_listing_inquiry(uuid)` definition excludes the listing owner; an ordinary-client self-inquiry write was not attempted here (task 4.12 owns that verification).
 - Task 4.11, 22 October: owner lookup now precedes onboarding and a lookup error fails closed. Source `fc43038b17dc235b5c48f90a08b7dc12e2a09a28` deployed as `dpl_3ycGwsAuxAAqkWojvuzdcqm5GWZk` READY. Chrome HE/EN 390px verified manage CTA for synthetic resident and nonresident owners; another synthetic resident's real inquiry was sent locally against the shared backend and remained pending on production. Owner-incomplete-profile ordering was checked in an isolated component harness, not by changing a retained owner's profile. The originally reported self-contact symptom was not independently reproduced; task 4.12 retains server-side denial verification.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
@@ -181,7 +181,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 - 22–23 October continuation: remains incomplete future inbox work. Existing actions now explain chat/exact-address access and recover from thrown/network failures with localized retry. These bounded fixes do not supply requester identity, introductions, timestamps or filters and do not close this issue.
 
-- State: Owner-reported 21 October; source confirms MyListingsPage currently has pending IDs/action buttons, not the approved safe sender/introduction/filterable inbox.
+- State: individual per-property/aggregate inbox fixed/verified by6.23–6.29,29October2026: safe sender/introduction/time/state, filters, private seen, accept/decline and exact chat/address context. Group inquiry extension remains open under6.6–6.14; this resolution does not certify it.
 - Task 4.9, 21–22 October: both synthetic accounts' production EN 390px My Listings screens had no aggregate inquiry link or filter controls. Reproduced the missing aggregate entry, not the full pending-inquiry interaction: these fixtures had no pending inquiry created for this check. Source `web/src/app/(main)/my-listings/MyListingsPage.tsx` selects pending IDs and renders action buttons, not the specified requester details and filterable inbox.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 6.1–6.5 and 6.22–6.29, then 6.9/6.11 for groups.
@@ -190,7 +190,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 - 22–23 October continuation: fixed and locally verified for the existing single-device new-listing draft. Explicit Save draft and close awaits ordered persistence, Escape uses the same path, failure retains fields/photos, reopened forms autosave again, and confirmed discard is secondary. HE/EN at 390px/1280px passed. This does not implement cloud/multiple/edit drafts; production evidence belongs to the current UX handoff.
 
-- State: Owner-reported 21 October; exact visible states require task 4.9 / targeted browser reproduction. Saving a local draft exists; this report is not proof of lost data.
+- State: new/cloud/edit labels and explicit save semantics fixed/verified by2.32/2.33/4.8, reconciled29October2026. Save draft, selected Publish and explicit Save changes have separate acknowledged results; original report was not proof of lost data.
 - Task 4.9, 21–22 October: both synthetic owners' production EN 390px new-listing screens showed Publish listing, Close and Discard draft; no Save changes or Continue draft control appeared in that state. Reproduced those new-form labels, not an existing edit flow or data loss. `web/src/app/(main)/compose/ComposeForm.tsx` saves one local draft on close.
 - Owner follow-up, 22 October: saving needs an explicit action, with discarding a secondary choice. A subagent prepared an uncommitted `ComposeForm.tsx` patch that labels the action Save draft and close, waits for local storage, states that storage is device-local and moves Discard draft into More draft options. The agent stopped before verification. Patch is preserved at `docs/handoffs/2026-10-22-compose-draft-buttons.patch`; it is not verified, committed as application code or deployed. Owner asked to stop after task 2.18; resume through the continuation prompt.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
@@ -198,7 +198,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 ### LISTING-MULTI-DRAFT-001 — Only one device-local listing draft; no cross-device draft list
 
-- State: Source-confirmed 21 October: draft-store.ts keys IndexedDB by accountId and stores File[]; ComposeForm loads that one account draft. Multiple independent cloud drafts/photos are not implemented by this plan change.
+- State: multiple private cloud drafts/photos and independent-context persistence fixed/verified by2.33,29October2026. Four HE/EN390/1280 functional cases passed; the original runner exit1 at final cleanup timeout and separately successful exact cleanup recovery are both retained. Combined evidence, not an invented original exit0, closes this bounded issue. Explicit legacy import is covered by2.32 and its prerequisite checks.
 - Task 4.9, 21–22 October: both synthetic owners' production EN new-listing screens lacked a draft chooser. Source `web/src/lib/listings/draft-store.ts` confirms one IndexedDB record per account; read-only live catalog contained no public draft table or draft-named RPC. No cross-device test was run, so this is source/catalog confirmation rather than a reproduced cross-device loss.
 - Expected: D16/I4/F4 and [LISTING_MANAGEMENT](specs/LISTING_MANAGEMENT.md).
 - Next: 2.16–2.33; import existing draft explicitly and retain it until verified cloud transfer.
@@ -209,7 +209,7 @@ The following entries are tracked for SL04.2, not fixed by this planning update.
 
 - 22–23 October continuation: fixed and locally verified for resident/lister/empty HE/EN phone paths. Card Manage link now requires an explicit destination; dashboard retains public View listing and the public-detail owner CTA still opens My Listings. No new edit route.
 
-- State: source-confirmed during the requested UX review, 22 October; no new browser reproduction in this review. `MyListingsPage` renders `OwnerListingCard` without a `manageHref`; the card defaults to the localized My Listings URL. A Manage listing link on that same page therefore opens no new management context.
+- State: fixed/verified by the23October owner UX release and current4.8 owner edit journey, reconciled29October2026. Management now opens the explicitly selected owned listing's private editor; public viewing remains a separate destination. The22October self-link description is historical.
 - Expected: links describe the action they actually perform; retain the owner-detail CTA into the dashboard. Until scoped editing exists, omit the redundant card link within the dashboard or target an existing meaningful section. Do not invent an edit route.
 - Follow-up: the requested UX review/release is recorded in [the owning checkpoint](workstreams/2026-10-22-owner-ux-continuation.md). The former next-chat prompt is archived in Git `6955c7f:docs/handoffs/2026-10-22-next-prompt.md`; it is not current dispatch.
 
