@@ -29,19 +29,22 @@ const CARTO_TILE_URL = CARTO_BASEMAPS_KEY
 // Fixed-size box (not content-sized) so the div's own bounding rect — what
 // Leaflet uses for click hit-testing — actually covers the visible pill.
 // A CSS-transform-positioned auto-width tag leaves a 0x0 hit target.
-function priceIcon(apt: Apartment, isSelected: boolean) {
+function priceIcon(apt: Apartment, isSelected: boolean, en: boolean) {
   const roomPrice = apt.min_room_price ?? apt.price;
   const roomPriceLabel = apt.max_room_price && apt.max_room_price !== roomPrice
     ? `₪${roomPrice.toLocaleString()}+`
     : `₪${roomPrice.toLocaleString()}`;
 
+  const label = `${apt.title}, ${roomPriceLabel} ${en ? 'per room' : 'לחדר'}`
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   return L.divIcon({
     className: '',
     html: `<div
       data-testid="apartment-marker"
       data-apartment-id="${apt.id}"
       role="button"
-      aria-label="${apt.title.replace(/"/g, '&quot;')}, ${roomPriceLabel} לחדר"
+      aria-label="${label}"
+      aria-pressed="${isSelected}"
       style="
       width:100%;height:100%;
       display:flex;align-items:center;justify-content:center;
@@ -123,7 +126,8 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
             <Marker
               key={apt.id}
               position={[apt.lat, apt.lng]}
-              icon={priceIcon(apt, apt.id === selectedId)}
+              icon={priceIcon(apt, apt.id === selectedId, en)}
+              title={apt.title}
               eventHandlers={{ click: () => onSelect(apt.id) }}
             />
           ))}

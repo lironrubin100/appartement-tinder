@@ -36,7 +36,10 @@ function isNewListing(createdAt: string) {
 
 export default function MapPage() {
   const locale = usePathname().startsWith('/en') ? 'en' : 'he';
+  const en = locale === 'en';
+  const prefix = en ? '/en' : '';
   const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
@@ -48,34 +51,65 @@ export default function MapPage() {
 
   useEffect(() => {
     let cancelled = false;
+    let expired = false;
+    const controller = new AbortController();
+    const deadline = setTimeout(() => {
+      if (cancelled) return;
+      expired = true; controller.abort(); setLoadError(true); setLoading(false);
+    }, 20_000);
     const supabase = createClient();
 
-    void supabase
-      .from('apartments_public')
-      .select('*')
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) setLoadError(true);
-        else setApartments(data ?? []);
+    let observedActor: string | null | undefined;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const actor = session?.user.id ?? null;
+      if (observedActor !== undefined && observedActor !== actor) {
+        cancelled = true; controller.abort(); clearTimeout(deadline);
+        setApartments([]); setOwnedIds(new Set()); setSelectedId(null); setContactMessage(null);
+        setLoadError(false); setLoading(true); setReloadCount(count => count + 1);
+      }
+      observedActor = actor;
+    });
+    void (async () => {
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) throw new Error('Session unavailable');
+        observedActor = user.id;
+        const { data, error } = await supabase.from('apartments_public').select('*').abortSignal(controller.signal);
+        if (error) throw error;
+        const entries = data ?? [];
+        // Ownership is a separate session-scoped read, never public poster data.
+        const owned = entries.length ? await supabase.from('apartments').select('id')
+          .eq('lister_id', user.id).in('id', entries.map(entry => entry.id)).abortSignal(controller.signal) : { data: [], error: null };
+        if (owned.error) throw owned.error;
+        const current = await supabase.auth.getUser();
+        if (current.error || current.data.user?.id !== user.id || observedActor !== user.id) throw new Error('Session changed');
+        if (cancelled || expired) return;
+        setApartments(entries); setOwnedIds(new Set((owned.data ?? []).map(entry => entry.id)));
         setLoading(false);
-      }, () => {
+      } catch {
         if (cancelled) return;
         setLoadError(true);
         setLoading(false);
-      });
+      } finally {
+        clearTimeout(deadline);
+      }
+    })();
 
     return () => {
       cancelled = true;
+      controller.abort(); clearTimeout(deadline);
+      subscription.unsubscribe();
     };
   }, [reloadCount]);
 
   const retryLoadApartments = () => {
     setLoading(true);
     setLoadError(false);
+    setApartments([]); setOwnedIds(new Set()); setSelectedId(null);
     setReloadCount((current) => current + 1);
   };
 
-  const selected = apartments.find((a) => a.id === selectedId) ?? null;
+  const selected = filtered.find((a) => a.id === selectedId) ?? null;
   const handleSave = useCallback(async (apartmentId: string) => {
     setSaveError(null);
     const result = await toggle(apartmentId);
@@ -90,18 +124,19 @@ export default function MapPage() {
     )));
   }, [toggle]);
   const handleContact = useCallback(async (apartmentId: string) => {
+    if (ownedIds.has(apartmentId)) return;
     setContactMessage(null);
     const result = await createListingInquiry(apartmentId);
-    setContactMessage(result.ok ? 'הפנייה נשלחה לבעל/ת הנכס. לאחר אישור תיפתח שיחה פרטית.' : result.message);
-  }, []);
+    setContactMessage(result.ok ? en ? 'Your inquiry was sent. A private conversation opens after the owner accepts.' : 'הפנייה נשלחה לבעל/ת הנכס. לאחר אישור תיפתח שיחה פרטית.' : result.message);
+  }, [ownedIds, en]);
   const selectedMinRoomPrice = selected?.min_room_price ?? selected?.price;
   const selectedMaxRoomPrice = selected?.max_room_price ?? selected?.price;
   const selectedPriceLabel = selectedMinRoomPrice === selectedMaxRoomPrice
-    ? `₪${selectedMinRoomPrice?.toLocaleString()} לחדר`
-    : `₪${selectedMinRoomPrice?.toLocaleString()}–${selectedMaxRoomPrice?.toLocaleString()} לחדר`;
+    ? `₪${selectedMinRoomPrice?.toLocaleString()} ${en ? 'per room' : 'לחדר'}`
+    : `₪${selectedMinRoomPrice?.toLocaleString()}–${selectedMaxRoomPrice?.toLocaleString()} ${en ? 'per room' : 'לחדר'}`;
   const selectedAvailabilityLabel = selected?.available_room_count === 1
-    ? 'חדר פנוי אחד'
-    : `${selected?.available_room_count} חדרים פנויים`;
+    ? en ? '1 available room' : 'חדר פנוי אחד'
+    : `${selected?.available_room_count} ${en ? 'available rooms' : 'חדרים פנויים'}`;
 
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] p-4 md:p-8">
@@ -121,7 +156,7 @@ export default function MapPage() {
           <div className="h-96 md:h-[calc(100vh-220px)] md:min-h-96 md:flex-1" data-testid="map-container">
             {loading ? (
               <div className="w-full h-full rounded-shutaf-lg bg-neutral-bg-soft flex items-center justify-center">
-                <p className="text-muted-text">טוען מפה…</p>
+                <p role="status" className="text-muted-text">{en ? 'Loading map…' : 'טוען מפה…'}</p>
               </div>
             ) : (
               <LeafletMap apartments={filtered} selectedId={selectedId} onSelect={setSelectedId} />
@@ -147,10 +182,13 @@ export default function MapPage() {
                   billsIncluded={apt.bills_included}
                   interestedCount={apt.interest_count}
                   image={apt.photos[0]}
-                  location={publicAreaLabel()}
+                  location={en ? 'Approximate area' : publicAreaLabel()}
                   bedrooms={apt.bedrooms}
                   availableFrom={apt.available_from ?? ''}
-                  tags={apt.is_sublet ? ['סאבלט'] : []}
+                  tags={apt.is_sublet ? [en ? 'Sublet' : 'סאבלט'] : []}
+                  isOwner={ownedIds.has(apt.id)}
+                  manageHref={ownedIds.has(apt.id) ? `${prefix}/compose?listing=${apt.id}` : undefined}
+                  selected={apt.id === selectedId}
                   isNew={isNewListing(apt.created_at)}
                   saved={isSaved(apt.id)}
                   savePending={isPending(apt.id)}
@@ -159,6 +197,9 @@ export default function MapPage() {
                   onClick={() => setSelectedId(apt.id)}
                 />
               ))}
+              {!loading && filtered.length === 0 && <p role="status" className="rounded-shutaf-lg border border-card-border bg-white p-4 text-muted-text">
+                {apartments.length ? en ? 'No listings match these filters.' : 'אין מודעות התואמות לסינון הזה.' : en ? 'No available listings yet.' : 'עדיין אין מודעות זמינות.'}
+              </p>}
             </div>
           </div>
         </div>
@@ -167,7 +208,8 @@ export default function MapPage() {
       {/* Apartment detail */}
       <Modal isOpen={!!selected} onClose={() => setSelectedId(null)} size="md">
         {selected && (
-          <div data-testid="apartment-detail">
+          <div data-testid="apartment-detail" data-apartment-id={selected.id} data-owned={ownedIds.has(selected.id)}>
+            {ownedIds.has(selected.id) && <Badge variant="default" className="mb-3">{en ? 'Your listing' : 'המודעה שלך'}</Badge>}
             {selected.photos[0] && (
               <div className="relative mb-4 h-48 overflow-hidden rounded-shutaf-md">
                 <Image src={selected.photos[0]} alt={selected.title} fill unoptimized sizes="(max-width: 768px) 100vw, 448px" className="object-cover" />
@@ -177,7 +219,7 @@ export default function MapPage() {
               <h2 className="text-xl font-bold text-ink">{selected.title}</h2>
               <button
                 onClick={() => handleSave(selected.id)}
-                aria-label={isSaved(selected.id) ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
+                aria-label={isSaved(selected.id) ? en ? 'Remove from saved' : 'הסר מהמועדפים' : en ? 'Save listing' : 'הוסף למועדפים'}
                 aria-pressed={isSaved(selected.id)}
                 disabled={isPending(selected.id)}
                 data-testid="favorite-toggle"
@@ -190,39 +232,41 @@ export default function MapPage() {
             </div>
             <div className="flex items-center gap-2 text-muted-text text-sm mb-3">
               <MapPin className="w-4 h-4" />
-              <span>{publicAreaLabel()}</span>
+              <span>{en ? 'Approximate area' : publicAreaLabel()}</span>
               <span>•</span>
-              <span>{selected.bedrooms} חדרים</span>
+              <span>{selected.bedrooms} {en ? 'rooms' : 'חדרים'}</span>
             </div>
             <div className="flex items-center gap-2 mb-3">
               <span className="font-bold text-lg text-orange">{selectedPriceLabel}</span>
-              {selected.is_sublet && <Badge variant="warning">סאבלט</Badge>}
+              {selected.is_sublet && <Badge variant="warning">{en ? 'Sublet' : 'סאבלט'}</Badge>}
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3">
               <Badge variant="default">{selectedAvailabilityLabel}</Badge>
               <Badge variant={selected.bills_included ? 'success' : 'default'}>
-                {selected.bills_included ? 'חשבונות כלולים' : 'חשבונות לא כלולים'}
+                {selected.bills_included ? en ? 'Bills included' : 'חשבונות כלולים' : en ? 'Bills not included' : 'חשבונות לא כלולים'}
               </Badge>
             </div>
             {selected.available_from && (
               <p className="text-sm text-muted-text mb-3">
-                זמין מ: {new Date(selected.available_from).toLocaleDateString('he-IL')}
+                {en ? 'Available from: ' : 'זמין מ: '}{new Date(selected.available_from).toLocaleDateString(en ? 'en-GB' : 'he-IL')}
               </p>
             )}
             <p className="mb-3 rounded-shutaf-md bg-neutral-bg-soft px-3 py-2 text-xs text-muted-text">
-              המיקום במפה מוצג כאזור כללי בלבד. הכתובת המדויקת תהיה זמינה בצ׳אט רק לאחר שבעל/ת הנכס יאשרו את הפנייה.
+              {en ? 'The map shows an approximate area. The exact address is available in the chat only after the owner accepts your inquiry.' : 'המיקום במפה מוצג כאזור כללי בלבד. הכתובת המדויקת תהיה זמינה בצ׳אט רק לאחר שבעל/ת הנכס יאשרו את הפנייה.'}
             </p>
             {selected.description && <p className="text-body-text mb-4">{selected.description}</p>}
-            <Link href={`${locale === 'en' ? '/en' : ''}/listings/${selected.id}`}  className="mb-4 inline-block rounded-xl border border-card-border px-4 py-3 text-teal">צפייה במודעה המלאה</Link>
+            <Link href={`${prefix}/listings/${selected.id}`} className="mb-4 inline-block rounded-xl border border-card-border px-4 py-3 text-teal">{en ? 'View full listing' : 'צפייה במודעה המלאה'}</Link>
             <ShareListing id={selected.id} locale={locale}/>
-            <Button
+            {ownedIds.has(selected.id) ? <Link href={`${prefix}/compose?listing=${selected.id}`} prefetch={false} className="min-h-11 flex items-center justify-center rounded-xl bg-orange px-4 py-3 font-semibold text-white">
+              {en ? 'Manage listing' : 'ניהול המודעה'}
+            </Link> : <Button
               variant="primary"
               className="w-full"
               onClick={() => handleContact(selected.id)}
             >
               <MessageCircle className="w-4 h-4 ms-2" />
-              יצירת קשר עם בעל/ת הנכס
-            </Button>
+              {en ? 'Contact owner' : 'יצירת קשר עם בעל/ת הנכס'}
+            </Button>}
           </div>
         )}
       </Modal>

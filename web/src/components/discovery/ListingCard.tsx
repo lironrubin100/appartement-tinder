@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { MapPin, Heart, MessageCircle } from 'lucide-react';
 import { ShareListing } from '@/components/listings/ShareListing';
 import { Badge } from '../ui/Badge';
@@ -22,6 +23,9 @@ interface ListingCardProps {
   isNew?: boolean;
   saved?: boolean;
   savePending?: boolean;
+  isOwner?: boolean;
+  manageHref?: string;
+  selected?: boolean;
   onSave?: (id: string) => void;
   onMessage?: (id: string) => void;
   onClick?: () => void;
@@ -45,16 +49,20 @@ export function ListingCard({
   isNew = false,
   saved = false,
   savePending = false,
+  isOwner = false,
+  manageHref,
+  selected = false,
   onSave,
   onMessage,
   onClick,
 }: ListingCardProps) {
+  const en = locale === 'en';
   const roomPriceLabel = minRoomPrice === maxRoomPrice
-    ? `₪${minRoomPrice.toLocaleString()} לחדר`
-    : `₪${minRoomPrice.toLocaleString()}–${maxRoomPrice.toLocaleString()} לחדר`;
+    ? `₪${minRoomPrice.toLocaleString()} ${en ? 'per room' : 'לחדר'}`
+    : `₪${minRoomPrice.toLocaleString()}–${maxRoomPrice.toLocaleString()} ${en ? 'per room' : 'לחדר'}`;
   const availableRoomsLabel = availableRoomCount === 1
-    ? 'חדר פנוי אחד'
-    : `${availableRoomCount} חדרים פנויים`;
+    ? en ? '1 available room' : 'חדר פנוי אחד'
+    : `${availableRoomCount} ${en ? 'available rooms' : 'חדרים פנויים'}`;
 
   return (
     <div
@@ -62,6 +70,8 @@ export function ListingCard({
       onClick={onClick}
       data-testid="listing-card"
       data-apartment-id={id}
+      data-selected={selected}
+      data-owned={isOwner}
     >
       {/* Image */}
       <div className="relative bg-neutral-bg-soft h-40 flex items-center justify-center overflow-hidden group">
@@ -76,7 +86,7 @@ export function ListingCard({
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-orange-soft to-neutral-bg flex items-center justify-center">
-            <span className="text-muted-text">תמונה לא זמינה</span>
+            <span className="text-muted-text">{en ? 'Image unavailable' : 'תמונה לא זמינה'}</span>
           </div>
         )}
         {/* Save Button */}
@@ -85,7 +95,7 @@ export function ListingCard({
             e.stopPropagation();
             onSave?.(id);
           }}
-          aria-label={saved ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
+          aria-label={saved ? en ? 'Remove from saved' : 'הסר מהמועדפים' : en ? 'Save listing' : 'הוסף למועדפים'}
           aria-pressed={saved}
           disabled={savePending}
           data-testid="favorite-toggle"
@@ -97,7 +107,7 @@ export function ListingCard({
         </button>
         {isNew && (
           <span className="absolute top-3 inset-s-3 bg-success text-white text-xs font-bold px-2.5 py-1 rounded-full">
-            חדש
+            {en ? 'New' : 'חדש'}
           </span>
         )}
         {/* Price Badge */}
@@ -109,14 +119,17 @@ export function ListingCard({
       {/* Content */}
       <div className="p-4">
         {/* Title */}
-        <h3 className="text-base font-bold text-ink mb-2 line-clamp-2">{title}</h3>
+        <h3 className="text-base font-bold text-ink mb-2 line-clamp-2">
+          <button type="button" className="text-start" onClick={event => { event.stopPropagation(); onClick?.(); }}>{title}</button>
+        </h3>
+        {isOwner && <Badge variant="default" className="mb-2">{en ? 'Your listing' : 'המודעה שלך'}</Badge>}
 
         {/* Location & Bedrooms */}
         <div className="flex items-center gap-2 text-muted-text text-sm mb-3">
           <MapPin className="w-4 h-4" />
           <span>{location}</span>
           <span className="text-muted-text">•</span>
-          <span>{bedrooms} חדרים</span>
+          <span>{bedrooms} {en ? 'rooms' : 'חדרים'}</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
@@ -125,14 +138,14 @@ export function ListingCard({
           </Badge>
           {billsIncluded !== undefined && (
             <Badge variant={billsIncluded ? 'success' : 'default'} className="text-xs py-0.5 px-2">
-              {billsIncluded ? 'חשבונות כלולים' : 'חשבונות לא כלולים'}
+              {billsIncluded ? en ? 'Bills included' : 'חשבונות כלולים' : en ? 'Bills not included' : 'חשבונות לא כלולים'}
             </Badge>
           )}
         </div>
 
         {/* Available From */}
         <div className="text-sm text-muted-text mb-3">
-          זמין מ: {new Date(availableFrom).toLocaleDateString('he-IL')}
+          {en ? 'Available from: ' : 'זמין מ: '}{availableFrom ? new Date(availableFrom).toLocaleDateString(en ? 'en-GB' : 'he-IL') : '—'}
         </div>
 
         {/* Tags */}
@@ -153,10 +166,14 @@ export function ListingCard({
         <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-card-border">
           <ShareListing id={id} locale={locale} />
           <div className="flex items-center gap-1 text-sm">
-            <span className="text-muted-text">מעוניינים:</span>
+            <span className="text-muted-text">{en ? 'Interested:' : 'מעוניינים:'}</span>
             <span className="font-semibold text-ink">{interestedCount}</span>
           </div>
-          <button
+          {isOwner && manageHref ? <Link href={manageHref} prefetch={false} onClick={event => event.stopPropagation()} className="min-h-11 inline-flex items-center text-sm font-semibold text-teal underline">
+            {en ? 'Manage listing' : 'ניהול המודעה'}
+          </Link> : !isOwner && onMessage ? <button
+            type="button"
+            aria-label={en ? 'Contact owner' : 'יצירת קשר עם בעל/ת הנכס'}
             onClick={(e) => {
               e.stopPropagation();
               onMessage?.(id);
@@ -164,7 +181,7 @@ export function ListingCard({
             className="p-2 hover:bg-neutral-bg-soft rounded-md transition-colors"
           >
             <MessageCircle className="w-5 h-5 text-muted-text hover:text-orange" />
-          </button>
+          </button> : null}
         </div>
       </div>
     </div>
