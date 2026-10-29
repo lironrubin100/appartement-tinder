@@ -11,6 +11,16 @@ DECISIONS.md remains authoritative for binding product and business rules. This 
 
 Owner intent confirmed in chat on 15 October: prepare a genuinely usable closed-pilot prototype and a clear vision for a university investment fund, before public release. Keep a durable, evolving place for business-model and Pro ideas while building. This does not approve payments or change existing deferrals.
 
+The evolving owner story, product purpose, messaging and long-term connections are maintained in [PRODUCT_VISION](PRODUCT_VISION.md). That interview draft distinguishes owner direction, proposals and unresolved choices; it does not replace canonical decisions or assign launch scope.
+
+### NOTE-20261029-001 Product vision interview in progress
+
+- Type: idea
+- Owner approval: confirmed
+- Routing: recorded
+
+Source: the owner's supplied 27 October context and direct clarifications in this chat, 27–29 October 2026. Confirmation concerns the vision/planning input, not final wording, designs or MVP scope. Routed to PRODUCT_VISION and ROADMAP IDEA-011–020: interactive area understanding, area preferences/flexibility, the bidirectional people/home connection, planned pilot-ready resident knowledge collection, and later local value. Existing IDEA-003/010 retain the place-discovery and advertising hypotheses. Student free core with optional future extras and labeled promotion independent of personal fit are owner directions awaiting precise canonical boundaries; no billing, feature task, launch gate, queue order or runner change is made by this note. Group preference aggregation and household representation remain open. The pilot tip structure is planning, not active collection or an approved publication workflow.
+
 ## Instinct: planning input, not development execution
 
 Owner workflow, 25 October 2026: Instinct receives voice/text ideas, problems, decisions, market research and funding/application context on the phone. It reads current PROJECT_STATUS plus relevant DECISIONS rows to distinguish owner intent, approved policy and actual tested implementation. It currently has read-only GitHub access; writing is not connected. A future owner-approved writing boundary is this existing file only. No code, schema/data/config/secrets, canonical decision edits, task ordering or completion flags belong to Instinct. No automatic sync is claimed while writing is unavailable.

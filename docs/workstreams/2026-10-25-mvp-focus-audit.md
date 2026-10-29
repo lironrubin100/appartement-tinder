@@ -1,5 +1,11 @@
 # MVP focus and execution-instruction audit — 25 October 2026
 
+## Product vision interview checkpoint — 29 October 2026
+
+Owner requests continuing product/vision clarification before launch sorting or implementation. Source at entry: primary master e85c450666c7d2c165dcc37b53664e2076a8e38e, clean. Added docs/PRODUCT_VISION.md for the distinct founder-story/purpose/messaging/evolution role, linked from existing BUSINESS_MODEL NOTE-20261029-001 and shared business-planning row. ROADMAP IDEA-011–020 index new directions once; IDEA-003/010 and tasks9.12–9.15 remain reusable existing coverage. Narrative records map as city understanding, Discover as people discovery, future area preferences/flexibility, bidirectional recruiting-home context and planned pilot-tip organization. Partial-registration household portrayal, request routing, group aggregation and tip editing remain open; early examples/answers are not a closed policy. Student email gate and all current canonical rules remain. No DECISIONS, checklist/packet, app, data, runner or launch-order change; no whole-journey acceptance claimed. Next: ask about household representation/voice, area-flexibility meaning and pilot editorial flow before canonical task reconciliation.
+
+Documentation validation29October: check-planning passed26 slices/23 packets/142 decision rows; next-work --check passed249 existing cards and valid dependencies, with product_execution false. No task IDs/completion flags or canonical decision changed. Whitespace/local-link checks and inventory refresh accompany the documentation handoff. The earlier approval-service quota failure executed no edit; retry through the same apply_patch path succeeded after the owner asked to continue. Publication uses the standing normal Git authorization; no product runtime validation or deployment acceptance is inferred.
+
 ## Current checkpoint
 
 Owner's latest scope is audit/workflow only. Plan/Build entrypoint, atomic card validation, scheduling guards and simplified Instinct intake are completed; no MVP task was executed. Current mode is Plan and both schedule/dispatch remain paused. See [the final workflow checkpoint](#final-workflow-checkpoint--25-october-2026) for current counts, checks, removal/recovery and next step. Earlier reviews and releases below are historical evidence, not current dispatch instructions.
