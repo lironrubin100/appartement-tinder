@@ -1,6 +1,6 @@
 # Git branch and worktree inventory
 
-Generated: 29 Oct 2026, 16:36 (Asia/Jerusalem); 2026-10-29T14:36:03.309Z.
+Generated: 29 Oct 2026, 16:40 (Asia/Jerusalem); 2026-10-29T14:40:44.143Z.
 
 Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at 8ee346c; this script does not fetch or infer deployment state.
 
@@ -10,7 +10,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Branch | HEAD | Local changes | HEAD in master? | Git lock |
 | --- | --- | --- | --- | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | master | 8ee346cf | 4 tracked; 0 untracked entries | Yes | No |
+| C:/Users/User/Desktop/appartement tinder | master | c3e72823 | 9 tracked; 0 untracked entries | Yes | No |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | codex/implementation-plan | a66f12a3 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | codex/standing-agent-authorization | f571b785 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | codex/next-step-reporting | cf39486d | Could not read | Unknown | No |
@@ -41,7 +41,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 | codex/sl01-lister-safe-browsing | f4d1d4a | None | Yes |
 | codex/standing-agent-authorization | f571b78 | origin/codex/standing-agent-authorization | No |
 | codex/streamline-execution | 4eca5c7 | origin/codex/streamline-execution | Yes |
-| master | 8ee346c | origin/master | Yes |
+| master | c3e7282 | origin/master | Yes |
 | onboarding-flow-impl | 71cec18 | None | No |
 | worktree-map-completeness | fe35d6f | None | No |
 
@@ -49,7 +49,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Last commit description |
 | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | Verify first owner-management milestone and reconcile evidence |
+| C:/Users/User/Desktop/appartement tinder | Bound the Stage A prerequisite selector correction |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | Check this checkout directly |

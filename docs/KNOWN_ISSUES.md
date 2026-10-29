@@ -2,8 +2,8 @@
 
 ## WORKFLOW-STAGE-PREREQUISITE-001 — Demonstration queue requires full later-stage packet verification
 
-- State: reproduced29October2026 on8ee346c after verified4.19. Preflight selects3.1 but blocks on SL02.1; that full packet depends on incomplete SL01.2/Google and includes later hardening. The approved Stage A checklist and already-accepted publication artifact must remain distinct from full packet certification.
-- Next: bounded0.14 repairs Stage A prerequisite evidence selection, preserving full packet states, physical order, blocked/missing evidence refusal and Stage B/C gates. No product/schema or publication-policy change.
+- State: fixed/verified29October2026 by0.14;32 selector tests pass. A dated source-bound artifact receipt permits Stage A3.1 using accepted publication evidence; absent/stale/failed/unfinished/blocked artifacts still refuse. Full parent verification and Stage B/C remain separate.
+- Original reproduction on8ee346c:3.1 blocked on full SL02.1 after verified4.19, although that packet includes later SL01.2/Google/hardening. Existing packet graph and states remain unchanged; see the existing workflow checkpoint. No product/schema or publication-policy change.
 
 This is a defect register, not a feature roadmap. Keep owner-reported, source-confirmed, reproduced, fixed and verified states distinct. Current scoped review:20 October 2026; [complete release/evidence map](releases/2026-10-20-profiles-chat.md). A report does not authorize unrelated implementation during planning.
 

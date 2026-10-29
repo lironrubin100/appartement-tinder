@@ -117,7 +117,8 @@ test('integrated production checklist is atomic and agrees with owner dispatch',
   } else if(ledger.micro_task_dispatch.task_ids.some(id=>!checklist.find(t=>t.id===id).done)) {
     assert.equal(next.action,'finish-current-micro-task');
   } else {
-    assert.notEqual(next.action,'micro-task');
+    if (next.action === 'micro-task') assert.equal(next.task,parseDemonstrationTasks(text).find(t=>!t.done)?.id);
+    else assert.ok(['blocked','reconcile-demonstration-evidence'].includes(next.action));
   }
 });
 
@@ -151,7 +152,7 @@ test('Stage A milestone transition preserves checklist order ahead of Google acc
   delete ledger.owner_priority_override;
   ledger.checklist_continuation={plan:'implementation_plan.md',stage:'A'};
   ledger.packets[ledger.micro_task_dispatch.packet].status='verified';
-  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9','0.10','0.11','0.12','0.13'].includes(t.id)});
+  const advance=t=>({...t,done:t.done||ledger.micro_task_dispatch.task_ids.includes(t.id)||['0.7','0.8','0.9','0.10','0.11','0.12','0.13','0.14'].includes(t.id)});
   const checklist=parseMicroTasks(text).map(advance), demo=parseDemonstrationTasks(text).map(advance);
   const next=chooseNext(packets,ledger,checklist,demo);
   assert.equal(next.task,'3.1');assert.equal(next.packet,'SL03.1');
@@ -170,6 +171,65 @@ test('missing Stage A source fails closed and checked demo requires evidence rev
   assert.equal(chooseNext(manifest,l,tasks,tasks).action,'reconcile-demonstration-evidence');
 });
 
+async function stageArtifactScenario() {
+  const source = await loadTaskSource();
+  delete source.ledger.owner_priority_override;
+  delete source.ledger.micro_task_dispatch;
+  source.tasks.find(task => task.id === '0.14').done = true;
+  return { ...source, select() { return chooseNext(this.manifest,this.ledger,this.tasks,this.tasks.filter(t=>t.stage===executionStage(this.ledger))); } };
+}
+
+test('source-bound Stage A artifact advances the real map card without promoting parent packets', async () => {
+  const source = await stageArtifactScenario(), before = JSON.stringify(source.ledger.packets);
+  assert.deepEqual(validateExecution(source.manifest,source.ledger),[]);
+  assert.deepEqual(validateTaskCards(source.tasks,source.manifest,source.ledger),[]);
+  assert.equal(source.select().task,'3.1');assert.equal(source.select().action,'micro-task');
+  assert.equal(source.select().prerequisite_artifacts['SL02.1'].source_packet,'SL04.2');
+  assert.equal(source.ledger.packets['SL02.1'].status,'verification-incomplete');
+  assert.equal(source.ledger.packets['SL01.2'].status,'verification-incomplete');
+  assert.equal(JSON.stringify(source.ledger.packets),before,'selection cannot promote evidence');
+  delete source.ledger.checklist_continuation.prerequisite_artifacts;
+  assert.equal(source.select().action,'blocked');assert.deepEqual(source.select().missing_prerequisites,['SL02.1']);
+});
+
+test('missing, stale, failed or blocked Stage A artifact evidence fails closed', async () => {
+  for (const mutate of [
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].source_sha='0'.repeat(40),
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].handoff='docs/workstreams/other.md',
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].verified_at='2026-99-99T00:00:00Z',
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].checks[0].result='failed',
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].artifact='',
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].task_ids.pop(),
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].task_ids.push('2.1'),
+    s=>s.ledger.checklist_continuation.prerequisite_artifacts.A['SL02.1'].task_ids.reverse(),
+    s=>s.ledger.packets['SL04.2'].status='verification-incomplete',
+    s=>s.ledger.packets['SL02.1'].status='blocked',
+    s=>s.tasks.splice(s.tasks.findIndex(t=>t.id==='2.4'),1),
+  ]) {
+    const source = await stageArtifactScenario();mutate(source);
+    assert.equal(source.select().action,'blocked',mutate.toString());
+    assert.ok([...validateExecution(source.manifest,source.ledger),...validateTaskCards(source.tasks,source.manifest,source.ledger)].length,mutate.toString());
+  }
+  const source=await stageArtifactScenario();source.tasks.find(t=>t.id==='2.4').done=false;
+  assert.ok(validateTaskCards(source.tasks,source.manifest,source.ledger).length);
+  assert.equal(source.select().task,'2.4','physical unfinished predecessor remains first');
+});
+
+test('Stage A artifact cannot waive full packet verification or Stage B prerequisites', async () => {
+  const source=await stageArtifactScenario();
+  source.ledger.packets['SL03.1']={...source.ledger.packets['SL04.2'],status:'verified'};
+  assert.match(validateExecution(source.manifest,source.ledger).join('\n'),/SL03\.1: verified with unverified prerequisite SL02\.1/);
+  source.ledger.packets['SL03.1']={status:'pending'};
+  source.ledger.checklist_continuation.stage='B';
+  assert.equal(source.select().action,'blocked','Stage A journey acceptance still required');
+  source.ledger.checklist_continuation.stage_acceptance.A={status:'verified'};
+  for(const task of source.tasks) if(task.stage==='B' && task.id==='3.6') break; else task.done=true;
+  assert.equal(source.select().task,'3.6');assert.equal(source.select().action,'blocked');
+  assert.deepEqual(source.select().missing_prerequisites,['SL02.1']);
+  source.ledger.checklist_continuation.prerequisite_artifacts.B=source.ledger.checklist_continuation.prerequisite_artifacts.A;
+  assert.match(validateExecution(source.manifest,source.ledger).join('\n'),/Only Stage A/);
+});
+
 test('explicit ready owner subset selects a real unchecked task without verifying its parent', () => {
   const {ledger,checklist}=ownerQueue();
   ledger.owner_priority_override={status:'ready',task:'2.16',issue:'DEMO',scope:'named approved subset',handoff:'docs/workstreams/demo.md'};
@@ -185,7 +245,7 @@ test('explicit ready owner subset selects a real unchecked task without verifyin
 
 test('every real A/B/deferred task has a bounded card without a second backlog', async () => {
   const source=await loadTaskSource();
-  assert.equal(source.tasks.length,249);
+  assert.equal(source.tasks.length,250);
   assert.deepEqual(validateTaskCards(source.tasks,source.manifest,source.ledger),[]);
   for (const task of source.tasks) {
     const card=buildBrief(task,source.manifest,source.ledger,source.decisions);

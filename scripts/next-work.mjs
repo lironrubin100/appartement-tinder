@@ -42,6 +42,14 @@ export function validateExecution(manifest, ledger) {
   }
   const override = ledger.owner_priority_override;
   if (override?.status === 'ready' && (!/^\d+\.\d+$/.test(override.task ?? '') || !override.scope || !override.issue || !/^docs\/workstreams\/[A-Za-z0-9_.-]+\.md$/.test(override.handoff ?? ''))) errors.push('Ready owner priority requires task, issue, scope and handoff');
+  for (const [stage, receipts] of Object.entries(ledger.checklist_continuation?.prerequisite_artifacts ?? {})) {
+    if (stage !== 'A' || !receipts || typeof receipts !== 'object' || Array.isArray(receipts)) {
+      errors.push('Only Stage A supports bounded prerequisite artifacts'); continue;
+    }
+    for (const [id, receipt] of Object.entries(receipts)) {
+      if (!stageArtifactValid(id, receipt, manifest, ledger)) errors.push(`${id}: invalid Stage A prerequisite artifact evidence`);
+    }
+  }
   for (const id of ids) {
     const row = ledger.packets?.[id];
     if (!row || !allowed.includes(row.status)) { errors.push(`${id}: missing/invalid execution status`); continue; }
@@ -57,6 +65,27 @@ export function validateExecution(manifest, ledger) {
     if (row.handoff && (!/^docs\/workstreams\/[A-Za-z0-9_.-]+\.md$/.test(row.handoff))) errors.push(`${id}: handoff must be a local workstream Markdown path`);
   }
   return errors;
+}
+
+// A demonstration artifact is narrower than full-packet certification. It is
+// usable only when explicitly bound to an already verified source packet and
+// every Stage A checklist task of the predecessor has actually been accepted.
+function stageArtifactValid(id, receipt, manifest, ledger, tasks) {
+  const source = ledger.packets?.[receipt?.source_packet];
+  if (!manifest.packets.some(p => p.id === id) || ledger.packets?.[id]?.status === 'blocked' ||
+      !receipt || receipt.status !== 'verified' || receipt.source_packet === id || source?.status !== 'verified' ||
+      !/^[a-f0-9]{40}$/.test(receipt.source_sha ?? '') || receipt.source_sha !== source.source_sha ||
+      !/^docs\/workstreams\/[A-Za-z0-9_.-]+\.md$/.test(receipt.handoff ?? '') || receipt.handoff !== source.handoff ||
+      !/^\d{4}-\d{2}-\d{2}T/.test(receipt.verified_at ?? '') || !Number.isFinite(Date.parse(receipt.verified_at)) ||
+      typeof receipt.artifact !== 'string' || !receipt.artifact.trim() ||
+      !Array.isArray(receipt.task_ids) || !receipt.task_ids.length || new Set(receipt.task_ids).size !== receipt.task_ids.length ||
+      !Array.isArray(receipt.checks) || !receipt.checks.length || receipt.checks.some(c => !c?.command_or_scenario || c.result !== 'passed')) return false;
+  if (tasks) {
+    const required = tasks.filter(task => task.stage === 'A' && packetFor(task, manifest) === id);
+    if (!required.length || required.some(task => !task.done) ||
+        JSON.stringify(required.map(task => task.id)) !== JSON.stringify(receipt.task_ids)) return false;
+  }
+  return true;
 }
 
 function chooseBase(manifest, ledger, checklist, demonstrationTasks) {
@@ -107,10 +136,15 @@ function chooseBase(manifest, ledger, checklist, demonstrationTasks) {
     const task = demonstrationTasks.find((task) => !task.done);
     if (!task) return { action: stage === 'A' ? 'reconcile-demonstration-evidence' : 'reconcile-mvp-evidence', packet: null, note: `All Stage ${stage} tasks checked; verify its combined acceptance. Stage C is never automatic.` };
     const packet = packetFor({...task, stage}, manifest);
-    if (!packet || !eligible(packet) || ledger.packets[packet].status === 'blocked') return { action: 'blocked', packet: packet ?? null, task: task.id,
+    const prerequisiteReady = dep => ledger.packets[dep].status === 'verified' || stage === 'A' &&
+      stageArtifactValid(dep, ledger.checklist_continuation.prerequisite_artifacts?.A?.[dep], manifest, ledger, demonstrationTasks);
+    if (!packet || byId.get(packet).state !== 'ready' || !byId.get(packet).depends_on.every(prerequisiteReady) || ledger.packets[packet].status === 'blocked') return { action: 'blocked', packet: packet ?? null, task: task.id,
       reason: `Selected Stage ${stage} task needs its prerequisite artifacts/evidence reconciled; preserve checklist order.`,
-      missing_prerequisites: packet ? byId.get(packet).depends_on.filter((dep) => ledger.packets[dep].status !== 'verified') : [] };
+      missing_prerequisites: packet ? byId.get(packet).depends_on.filter(dep => !prerequisiteReady(dep)) : [] };
     return { action: 'micro-task', packet, task: task.id, plan: ledger.checklist_continuation.plan,
+      ...(stage === 'A' ? {prerequisite_artifacts: Object.fromEntries(byId.get(packet).depends_on
+        .filter(dep => ledger.packets[dep].status !== 'verified')
+        .map(dep => [dep,ledger.checklist_continuation.prerequisite_artifacts.A[dep]]))} : {}),
       prerequisites: byId.get(packet).depends_on, note: `Stage ${stage} physical order. Reuse existing verified behavior; task acceptance does not certify its full parent packet. Continue only after actual checks pass.` };
   }
   for (const status of ['in-progress', 'verification-incomplete']) {
@@ -203,6 +237,9 @@ export function packetFor(task, manifest) {
 export function validateTaskCards(tasks, manifest, ledger) {
   const errors = [], ids = new Set(tasks.map(t => t.id));
   if (!tasks.length || ids.size !== tasks.length) errors.push('Checklist is empty or has duplicate task IDs');
+  for (const [id, receipt] of Object.entries(ledger.checklist_continuation?.prerequisite_artifacts?.A ?? {})) {
+    if (!stageArtifactValid(id, receipt, manifest, ledger, tasks)) errors.push(`${id}: Stage A artifact requires all exact predecessor task IDs completed`);
+  }
   for (const [stage, gate] of Object.entries(ledger.checklist_continuation?.stage_acceptance ?? {})) {
     if (gate.status === 'verified' && (!tasks.some(task => task.stage === stage) || tasks.some(task => task.stage === stage && !task.done))) errors.push(`${stage}: verified stage has unfinished or missing checklist tasks`);
   }
