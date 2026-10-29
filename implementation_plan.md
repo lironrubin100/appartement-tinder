@@ -352,7 +352,7 @@
   - **הוראות טכניות ברורות:** בדוק שני בעלים, שני טאבים, draft edit פרטי עד שמירה מפורשת, חדרים, intake reopen, taken→active מ־4.20/4.21, accepted chat ו־pending reconfirm. HE/EN בטלפון/מחשב.
   - **קריטריון קבלה:** npx playwright test e2e/listing-edit.spec.ts --workers=1 עובר; שיחת accepted נשארת; draft אינו מפרסם אוטומטית.
 
-- [ ] **משימה 6.29: בדיקת מסלול בעלים ופניות**
+- [x] **משימה 6.29: בדיקת מסלול בעלים ופניות**
   - **קבצים לעריכה/יצירה:** `web/e2e/owner-listing-inbox.spec.ts`.
   - **הוראות טכניות ברורות:** בדוק בעל שתי דירות ושני פונים: intro, listing filter, seen, accept, decline ושיחה; אין self-inquiry ואין גישת בעלים אחר.
   - **קריטריון קבלה:** npx playwright test e2e/owner-listing-inbox.spec.ts --workers=1 עובר מול יעד מזוהה בשתי שפות; פניות ושיחות משויכות נכון.
