@@ -178,7 +178,10 @@
       "revisit_when": "Review remaining packet hardening evidence before marking verified; the confirmation fix passed production acceptance; retain demo fixtures and recheck current master."
     },
     "SL03.1": {
-      "status": "pending"
+      "status": "in-progress",
+      "handoff": "docs/workstreams/implementation-plan-SL03.md",
+      "worktree": "C:/Users/User/Desktop/appartement tinder",
+      "outcome": "3.1 accepted29October: existing active/available/public-point view matches live npbduvjnqnbydolmdpsc. New plan_core_map.sql and full disposable runner pass owner/resident/B10, room count/range, exact-field exclusion, stable public points, block/anonymous denial. Same3 ordinary QA actors freshly read4 seed listings each with exact safe field allowlist, repeat stability and inactive exclusion; wrapper0, no fixture mutations. Reused unchanged-view4.4 ordinary last-room exclusion with its dated unrelated group/chat digest drift retained. No migration/product/config change; full SL03.1 remains open. Next3.2 pin/card synchronization."
     },
     "SL04.1": {
       "status": "pending"

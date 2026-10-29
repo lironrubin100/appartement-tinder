@@ -74,6 +74,8 @@ for (let i = 0; i < ids.length; i++) {
 await db.exec('reset role');
 await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
+await db.exec(await read('supabase/tests/plan_core_map.sql'));
+console.log('PASS: public map active/available eligibility, room price/count, stable approximate-only projection, owner/resident/lister reads, block and anonymous denial.');
 await db.exec(await read('supabase/tests/plan_room_availability.sql'));
 console.log('PASS: owner-only room availability, public count/range, D18 pending reconfirmation and accepted-chat preservation.');
 await db.exec(await read('supabase/tests/plan_listing_inquiry_intake.sql'));
