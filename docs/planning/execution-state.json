@@ -70,6 +70,14 @@
       ]
     },
     "SL08.1": {
+      "task_8_1_acceptance": {
+        "verified_at": "2026-10-30",
+        "source_sha": "e6d816d3ac248a772ee8712241fa8ef82bd9be87",
+        "deployment_id": "dpl_FGWtESqTKsfYysQzLkXAisduvj9S",
+        "worktree": "C:/Users/User/Desktop/appartement tinder",
+        "outcome": "Bounded8.1 accepted: deliberate multiline composer, active actor/token binding, draft-preserving stable-key retry and mobile navigation clearance. Types/lint/build and4 local+4 exact-production HE/EN390/1280 two-browser live/reload/error/lost-ACK cases pass. Guest/outsider populated-history/send denied; HE390 delayed-response newer draft and offline catch-up pass on both targets. Run09883595 wrapper exit0, full baseline/eight chat hashes restored, run roots/messages0, five driver sessions absent, journals clean/leases0. No migration or new actors. Historical full packet source/checks below retain their original date/scope; no later chat/full-MVP certification inferred. Owner requested stop; no8.2 started.",
+        "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md"
+      },
       "handoff": "docs/workstreams/2026-10-19-cloud-mvp-progress.md",
       "worktree": "/workspace/appartement-tinder",
       "source_sha": "95f333bb5d7587122e9e72a9296b48bd14e3f3e0",
@@ -570,7 +578,7 @@
     "unit": "one-approved-atomic-task",
     "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner30October explicitly requested finishing only the currently claimed8.1 outcome and then stopping; goal is paused. Disable new dispatch now, finish verification/publication/guarded cleanup for8.1 only, then release this writer. No successor task is authorized until owner resumes. Existing SQL/publication authorization and target/data/ownership guards persist.",
+    "reason": "Owner30October requested finishing only8.1 and stopping.8.1 is accepted/published/cleaned, its executor claim released, goal paused and new dispatch disabled. No successor task started or authorized until an explicit owner resume. Existing SQL/publication authorization and target/data/ownership guards persist.",
     "automation_id": "shutaf-next-approved-task"
   }
 }

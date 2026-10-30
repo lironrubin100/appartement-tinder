@@ -57,7 +57,7 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 - Owner reported26October2026 in this chat: the chat composer cannot insert a new line. Source-confirmed: ChatThread.tsx renders a single-line input, while the existing message renderer already uses whitespace-pre-wrap. No browser fix/acceptance is claimed by this record.
 - Routed once to existing task8.1; preserve its RPC/idempotency/draft/error scope. Provide multiline composition with a deliberate send action and documented keyboard behavior. Verify two-line Hebrew/English messages, phone/desktop typing, newline persistence for sender/recipient after reload, and retry preserving the draft. This is not image messages, message editing or a chat redesign.
--30October implementation/local acceptance: textarea/explicit Send, Enter/Shift+Enter newline, guarded session/stable request key, preserved draft/error and mobile navigation clearance. Four actual local HE/EN390/1280 two-browser cases pass, including committed lost-ACK retry once; production and final cleanup pending in the [owning checkpoint](workstreams/2026-10-19-cloud-mvp-progress.md). Not yet closed.
+-30October fixed/verified in e6d816d, READYdpl_FGWtESqTKsfYysQzLkXAisduvj9S/canonical: textarea/explicit Send, Enter/Shift+Enter newline, preserved draft/stable retry key and mobile navigation clearance. Four local+four exact-production HE/EN390/1280 two-browser cases pass, including persisted multiline text, real pre-send failure and committed lost-ACK retry once. Run09883595 exit0/full baseline restored/temporary roots and sessions absent. See [owning checkpoint](workstreams/2026-10-19-cloud-mvp-progress.md).
 
 ## CHAT-LONG-GROUP-NAME-001 — Long group title can overflow the phone header
 
