@@ -448,8 +448,8 @@
   - **קריטריון קבלה:** A שומר → מופיע בשמורים של A בלבד; אין פנייה חדשה; מונה הציבורי גדל באחד.
 
 - [ ] **משימה 5.2: חיבור מצב שמירה בכרטיס ובמפה**
-  - **קבצים לעריכה/יצירה:** `web/src/hooks/useFavorites.ts`, `web/src/components/discovery/ListingCard.tsx`, `web/src/components/listings/PublicListing.tsx`.
-  - **הוראות טכניות ברורות:** השתמש במקור state אחד ל־Save/Unsave ול־favorite overlay; הצג שגיאה עם אפשרות ניסיון חוזר.
+  - **קבצים לעריכה/יצירה:** `web/src/hooks/useFavorites.ts`, `web/src/lib/listings/personal-saves-store.ts`, `web/src/components/listings/SaveListing.tsx`, `web/src/components/discovery/ListingCard.tsx`, `web/src/components/listings/PublicListing.tsx`, `web/src/app/(main)/map/MapClient.tsx`, `web/src/types/database.ts`, `supabase/migrations/20261030191626_personal_save_state.sql`, `supabase/tests/plan_core_save_state.sql`, `scripts/test-resident-sql.mjs`, `scripts/test-personal-saves.mjs`.
+  - **הוראות טכניות ברורות:** השתמש במקור state אחד ל־Save/Unsave ול־favorite overlay; הצג שגיאה עם אפשרות ניסיון חוזר. התאמה30באוקטובר: ה־hook הנוכחי שומר עותק בכל mount, אינו מנקה על החלפת actor, מסיים כשל טעינה כ־ready וללא שמירות, ו־PublicListing שרתי בלי Save. הוסף client island לפרטים, חיבור MapClient/כרטיס/מודל למקור זיכרון משותף בדפדפן בלבד, loading/error/retry ו־single-flight לפי דירה. getUser ובדיקת actor/epoch מונעים קבלת קריאה/תשובה ישנה; אין cache משתמש בשרת או אחסון פרטי חדש. Retry שומר כוונת Save/Unsave ואינו מפעיל toggle עיוור אחרי אובדן תשובה: הוסף set_apartment_saved(uuid,boolean,uuid) קשור actor, נועל באותו סדר וממחזר את toggle הקיים רק כשנדרש מעבר. כפילות desired-state אינה הופכת מצב או מגדילה מונה; אין ledger/מוצר/הרשאות זהות חדשות. שמור API toggle לצרכנים קיימים. שלד CLI2.122.0 נוצר; SQL/store tests כוללים כשל, stale actor/read, single-flight ותשובה שאבדה אחרי commit; UI HE/EN390/1280 כולל load/read/mutation error/retry, reload, cross-surface state ו־B עצמאי. בדוק SQL ובעלות/יעד/history/data לפני shared apply; לא משנים סגנון מפה/שיתוף/פנייה.
   - **קריטריון קבלה:** שמירה והסרה מתעדכנות ונשמרות אחרי reload; המשתמש השני אינו מוצג כאילו שמר.
 
 

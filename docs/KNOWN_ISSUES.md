@@ -1,5 +1,10 @@
 # Known issues
 
+## PERSONAL-SAVE-UI-STATE-001 — Save overlays have separate stale state and unsafe blind retry
+
+- Source-confirmed30October2026 for5.2: useFavorites has per-mount state, no auth-change reset, getSession-only initialization and silent empty-ready on read failure. Map controls do not wait for favorite readiness or provide a separate load Retry; public detail lacks Save. Current toggle intentionally flips state, so a blind retry after a committed lost response reverses the user's intent.
+- Bounded5.2: shared browser-only actor-bound state, explicit unknown/loading/error/Retry, public-detail client action and idempotent desired-state RPC adapter over accepted5.1. No runtime leak reproduced, new product rule, private server cache, messaging or group wishlist. Acceptance pending.
+
 ## PERSONAL-SAVE-PRIVACY-001 — Legacy save sharing and interest identity/count bypass
 
 - Source/live-confirmed30October2026 while reconciling5.1: own_saves includes group-member access, ordinary roles can mutate separate apartment_interests, and apartment_hype_faces is ordinarily granted with names/identity and an is_pro branch. Existing toggle/public counters read that separately writable interest table. No real-user leak or destructive test was performed; current target is the retained demo/QA dataset.
