@@ -3,7 +3,7 @@
 ## LISTING-UNAVAILABLE-ROUTE-001 — Public unavailable listing loses its localized return path
 
 - Reproduced30October2026 on production b58198f: English missing listing returns404 with generic Next text, no explicit listing-unavailable message or return link. The validating ID layout throws outside its own segment's not-found boundary. Existing English nested fallback also aliases bilingual Hebrew UI and /map.
-- Task3.5 bounded correction: retain prestream404/public privacy and shared healthy renderer; localized parent boundaries render a shared explicit unavailable state and return to the same-language public catalog. No database/authorization change. Acceptance pending.
+- Task3.5 fixed and locally verified30October: identity catalog layouts mount localized parent boundaries around the prestream ID validation. Shared unavailable UI returns to the same-language public catalog;16 local guest/original3 HE/EN390/1280 cases each pass four explicit404/noindex states and healthy share/contact/language/refresh. Types/lint/build pass. Production acceptance pending; no database/authorization change.
 
 ## WORKFLOW-STAGE-PREREQUISITE-001 — Demonstration queue requires full later-stage packet verification
 
