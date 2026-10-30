@@ -181,7 +181,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL03.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "3.1–3.3 accepted29–30October; full SL03.1 remains open. Latest38276b2 READY/canonical: per-room public rent/date/area/gallery,8 local+8 production HE/EN390/1280 pages, keyboard locale navigation and8 ordinary guest/original3 safe RPC reads; types/lint/build/full SQL pass. Exact already-applied20261015143837 source restored locally only. Read-only run/full original59/59/62 and four global/nine private/three profile hashes equal, clean journal/leases0/wrapper0. Prior3.2 ownership/selection/keyboard and protected cleanup/session revocation evidence retained with earlier failed exits. Next3.4 same-room filters, then3.5 routes; later viewport/privacy gates remain open."
+      "outcome": "3.1–3.4 accepted29–30October; full SL03.1 remains in-progress. Latest3c6d016 READY/canonical: same-available-room price/date matching, tags, controlled filter state/reset/error/retry/deadline/stale-response protection. Full disposable SQL/types/lint/build and4 local+4 production HE/EN390/1280 Chrome cases pass. Hosted20261030151222 stable invoker/authenticated ID-only matcher; no private grants. Same3 actors, source-hash-bound ordinary evidence reused; read-only runba79c2a9 exit0, original59/59/62/root/nine private/three profile hashes equal, clean journal/leases0. Earlier failures remain recorded. Owner requested finish3.4 and stop; dispatch disabled,3.5 not started. Later viewport/privacy/full-packet gates remain open."
     },
     "SL04.1": {
       "status": "pending"
@@ -549,12 +549,12 @@
   },
   "workflow_mode": "build",
   "automation_control": {
-    "enabled": true,
+    "enabled": false,
     "cadence_minutes": 10,
     "unit": "one-approved-atomic-task",
     "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner27October resumed Build in the primary checkout, starting with exact partial6.22 cleanup and baseline proof. Reuse the same three QA actors and unchanged-source evidence; existing publication/DB/QA authorization and ownership guards persist. Continue the approved queue; Stage C remains deferred.",
+    "reason": "Owner30October requested completion of current task3.4 followed by a stop.3.4 is accepted and published; dispatch is paused and3.5 has not started. Resume only on a new owner instruction. Existing evidence, reusable QA actors and ownership guards are preserved; Stage C remains deferred.",
     "automation_id": "shutaf-next-approved-task"
   }
 }
