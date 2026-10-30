@@ -1,5 +1,9 @@
 # Implementation plan SL03 — public map and listing detail
 
+## Task3.5 — first local boundary check incomplete — 30October2026
+
+Shared localized unavailable component and nested/parent fallbacks compile; types/focused lint/optimized build exit0. Read-only optimized HTTP check still renders generic404 (custom text only embedded as route data, no main/catalog link). Parent folders have no layout, so their fallback alone is not a mounted catch boundary. Add identity parent layouts for those same public catalogs/details; preserve the ID layout's prestream validation and404. Card scope aligned to these two supporting files; lease released before new fingerprint. No SQL/data/fixture mutation. Existing generic probe is diagnosis only, not acceptance. The first local server was unreachable across its sandbox boundary and was stopped through its owned handle; current optimized server14153 is reachable.
+
 ## Task3.5 — unavailable boundary defect reproduced; bounded scope reconciled — 30October2026
 
 Published English missing UUID returns404 but generic Next "This page could not be found", with no custom unavailable copy/return link (read-only HTTP and owned Chrome probe). Existing ID layout validates before streaming, so its thrown notFound is outside that segment's own fallback. Existing nested English fallback also re-exports bilingual Hebrew UI and /map. Preserve nonstreamed404 and healthy shared renderer/SSR; add localized parent not-found boundaries and one shared unavailable component with public same-locale /listings return. Card scope expanded only to those supporting files. No SQL/authorization/metadata-policy change or test fixture mutation. Initial3.5 lease released before card fingerprint change; next validate/commit/reselect and implement this bounded route correction. New defect recorded as LISTING-UNAVAILABLE-ROUTE-001.

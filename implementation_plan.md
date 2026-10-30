@@ -433,7 +433,7 @@
   - **קריטריון קבלה:** בדירת 2000/2600 סינון 2100–2500 אינו מציג אותה רק מפני שהטווח הכולל חופף; איפוס מחזיר אותה.
 
 - [ ] **משימה 3.5: נתיבי פרטים בשתי שפות**
-  - **קבצים לעריכה/יצירה:** `web/src/app/listings/[listingId]/page.tsx`, `web/src/app/en/listings/[listingId]/page.tsx`, `web/src/components/listings/ListingUnavailable.tsx`, `web/src/app/listings/[listingId]/not-found.tsx`, `web/src/app/en/listings/[listingId]/not-found.tsx`, `web/src/app/listings/not-found.tsx`, `web/src/app/en/listings/not-found.tsx`.
+  - **קבצים לעריכה/יצירה:** `web/src/app/listings/[listingId]/page.tsx`, `web/src/app/en/listings/[listingId]/page.tsx`, `web/src/components/listings/ListingUnavailable.tsx`, `web/src/app/listings/[listingId]/not-found.tsx`, `web/src/app/en/listings/[listingId]/not-found.tsx`, `web/src/app/listings/not-found.tsx`, `web/src/app/en/listings/not-found.tsx`, `web/src/app/listings/layout.tsx`, `web/src/app/en/listings/layout.tsx`.
   - **הוראות טכניות ברורות:** השתמש באותו renderer; העבר locale ונתיב חזרה מתאים. מצב unavailable מוביל לתצוגה מפורשת ולא לשגיאת שרת.
   - **קריטריון קבלה:** אותה דירה נפתחת בעברית ובאנגלית, ב־390px ובמחשב, בלי איבוד לחצני השיתוף והפנייה.
 
