@@ -57,6 +57,11 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 - Owner reported26October2026 in this chat: the chat composer cannot insert a new line. Source-confirmed: ChatThread.tsx renders a single-line input, while the existing message renderer already uses whitespace-pre-wrap. No browser fix/acceptance is claimed by this record.
 - Routed once to existing task8.1; preserve its RPC/idempotency/draft/error scope. Provide multiline composition with a deliberate send action and documented keyboard behavior. Verify two-line Hebrew/English messages, phone/desktop typing, newline persistence for sender/recipient after reload, and retry preserving the draft. This is not image messages, message editing or a chat redesign.
+-30October implementation/local acceptance: textarea/explicit Send, Enter/Shift+Enter newline, guarded session/stable request key, preserved draft/error and mobile navigation clearance. Four actual local HE/EN390/1280 two-browser cases pass, including committed lost-ACK retry once; production and final cleanup pending in the [owning checkpoint](workstreams/2026-10-19-cloud-mvp-progress.md). Not yet closed.
+
+## CHAT-LONG-GROUP-NAME-001 — Long group title can overflow the phone header
+
+- Observed30October in private8.1 attempt6df08a8f: a generated `QA multiline <UUID>` title caused horizontal overflow at390px in the existing header. No message/send defect was inferred from that failed layout assertion. Final composer acceptance uses an ordinary short title; long-title header layout is a separate unresolved defect, with screenshot retained privately. No new feature/queue priority or fix is claimed.
 
 ## SETTINGS-PAGE-TYPE-001 — Settings route default export violates Next page props
 

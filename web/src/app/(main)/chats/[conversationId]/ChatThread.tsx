@@ -4,7 +4,7 @@ import { ChatListingCard } from '@/components/chat/ChatListingCard';
 import { sharedListingId, messageFields } from '@/lib/chat/message-types';
 import { useFavorites } from '@/hooks/useFavorites';
 import Link from 'next/link';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useId, useRef, useState } from 'react';
 import { ArrowRight, Send } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { localePath, type Locale } from '@/utils/navigation';
@@ -52,6 +52,8 @@ export default function ChatThread({
 
   const catchUpCursor = useRef(initialMessages.at(-1)?.message_seq ?? 0);
   const pendingSend = useRef<{ body: string; key: string } | null>(null);
+  const sendingNow = useRef(false);
+  const composerHintId = useId();
   const acknowledgedSeq = useRef(0);
   useEffect(() => { acknowledgedSeq.current = 0; }, [conversationId]);
   const newestRenderedSeq = messages.at(-1)?.message_seq ?? 0;
@@ -196,36 +198,66 @@ export default function ChatThread({
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const submittedDraft = body;
     const trimmedBody = body.trim();
-    if (!trimmedBody || sending) return;
+    if (!trimmedBody || sendingNow.current) return;
+    sendingNow.current = true;
     setSending(true);
     setError(null);
     const supabase = createClient();
     if (pendingSend.current?.body !== trimmedBody) {
       pendingSend.current = { body: trimmedBody, key: crypto.randomUUID() };
     }
-    const { data, error: insertError } = await supabase
-      .rpc('send_chat_message', {
-        p_conversation_id: conversationId,
-        p_body: trimmedBody,
-        p_request_key: pendingSend.current.key,
-      }).single();
-    if (insertError)
-      setError(
-        en
-          ? 'Could not send. Please retry.'
-          : 'לא הצלחנו לשלוח את ההודעה. נסה שוב.'
-      );
-    else if (data) {
+    const requestKey = pendingSend.current.key;
+    const controller = new AbortController();
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const send = async () => {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) throw new Error('No active session');
+        const { data: { user }, error: userError } = await supabase.auth.getUser(session.access_token);
+        if (userError || user?.id !== currentUserId) throw new Error('Session changed');
+        controller.signal.throwIfAborted();
+        // Bind this intent to the verified session, even if another tab switches accounts.
+        const { data, error: insertError } = await supabase
+          .rpc('send_chat_message', {
+            p_conversation_id: conversationId,
+            p_body: trimmedBody,
+            p_request_key: requestKey,
+          })
+          .setHeader('Authorization', `Bearer ${session.access_token}`)
+          .abortSignal(controller.signal)
+          .single();
+        if (insertError || !data) throw new Error('Send failed');
+        return data;
+      };
+      const data = await Promise.race([
+        send(),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(() => {
+            controller.abort();
+            reject(new Error('Send timed out'));
+          }, 20_000);
+        }),
+      ]);
       setMessages((current) =>
         current.some((m) => m.id === data.id)
           ? current
           : [...current, data].sort((a, b) => a.message_seq - b.message_seq)
       );
       pendingSend.current = null;
-      setBody('');
+      setBody((current) => current === submittedDraft ? '' : current);
+    } catch {
+      setError(
+        en
+          ? 'Could not send. Please retry.'
+          : 'לא הצלחנו לשלוח את ההודעה. נסה שוב.'
+      );
+    } finally {
+      clearTimeout(timeout);
+      sendingNow.current = false;
+      setSending(false);
     }
-    setSending(false);
   }
 
   return (
@@ -343,18 +375,29 @@ export default function ChatThread({
           );
         })}
       </div>
+      <div className="sticky bottom-20 bg-white md:bottom-0">
       <form
         onSubmit={sendMessage}
-        className="sticky bottom-0 bg-white border-t border-card-border p-3 flex gap-2"
+        className="border-t border-card-border p-3 flex items-start gap-2"
       >
-        <input
+        <div className="min-w-0 flex-1">
+        <textarea
+          rows={2}
           value={body}
           onChange={(event) => setBody(event.target.value)}
           maxLength={2000}
           placeholder={en ? 'Write a message…' : 'כתבו הודעה…'}
-          className="flex-1 rounded-shutaf-md border border-card-border px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-orange"
+          className="block w-full max-h-48 resize-y rounded-shutaf-md border border-card-border px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-orange"
           aria-label={en ? 'Message' : 'הודעה'}
+          aria-describedby={composerHintId}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) event.preventDefault();
+          }}
         />
+        <p id={composerHintId} className="mt-1 text-xs text-muted-text">
+          {en ? 'Enter adds a line. Use Send to send.' : 'Enter מוסיף שורה. לשליחה השתמשו בכפתור השליחה.'}
+        </p>
+        </div>
         <Button
           type="submit"
           disabled={!body.trim() || sending}
@@ -365,10 +408,11 @@ export default function ChatThread({
         </Button>
       </form>
       {error && (
-        <p className="bg-white text-error text-sm px-4 pb-3 text-center">
+        <p role="alert" className="bg-white text-error text-sm px-4 pb-3 text-center">
           {error}
         </p>
       )}
+      </div>
     </div>
   );
 }

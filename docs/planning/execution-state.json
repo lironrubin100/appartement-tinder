@@ -565,12 +565,12 @@
   },
   "workflow_mode": "build",
   "automation_control": {
-    "enabled": true,
+    "enabled": false,
     "cadence_minutes": 10,
     "unit": "one-approved-atomic-task",
     "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner30October explicitly resumed the active Build goal after the completed3.4 stop. Continue the approved queue from3.5 with one writer, existing reusable QA actors and source-bound evidence. Existing SQL/publication authorization and ownership/target/data guards persist; Stage C remains deferred.",
+    "reason": "Owner30October explicitly requested finishing only the currently claimed8.1 outcome and then stopping; goal is paused. Disable new dispatch now, finish verification/publication/guarded cleanup for8.1 only, then release this writer. No successor task is authorized until owner resumes. Existing SQL/publication authorization and target/data/ownership guards persist.",
     "automation_id": "shutaf-next-approved-task"
   }
 }
