@@ -1,5 +1,9 @@
 # Implementation plan SL03 — public map and listing detail
 
+## Stage A prerequisite handoff to personal saves5.1 — 30October2026
+
+After3.5 completion the actual selector chooses5.1/SL05.1, not3.6 (Stage B). It initially blocked on full SL03.1; no writer claimed. Existing bounded Stage A receipt mechanism now names completed exact3.1–3.5 and only the public apartment identity/eligible catalog artifact needed by saves. Its verified source is4.19/SL04.2 a37fc59 and guest catalog/publication proof; it explicitly does not attribute newer map code to that source. Later independently accepted map/detail evidence remains here at da455981/8f95a31. No full SL03.1 certification, dependency graph/order/selector rule or product change. Structural/planning validation passes; next commit this receipt and reselect5.1 under normal usage/lease gates. The earlier next3.6 sentence was provisional and is superseded.
+
 ## Task3.5 — accepted and production verified after owner resume — 30October2026
 
 Exact da455981c47c9afac063fdfb9c35f0e07b54d9d8 equals remote master at publication; READYdpl_4zkWGQPqVxrKHR5os5wc5cZgmD79 and canonical alias independently verified. Shared healthy HE/EN renderer retains share/contact and locale navigation; mounted public parent boundaries give unavailable routes localized copy and same-language catalog return, preserving404/noindex. LISTING-UNAVAILABLE-ROUTE-001 closed for this browser scope. Final types/focused lint/optimized build pass. Healthy renderer/reader and room SQL/test are byte-identical to accepted3.3; its ordinary/API/SQL evidence reused without a new migration. No config/dependency/authorization change.
@@ -8,7 +12,7 @@ Read-only run8cc6d2ca-5454-48b3-9a13-25f5a370205f:16 local+16 production actual 
 
 Wrapper exit0, browser_passed=true. Independent original59 Auth/59 profiles/62 apartments, four global root-ID hashes, nine complete private-table hashes and exact3 profile hash unchanged; main scenario remains clean, actor leases0. All six generated browser Auth sessions independently absent after ordinary local sign-out. No new identities/fixtures/media, inquiry/message send or cleanup mutation. Private route35 baseline/local/production/publication/proof/independent-after/final receipts preserved; initial generic404 probe and partial boundary result remain diagnosis, not acceptance.
 
-Task3.5 checked; full SL03.1 remains in-progress. Owner explicitly resumed the goal after3.4, superseding the earlier stop; dispatch stays enabled. Next3.6 through the same entrypoint/usage/claim gate; later viewport/privacy/full-packet acceptance remains open.
+Task3.5 checked; full SL03.1 remains in-progress. Owner explicitly resumed the goal after3.4, superseding the earlier stop; dispatch stays enabled. Actual next Stage A5.1 through the entrypoint/usage/claim gate;3.6 belongs to later Stage B. Viewport/privacy/full-packet acceptance remains open.
 
 ## Task3.5 — local acceptance passed; production pending — 30October2026
 
