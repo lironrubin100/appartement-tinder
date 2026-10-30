@@ -32,6 +32,8 @@ This is a defect register, not a feature roadmap. Keep owner-reported, source-co
 
 ## LISTING-OWNER-SEARCH-CUE-001 — Own listing looks like an ordinary search result
 
+- Fixed and production verified30October2026:3.2 exact2c306c0/READYdpl_DA5YSrGq6HffQU5cfodBVkWEsv1B. Separate session-owned IDs provide Your listing/Manage in map cards/modal for resident and completed B10 owners, with no self-contact control; foreign viewers keep ordinary contact.12 local+12 production HE/EN390/1280/refresh/real streets-pin-card cases and actual card/pin keyboard checks pass. Exact two-source cleanup and original baseline/session revocation independently verified. Public projection and server inquiry authorization unchanged; broader map/filter/privacy acceptance remains open.
+
 - Owner reported26October2026 that appearing in their own search is acceptable, but ownership is unclear. Source-confirmed: discovery/ListingCard has no ownership cue and MapClient renders ordinary cards/contact modal actions for the owner too. Existing4.11 detail-page management and4.12 self-inquiry denial do not certify search presentation.
 - Route once to existing3.2 map/card work: derive ownership from the authenticated session's own-listing query, render localized Your listing/Manage on that result and modal, retain the same listing in search, and keep other listings unchanged. Do not add publisher identity/private fields to the public projection or treat a client badge as authorization.
 - Verify resident/nonresident owners versus another viewer, HE/EN390/desktop, refresh and card/modal/detail consistency. No fix or new queue override is claimed by this Plan intake.
