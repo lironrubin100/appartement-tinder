@@ -1578,6 +1578,7 @@ export type Database = {
           min_room_price: number;
           photos: string[];
           public_location_label: string;
+          rooms: Json;
           title: string;
         }[];
       };

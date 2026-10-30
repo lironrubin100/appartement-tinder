@@ -45,6 +45,17 @@ begin
     if (select to_jsonb(p) from public.apartments_public p where id=active_id) <> result then
       raise exception 'public point or summary unstable on repeat read';
     end if;
+    select to_jsonb(p) into result from public.get_public_listing(active_id) p;
+    if result->'rooms' <> '[{"monthly_price":2000,"available_from":"2026-12-01"},{"monthly_price":2600,"available_from":"2026-12-01"}]'::jsonb
+      or (result->>'available_room_count')::int <> 2
+      or result ?| array['address','lat','lng','lister_id','phone','contact_url','location_seed']
+      or exists(select 1 from jsonb_array_elements(result->'rooms') room
+        where (select array_agg(key order by key) from jsonb_object_keys(room) key) <> array['available_from','monthly_price'])
+    then raise exception 'public detail room projection missing or unsafe'; end if;
+    if exists(select 1 from public.get_public_listing(empty_id))
+      or exists(select 1 from public.get_public_listing(taken_id))
+      or exists(select 1 from public.get_public_listing(paused_id))
+    then raise exception 'ineligible listing detail returned'; end if;
     execute 'reset role';
   end loop;
 
@@ -54,10 +65,18 @@ begin
   if exists(select 1 from public.apartments_public where id=active_id) then
     raise exception 'blocked poster remained in authenticated map view';
   end if;
+  if exists(select 1 from public.get_public_listing(active_id)) then
+    raise exception 'blocked poster remained in listing detail';
+  end if;
   execute 'reset role';
   delete from public.blocks where blocker_id=outsider_id and blocked_id=owner_id;
 
+  perform set_config('request.jwt.claim.sub','',true);
   execute 'set local role anon';
+  select to_jsonb(p) into result from public.get_public_listing(active_id) p;
+  if result is null or jsonb_array_length(result->'rooms') <> 2
+    or result ?| array['address','lat','lng','lister_id','phone','contact_url','location_seed']
+  then raise exception 'anonymous public detail contract unavailable or unsafe'; end if;
   begin
     perform id from public.apartments_public where id=active_id;
   exception when insufficient_privilege then denied := true;

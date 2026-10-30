@@ -41,6 +41,7 @@ export async function PublicListing({
       </header>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h1 className="text-3xl font-bold">{listing.title}</h1><ShareListing id={id} locale={locale}/></div>
       <p className="mb-5 text-muted-text">
+        {listing.public_location_label && <><bdi>{listing.public_location_label}</bdi> · </>}
         {en ? 'Approximate area' : 'אזור משוער'} ·{' '}
         {listing.bedrooms} {en ? 'bedrooms' : 'חדרים בדירה'}
       </p>
@@ -88,6 +89,27 @@ export async function PublicListing({
           </p>
         )}
         {listing.is_sublet && <p className="mt-2">{en ? 'Sublet' : 'סאבלט'}</p>}
+      </section>
+      <section aria-labelledby="available-rooms-heading" className="mb-6">
+        <h2 id="available-rooms-heading" className="mb-3 text-xl font-bold">
+          {en ? 'Available rooms' : 'החדרים הפנויים'}
+        </h2>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {listing.rooms.map((room, index) => (
+            <li key={`${room.available_from}-${room.monthly_price}-${index}`} data-testid="public-room" className="rounded-2xl border border-card-border bg-white p-5">
+              <h3 className="font-semibold">{en ? `Available room ${index + 1}` : `חדר פנוי ${index + 1}`}</h3>
+              <p className="mt-2 font-semibold text-orange-dark">
+                <bdi>₪{room.monthly_price.toLocaleString('en-US')}</bdi> {en ? 'per month' : 'לחודש'}
+              </p>
+              <p className="mt-2 text-muted-text">
+                {en ? 'Available from' : 'כניסה מתאריך'}:{' '}
+                <time dateTime={room.available_from}>
+                  {new Date(`${room.available_from}T12:00:00`).toLocaleDateString(en ? 'en-GB' : 'he-IL')}
+                </time>
+              </p>
+            </li>
+          ))}
+        </ul>
       </section>
       {listing.description && (
         <section className="mb-6">
