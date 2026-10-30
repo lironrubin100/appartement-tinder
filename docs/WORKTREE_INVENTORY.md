@@ -1,8 +1,8 @@
 # Git branch and worktree inventory
 
-Generated: 30 Oct 2026, 21:11 (Asia/Jerusalem); 2026-10-30T19:11:06.988Z.
+Generated: 30 Oct 2026, 22:07 (Asia/Jerusalem); 2026-10-30T20:07:52.945Z.
 
-Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at c1ded9f; this script does not fetch or infer deployment state.
+Primary checkout: C:/Users/User/Desktop/appartement tinder. Comparison: local integration branch `master`. Cached GitHub reference: origin/master at c3e939d; this script does not fetch or infer deployment state.
 
 This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STATUS.md](../PROJECT_STATUS.md) and its handoffs for acceptance evidence. A contained HEAD can still have unmerged local changes. Detached means the checkout has no branch name. A lock is a Git worktree lock, not proof a chat is currently running.
 
@@ -10,7 +10,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Branch | HEAD | Local changes | HEAD in master? | Git lock |
 | --- | --- | --- | --- | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | master | c1ded9f6 | 5 tracked; 0 untracked entries | Yes | No |
+| C:/Users/User/Desktop/appartement tinder | master | c3e939d2 | 5 tracked; 0 untracked entries | Yes | No |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | codex/implementation-plan | a66f12a3 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | codex/standing-agent-authorization | f571b785 | Could not read | Unknown | No |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | codex/next-step-reporting | cf39486d | Could not read | Unknown | No |
@@ -41,7 +41,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 | codex/sl01-lister-safe-browsing | f4d1d4a | None | Yes |
 | codex/standing-agent-authorization | f571b78 | origin/codex/standing-agent-authorization | No |
 | codex/streamline-execution | 4eca5c7 | origin/codex/streamline-execution | Yes |
-| master | c1ded9f | origin/master | Yes |
+| master | c3e939d | origin/master | Yes |
 | onboarding-flow-impl | 71cec18 | None | No |
 | worktree-map-completeness | fe35d6f | None | No |
 
@@ -49,7 +49,7 @@ This snapshot reports Git facts, not whether a feature works. Read [PROJECT_STAT
 
 | Checkout | Last commit description |
 | --- | --- |
-| C:/Users/User/Desktop/appartement tinder | Make personal saves private and count only canonical saved rows |
+| C:/Users/User/Desktop/appartement tinder | Share actor-bound save state and retry explicit Save or Unsave safely |
 | C:/Users/User/.codex/worktrees/6b9e/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/7da4/appartement tinder | Check this checkout directly |
 | C:/Users/User/.codex/worktrees/e175/appartement tinder | Check this checkout directly |

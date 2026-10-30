@@ -190,7 +190,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL05.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "5.1 accepted/published30October on c1ded9f;5.2 locally verified, publication/production acceptance pending. Hosted20261030193357 (60 migrations) adds actor-bound idempotent desired Save/Unsave over private canonical5.1 state. Full SQL/nine actual-source store tests/types/lint/build and4 local Chrome HE/EN390/1280 card/modal/detail/reload/independent-peer/error/deadline/lost-ACK cases plus4 guest cases pass. Current run c3fe92fe holds original3 leases and active save journal at publication gate. Earlier e6cd journal failure exactly recovered, original11/11/full hashes restored and4 sessions absent; failed exit retained. Require exact production/full baseline/exit0 before checking5.2; full packet remains in-progress."
+      "outcome": "5.1–5.2 accepted/published30October; full SL05.1 remains in-progress. Exactc3e939d2f457f0333a33fd4ae6a285f29e4aa49f / READYdpl_2KNNKeJJ6TUu121YjMp5KcSGshwK/canonical; hosted20261030193357 (60 migrations). Shared actor-bound private state, public detail action and desired-state Retry pass full SQL/nine store tests/types/lint/build and4 local+4 production Chrome HE/EN390/1280 card/modal/detail/peer/load/error/deadline/lost-ACK cases plus4 guest cases per target. Run c3fe92fe exit0/85 resolved operations, original11/11 and59/59/62/root/private/profile hashes equal, clean journals/leases0/three sessions absent. Prior failed Windows journal run retains separate exact recovery/exit1. Next entrypoint Stage A8.1; later hardening separate."
     },
     "SL08.2": {
       "status": "pending"
