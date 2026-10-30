@@ -53,7 +53,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261028102629_owner_listing_inbox.sql'),
   await read('supabase/migrations/20261028103654_owner_inquiry_seen.sql'),
   await read('supabase/migrations/20261028114557_inquiry_state_transitions.sql'),
-  await read('supabase/migrations/20261028174705_owner_listing_status.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261028174705_owner_listing_status.sql'),
+  await read('supabase/migrations/20261030151222_map_room_filters.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -77,6 +78,8 @@ await db.exec(await read('supabase/tests/plan_self_listing_inquiry.sql'));
 console.log('PASS: owner self-inquiry denied without side effects; another resident can inquire.');
 await db.exec(await read('supabase/tests/plan_core_map.sql'));
 console.log('PASS: public map eligibility/approximate points and public detail per-room price/date allowlist, owner/resident/lister/guest detail, inactive/block exclusion and anonymous direct-view denial.');
+await db.exec(await read('supabase/tests/plan_core_room_filters.sql'));
+console.log('PASS: bounded invoker matcher, same available-room price/date, inclusive bounds, apartment tags, block/guest/null-session denial and invalid candidate/filter refusal.');
 await db.exec(await read('supabase/tests/plan_room_availability.sql'));
 console.log('PASS: owner-only room availability, public count/range, D18 pending reconfirmation and accepted-chat preservation.');
 await db.exec(await read('supabase/tests/plan_listing_inquiry_intake.sql'));

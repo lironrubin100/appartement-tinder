@@ -47,7 +47,7 @@ export default function MapPage() {
   const { isSaved, isPending, toggle } = useFavorites();
   const [saveError, setSaveError] = useState<string | null>(null);
   const [contactMessage, setContactMessage] = useState<string | null>(null);
-  const { values, setValue, filtered } = useApartmentFilters(apartments);
+  const { values, setValue, filtered, reset, pending: filterPending, error: filterError, retry: retryFilters, validationError } = useApartmentFilters(apartments);
 
   useEffect(() => {
     let cancelled = false;
@@ -140,7 +140,10 @@ export default function MapPage() {
 
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] p-4 md:p-8">
-      <FilterBar filters={APARTMENT_FILTERS} values={values} onChange={setValue} resultCount={filtered.length} />
+      <FilterBar filters={APARTMENT_FILTERS} values={values}
+        onChange={(id, value) => { setSelectedId(null); setValue(id, value); }}
+        onReset={() => { setSelectedId(null); reset(); }} pending={loading || filterPending}
+        validationError={validationError} resultCount={filtered.length} />
       {saveError && (
         <p role="alert" className="mb-4 text-sm text-error" aria-live="polite">
           {saveError}
@@ -150,6 +153,13 @@ export default function MapPage() {
 
       {loadError ? (
         <JourneyError retry={retryLoadApartments} />
+      ) : filterError === 'request' ? (
+        <JourneyError retry={retryFilters} />
+      ) : filterError === 'scope' ? (
+        <section role="alert" className="rounded-shutaf-lg border border-card-border bg-white p-5 text-ink">
+          <h1 className="font-semibold">{en ? 'Narrow the filters' : 'צמצמו את הסינון'}</h1>
+          <p>{en ? 'There are too many listings for one request. Try selecting bedrooms, bills or sublets.' : 'יש יותר מדי מודעות לבקשה אחת. אפשר לבחור מספר חדרים, חשבונות או סאבלט.'}</p>
+        </section>
       ) : (
         <div className="flex flex-col md:flex-row gap-6">
           {/* Map */}
@@ -197,7 +207,7 @@ export default function MapPage() {
                   onClick={() => setSelectedId(apt.id)}
                 />
               ))}
-              {!loading && filtered.length === 0 && <p role="status" className="rounded-shutaf-lg border border-card-border bg-white p-4 text-muted-text">
+              {!loading && !filterPending && !validationError && filtered.length === 0 && <p role="status" className="rounded-shutaf-lg border border-card-border bg-white p-4 text-muted-text">
                 {apartments.length ? en ? 'No listings match these filters.' : 'אין מודעות התואמות לסינון הזה.' : en ? 'No available listings yet.' : 'עדיין אין מודעות זמינות.'}
               </p>}
             </div>

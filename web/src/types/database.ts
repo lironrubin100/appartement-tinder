@@ -1582,6 +1582,10 @@ export type Database = {
           title: string;
         }[];
       };
+      match_public_listing_ids: {
+        Args: { p_listing_ids: string[]; p_min_price?: number; p_max_price?: number; p_available_by?: string | null; p_bedrooms?: number | null; p_bills_included?: boolean; p_sublet_only?: boolean };
+        Returns: { id: string }[];
+      };
       invite_group_contact: {
         Args: { p_contact: string; p_group: string | null };
         Returns: undefined;
