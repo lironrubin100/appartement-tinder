@@ -1,5 +1,9 @@
 # Implementation plan SL03 — public map and listing detail
 
+## Task3.5 — unavailable boundary defect reproduced; bounded scope reconciled — 30October2026
+
+Published English missing UUID returns404 but generic Next "This page could not be found", with no custom unavailable copy/return link (read-only HTTP and owned Chrome probe). Existing ID layout validates before streaming, so its thrown notFound is outside that segment's own fallback. Existing nested English fallback also re-exports bilingual Hebrew UI and /map. Preserve nonstreamed404 and healthy shared renderer/SSR; add localized parent not-found boundaries and one shared unavailable component with public same-locale /listings return. Card scope expanded only to those supporting files. No SQL/authorization/metadata-policy change or test fixture mutation. Initial3.5 lease released before card fingerprint change; next validate/commit/reselect and implement this bounded route correction. New defect recorded as LISTING-UNAVAILABLE-ROUTE-001.
+
 ## Task3.5 — owner resumed Build — 30October2026
 
 Owner explicitly resumed the active goal after the completed3.4 stop. Re-enabled the existing Build dispatch gate; resume from3.5's same-renderer HE/EN public routes, explicit unavailable state and share/contact acceptance. Primary b58198f was clean, no executor/actor lease remained; prior stop evidence is preserved. Existing3.3 source-bound public detail/keyboard evidence is available for reuse after current-source verification. No fixture reset, new identity or SQL change authorized by this checkpoint alone. Next select/claim3.5 and inspect only its route/renderer contracts.

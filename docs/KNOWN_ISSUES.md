@@ -1,5 +1,10 @@
 # Known issues
 
+## LISTING-UNAVAILABLE-ROUTE-001 — Public unavailable listing loses its localized return path
+
+- Reproduced30October2026 on production b58198f: English missing listing returns404 with generic Next text, no explicit listing-unavailable message or return link. The validating ID layout throws outside its own segment's not-found boundary. Existing English nested fallback also aliases bilingual Hebrew UI and /map.
+- Task3.5 bounded correction: retain prestream404/public privacy and shared healthy renderer; localized parent boundaries render a shared explicit unavailable state and return to the same-language public catalog. No database/authorization change. Acceptance pending.
+
 ## WORKFLOW-STAGE-PREREQUISITE-001 — Demonstration queue requires full later-stage packet verification
 
 - State: fixed/verified29October2026 by0.14;32 selector tests pass. A dated source-bound artifact receipt permits Stage A3.1 using accepted publication evidence; absent/stale/failed/unfinished/blocked artifacts still refuse. Full parent verification and Stage B/C remain separate.
