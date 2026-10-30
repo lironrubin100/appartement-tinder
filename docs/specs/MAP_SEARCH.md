@@ -40,6 +40,8 @@ Selection: pin/list card synchronize one selected listing; keyboard access opens
 
 Filters: per-room price, total bedrooms, bills included, sublet, available-from (D13). Min/max price matches if at least one available room fits, not merely because apartment price-range endpoints overlap. Define date/bills semantics and invalid range errors. No client-only exclusion that leaks private rows.
 
+Task3.4 matcher: authenticated SECURITY INVOKER match_public_listing_ids accepts at most500 candidate public IDs and validated price/date/bedrooms/bills/sublet filters. It reuses get_public_listing's available-room allowlist and visibility/block boundary, applies price/date in one EXISTS over the same room and returns IDs only. No new private table privileges, anonymous grant, public fields or per-listing browser HTTP fan-out. Invalid ranges/oversized inputs fail explicitly; pending/error/retry/reset preserve controlled filter values and discard stale/session-changed responses. This bounded matching step does not certify the existing candidate acquisition: bounded viewport/Search this area/cluster overlap and capped-result messaging remain3.8/3.9. The existing technical500 bound is reused.
+
 ## Editing and persistence
 
 Reuse composer validation and photo pipeline. New property means new listing; post-publication ordinary location edits disabled; protected reviewed correction increments location version and rechecks grants. Public approximate pin must remain stable across reloads/ordinary edits, but privacy mechanism must pass the synthetic inversion review. Do not preserve a reconstructible transform merely to keep old coordinates identical.

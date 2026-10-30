@@ -428,8 +428,8 @@
   - **קריטריון קבלה:** דירת שני חדרים מציגה מחירים נפרדים, כמות זמינה ותמונות נכונות; פרטי בעלים פרטיים אינם נדרשים לתצוגה.
 
 - [ ] **משימה 3.4: סינון חדר מתאים**
-  - **קבצים לעריכה/יצירה:** `web/src/components/map/filters.ts`, `web/src/components/map/FilterBar.tsx`, `web/src/hooks/useApartmentFilters.ts`.
-  - **הוראות טכניות ברורות:** חבר מחיר/תאריך/חשבונות למסנן המאושר; כל תנאי חדר חל על אותו חדר זמין. שמור את state בעת פתיחה וסגירה של פרטים.
+  - **קבצים לעריכה/יצירה:** `web/src/components/map/filters.ts`, `web/src/components/map/FilterBar.tsx`, `web/src/hooks/useApartmentFilters.ts`, `web/src/app/(main)/map/MapClient.tsx`, `web/src/types/database.ts`, `supabase/migrations/20261030144402_map_room_filters.sql`, `supabase/tests/plan_core_room_filters.sql`, `scripts/test-resident-sql.mjs`, `docs/specs/MAP_SEARCH.md`.
+  - **הוראות טכניות ברורות:** חבר מחיר/תאריך/חשבונות למסנן המאושר; כל תנאי חדר חל על אותו חדר זמין. שמור את state בעת פתיחה וסגירה של פרטים. התאמת30באוקטובר: שני false positives שוחזרו במקור; מידע החדרים חסר בשורת המפה. הוסף match_public_listing_ids כ־SECURITY INVOKER למשתמש מחובר בלבד, על עד500 מזהים מועמדים, עם get_public_listing הקיים ו־EXISTS אחד על חדר במחיר ובתאריך המבוקשים. החזר מזהים בלבד, בלי הרחבת projection או הרשאה לטבלה פרטית ובלי פנייה נפרדת בדפדפן לכל מודעה. חבר pending/error/retry/reset, שגיאת טווח הפוך ו־HE/EN; דחה קלט גדול מדי בלי חיתוך שקט. שלד המיגרציה נוצר ב־CLI2.122.0; בדוק SQL מקומי ובעלות/יעד/data/history עדכניים לפני apply_migration. acquisition/viewport/cluster/pagination נותרים3.8/3.9 ואינם מאושרים כשלמים כאן.
   - **קריטריון קבלה:** בדירת 2000/2600 סינון 2100–2500 אינו מציג אותה רק מפני שהטווח הכולל חופף; איפוס מחזיר אותה.
 
 - [ ] **משימה 3.5: נתיבי פרטים בשתי שפות**
