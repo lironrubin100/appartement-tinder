@@ -3,7 +3,7 @@
 ## PERSONAL-SAVE-UI-STATE-001 — Save overlays have separate stale state and unsafe blind retry
 
 - Source-confirmed30October2026 for5.2: useFavorites has per-mount state, no auth-change reset, getSession-only initialization and silent empty-ready on read failure. Map controls do not wait for favorite readiness or provide a separate load Retry; public detail lacks Save. Current toggle intentionally flips state, so a blind retry after a committed lost response reverses the user's intent.
-- Bounded5.2: shared browser-only actor-bound state, explicit unknown/loading/error/Retry, public-detail client action and idempotent desired-state RPC adapter over accepted5.1. No runtime leak reproduced, new product rule, private server cache, messaging or group wishlist. Acceptance pending.
+- Fixed and locally verified30October in5.2: shared browser-only actor-bound state, explicit unknown/loading/error/Retry, public-detail client action and hosted20261030193357 desired-state setter. Full SQL/nine store tests/types/lint/build and four local actual Chrome HE/EN390/1280 card/modal/detail/peer/error/deadline/lost-ACK cases pass, plus four guest returnTo/spacing checks. Production/full baseline proof pending; no private server cache, messaging or group wishlist. Prior private journal failure was exactly recovered and remains unaccepted.
 
 ## PERSONAL-SAVE-PRIVACY-001 — Legacy save sharing and interest identity/count bypass
 

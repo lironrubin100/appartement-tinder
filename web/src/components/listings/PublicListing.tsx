@@ -7,6 +7,19 @@ import {
 } from '@/lib/listings/public';
 import { ShareListing } from './ShareListing';
 import { ListingContact } from './ListingContact';
+import { SaveListing } from './SaveListing';
+import { createServerClient } from '@/utils/supabase/server';
+
+async function PersonalSaveAction({ id, locale }: { id: string; locale: ListingLocale }) {
+  const client = await createServerClient();
+  const { data: { user } } = await client.auth.getUser();
+  if (user) {
+    // Ownership is viewer-scoped and is never added to the public listing DTO.
+    const own = await client.from('apartments').select('id').eq('id', id).eq('lister_id', user.id).maybeSingle();
+    if (own.error || own.data) return null;
+  }
+  return <SaveListing id={id} locale={locale} />;
+}
 
 export async function PublicListing({
   id,
@@ -126,6 +139,7 @@ export async function PublicListing({
           ? 'The exact address is private. It is shared in the app only after the owner accepts your inquiry.'
           : 'הכתובת המדויקת פרטית. היא תיחשף באפליקציה רק לאחר שבעל המודעה יאשר את הפנייה שלך.'}
       </p>
+      <div className="mt-5"><PersonalSaveAction id={id} locale={locale} /></div>
       <ListingContact id={id} locale={locale} />
       <Link
         href={locale === 'en' ? '/en/listings' : '/listings'}

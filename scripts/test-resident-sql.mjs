@@ -55,7 +55,8 @@ for (const sql of [foundation,
   await read('supabase/migrations/20261028114557_inquiry_state_transitions.sql'),
   await read('supabase/migrations/20261028174705_owner_listing_status.sql'),
   await read('supabase/migrations/20261030151222_map_room_filters.sql'),
-  await read('supabase/migrations/20261030185848_core_personal_save.sql')]) await db.exec(sql);
+  await read('supabase/migrations/20261030185848_core_personal_save.sql'),
+  await read('supabase/migrations/20261030193357_personal_save_state.sql')]) await db.exec(sql);
 
 await db.exec('alter table storage.objects enable row level security; grant usage on schema storage,auth to anon,authenticated; grant select,insert,update,delete on storage.objects to anon,authenticated;');
 
@@ -83,6 +84,8 @@ await db.exec(await read('supabase/tests/plan_core_room_filters.sql'));
 console.log('PASS: bounded invoker matcher, same available-room price/date, inclusive bounds, apartment tags, block/guest/null-session denial and invalid candidate/filter refusal.');
 await db.exec(await read('supabase/tests/plan_core_saves.sql'));
 console.log('PASS: personal actor-only save state, canonical unique count, no legacy/Pro identity or direct-write bypass, ordinary lister and guest/null/block/closed denial, unsave and no inquiry/chat/group side effects.');
+await db.exec(await read('supabase/tests/plan_core_save_state.sql'));
+console.log('PASS: actor-bound idempotent desired Save/Unsave, lost-ack repeat semantics, independent actors and unchanged privacy/eligibility/no-inquiry boundary.');
 await db.exec(await read('supabase/tests/plan_room_availability.sql'));
 console.log('PASS: owner-only room availability, public count/range, D18 pending reconfirmation and accepted-chat preservation.');
 await db.exec(await read('supabase/tests/plan_listing_inquiry_intake.sql'));

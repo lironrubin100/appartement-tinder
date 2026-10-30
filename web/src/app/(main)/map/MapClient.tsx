@@ -44,8 +44,8 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { isSaved, isPending, toggle } = useFavorites();
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const { ready: favoritesReady, loadError: favoritesLoadError, uncertain, reload: reloadFavorites, isSaved, isPending, isUncertain, toggle } = useFavorites(locale);
+  const failedSaveId = uncertain.values().next().value;
   const [contactMessage, setContactMessage] = useState<string | null>(null);
   const { values, setValue, filtered, reset, pending: filterPending, error: filterError, retry: retryFilters, validationError } = useApartmentFilters(apartments);
 
@@ -111,12 +111,8 @@ export default function MapPage() {
 
   const selected = filtered.find((a) => a.id === selectedId) ?? null;
   const handleSave = useCallback(async (apartmentId: string) => {
-    setSaveError(null);
     const result = await toggle(apartmentId);
-    if (!result.ok) {
-      setSaveError(result.message);
-      return;
-    }
+    if (!result.ok) return;
     setApartments((current) => current.map((apartment) => (
       apartment.id === apartmentId
         ? { ...apartment, interest_count: result.interestCount }
@@ -138,17 +134,24 @@ export default function MapPage() {
     ? en ? '1 available room' : 'חדר פנוי אחד'
     : `${selected?.available_room_count} ${en ? 'available rooms' : 'חדרים פנויים'}`;
 
+  const saveFeedback = (favoritesLoadError || failedSaveId) && <div role="alert" data-testid="favorite-error" className="mb-4 text-sm text-error">
+    <p>{favoritesLoadError
+      ? en ? 'Could not load your saved apartments.' : 'לא הצלחנו לטעון את השמורים שלך.'
+      : en ? 'The update could not be confirmed. Retry keeps the same choice.' : 'לא ניתן לאשר שהעדכון הושלם. ניסיון חוזר שומר על אותה בחירה.'}</p>
+    <button type="button" className="min-h-11 text-teal underline disabled:opacity-60"
+      disabled={!!failedSaveId && isPending(failedSaveId)}
+      onClick={() => { if (favoritesLoadError) void reloadFavorites(); else if (failedSaveId) void handleSave(failedSaveId); }}>
+      {en ? 'Retry' : 'ניסיון חוזר'}
+    </button>
+  </div>;
+
   return (
     <div className="w-full bg-page-bg min-h-[calc(100vh-80px)] p-4 md:p-8">
       <FilterBar filters={APARTMENT_FILTERS} values={values}
         onChange={(id, value) => { setSelectedId(null); setValue(id, value); }}
         onReset={() => { setSelectedId(null); reset(); }} pending={loading || filterPending}
         validationError={validationError} resultCount={filtered.length} />
-      {saveError && (
-        <p role="alert" className="mb-4 text-sm text-error" aria-live="polite">
-          {saveError}
-        </p>
-      )}
+      {(!selected || (!favoritesLoadError && failedSaveId !== selected.id)) && saveFeedback}
       {contactMessage && <p role="status" className="mb-4 text-sm text-muted-text" aria-live="polite">{contactMessage}</p>}
 
       {loadError ? (
@@ -202,6 +205,7 @@ export default function MapPage() {
                   isNew={isNewListing(apt.created_at)}
                   saved={isSaved(apt.id)}
                   savePending={isPending(apt.id)}
+                  saveKnown={favoritesReady && !isUncertain(apt.id)}
                   onSave={handleSave}
                   onMessage={handleContact}
                   onClick={() => setSelectedId(apt.id)}
@@ -219,6 +223,7 @@ export default function MapPage() {
       <Modal isOpen={!!selected} onClose={() => setSelectedId(null)} size="md">
         {selected && (
           <div data-testid="apartment-detail" data-apartment-id={selected.id} data-owned={ownedIds.has(selected.id)}>
+            {(favoritesLoadError || failedSaveId === selected.id) && saveFeedback}
             {ownedIds.has(selected.id) && <Badge variant="default" className="mb-3">{en ? 'Your listing' : 'המודעה שלך'}</Badge>}
             {selected.photos[0] && (
               <div className="relative mb-4 h-48 overflow-hidden rounded-shutaf-md">
@@ -228,10 +233,12 @@ export default function MapPage() {
             <div className="flex items-start justify-between gap-4 mb-2">
               <h2 className="text-xl font-bold text-ink">{selected.title}</h2>
               <button
+                type="button"
                 onClick={() => handleSave(selected.id)}
                 aria-label={isSaved(selected.id) ? en ? 'Remove from saved' : 'הסר מהמועדפים' : en ? 'Save listing' : 'הוסף למועדפים'}
-                aria-pressed={isSaved(selected.id)}
-                disabled={isPending(selected.id)}
+                aria-pressed={favoritesReady && !isUncertain(selected.id) ? isSaved(selected.id) : undefined}
+                aria-busy={isPending(selected.id)}
+                disabled={!favoritesReady || isPending(selected.id) || isUncertain(selected.id) || ownedIds.has(selected.id)}
                 data-testid="favorite-toggle"
                 className="p-2 bg-white rounded-full shadow-md shrink-0 disabled:cursor-wait disabled:opacity-60"
               >

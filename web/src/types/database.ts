@@ -1675,6 +1675,10 @@ export type Database = {
         };
         Returns: string;
       };
+      set_apartment_saved: {
+        Args: { p_apartment_id: string; p_saved: boolean; p_expected_actor: string };
+        Returns: { saved: boolean; interest_count: number }[];
+      };
       toggle_apartment_save_and_interest: {
         Args: { p_apartment_id: string };
         Returns: {

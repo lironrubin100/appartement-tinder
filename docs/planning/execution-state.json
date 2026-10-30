@@ -190,7 +190,7 @@
       "status": "in-progress",
       "handoff": "docs/workstreams/implementation-plan-SL05.md",
       "worktree": "C:/Users/User/Desktop/appartement tinder",
-      "outcome": "5.1 accepted/published30October on exactc1ded9f6dde0b0b3afb0f71cb837a57524f968b0 / READYdpl_6ERnBPXuBjirmxr8CeZ2G6iDoBhP/canonical. Hosted20261030185848 (59 migrations): private actor-only save reads, RPC-only writes, canonical count and denial of legacy/Pro identity bypass. Full disposable SQL and original3 ordinary concurrency/privacy/count checks pass; run07cafbb5 exit0, exact original11 save/interest rows plus59/59/62/root/private/profile hashes restored, clean journals/leases0/three sessions absent. App/build unchanged from accepted3.5; no new UI or lost-response retry-idempotency claim. Next5.2; full packet remains in-progress."
+      "outcome": "5.1 accepted/published30October on c1ded9f;5.2 locally verified, publication/production acceptance pending. Hosted20261030193357 (60 migrations) adds actor-bound idempotent desired Save/Unsave over private canonical5.1 state. Full SQL/nine actual-source store tests/types/lint/build and4 local Chrome HE/EN390/1280 card/modal/detail/reload/independent-peer/error/deadline/lost-ACK cases plus4 guest cases pass. Current run c3fe92fe holds original3 leases and active save journal at publication gate. Earlier e6cd journal failure exactly recovered, original11/11/full hashes restored and4 sessions absent; failed exit retained. Require exact production/full baseline/exit0 before checking5.2; full packet remains in-progress."
     },
     "SL08.2": {
       "status": "pending"

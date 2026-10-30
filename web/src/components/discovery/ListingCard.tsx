@@ -23,6 +23,7 @@ interface ListingCardProps {
   isNew?: boolean;
   saved?: boolean;
   savePending?: boolean;
+  saveKnown?: boolean;
   isOwner?: boolean;
   manageHref?: string;
   selected?: boolean;
@@ -49,6 +50,7 @@ export function ListingCard({
   isNew = false,
   saved = false,
   savePending = false,
+  saveKnown = false,
   isOwner = false,
   manageHref,
   selected = false,
@@ -91,13 +93,15 @@ export function ListingCard({
         )}
         {/* Save Button */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onSave?.(id);
           }}
           aria-label={saved ? en ? 'Remove from saved' : 'הסר מהמועדפים' : en ? 'Save listing' : 'הוסף למועדפים'}
-          aria-pressed={saved}
-          disabled={savePending}
+          aria-pressed={saveKnown ? saved : undefined}
+          aria-busy={savePending}
+          disabled={!saveKnown || savePending || isOwner}
           data-testid="favorite-toggle"
           className="absolute top-3 inset-e-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow disabled:cursor-wait disabled:opacity-60"
         >
