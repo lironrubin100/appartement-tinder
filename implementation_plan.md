@@ -442,7 +442,7 @@
 
 חוזים: G1/G2/E7. שמירה אינה פנייה ואינה הסכמה קבוצתית.
 
-- [ ] **משימה 5.1: שמירה לפי משתמש**
+- [x] **משימה 5.1: שמירה לפי משתמש**
   - **קבצים לעריכה/יצירה:** `supabase/migrations/20261030185848_core_personal_save.sql`, `supabase/tests/plan_core_saves.sql`, `scripts/test-resident-sql.mjs`.
   - **הוראות טכניות ברורות:** אמת/תקן toggle_apartment_save_and_interest: ייחודיות משתמש/דירה, גישה רק לשמורים האישיים וספירת שומרים פעילים. התאמת30באוקטובר: שם ישן לא קיים; CLI2.122.0 יצר שלד חדש. Live/source מאשרים own_saves קבוצתי, hype_faces וכתיבה ישירה ל־interest;11 שמירות/11 interests,0 קבוצתיות. הגבל קריאה לבעל השמירה, כתיבה דרך RPC בלבד, אין wishlist קבוצתי או גישת Pro לזהויות. המונה ב־RPC/שתי תצוגות aggregate ייספר מתוך saves, בלי שכתוב11 רשומות קיימות או הרחבת projection. שמור חתימת toggle ותשובתו, eligibility ו־shadow compatibility אטומיים, עם נעילה בסדר המאושר; בטל הרשאות רגילות ל־hype_faces ול־interest הישיר. אל תיצור inquiry מהפעולה. חבר את המיגרציה וה־SQL assertions ל־runner הקיים; הרץ node scripts/test-resident-sql.mjs ובנפרד בדיקת לקוח רגיל ביעד המזוהה. לפני shared apply נדרש recheck יעד/history/data/בעלות עדכני לפי AGENTS; אין שינוי UI כאן.
   - **קריטריון קבלה:** A שומר → מופיע בשמורים של A בלבד; אין פנייה חדשה; מונה הציבורי גדל באחד.

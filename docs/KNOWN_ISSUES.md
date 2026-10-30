@@ -3,7 +3,7 @@
 ## PERSONAL-SAVE-PRIVACY-001 — Legacy save sharing and interest identity/count bypass
 
 - Source/live-confirmed30October2026 while reconciling5.1: own_saves includes group-member access, ordinary roles can mutate separate apartment_interests, and apartment_hype_faces is ordinarily granted with names/identity and an is_pro branch. Existing toggle/public counters read that separately writable interest table. No real-user leak or destructive test was performed; current target is the retained demo/QA dataset.
-- Fixed/verified30October in task5.1: hosted20261030185848 enforces private actor-only reads/RPC writes, canonical save count, no ordinary saver-identity view or group wishlist. Full disposable SQL plus same3-actor live ordinary privacy/count/concurrency checks pass. Original11 save/interest rows and full private/root/profile baseline restored exactly, journal clean/leases0/wrapper0; source publication pending. No UI/retry-idempotency/full-packet acceptance inferred.
+- Fixed/verified/published30October in task5.1: sourcec1ded9f / READYdpl_6ERnBPXuBjirmxr8CeZ2G6iDoBhP/canonical and hosted20261030185848 enforce private actor-only reads/RPC writes, canonical save count, no ordinary saver-identity view or group wishlist. Full disposable SQL plus same3-actor live ordinary privacy/count/concurrency checks pass. Original11 save/interest rows and full private/root/profile baseline restored exactly, journals clean/leases0/wrapper0. No UI/retry-idempotency/full-packet acceptance inferred.
 
 ## LISTING-UNAVAILABLE-ROUTE-001 — Public unavailable listing loses its localized return path
 
