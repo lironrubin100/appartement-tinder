@@ -432,7 +432,7 @@
   - **הוראות טכניות ברורות:** חבר מחיר/תאריך/חשבונות למסנן המאושר; כל תנאי חדר חל על אותו חדר זמין. שמור את state בעת פתיחה וסגירה של פרטים. התאמת30באוקטובר: שני false positives שוחזרו במקור; מידע החדרים חסר בשורת המפה. הוסף match_public_listing_ids כ־SECURITY INVOKER למשתמש מחובר בלבד, על עד500 מזהים מועמדים, עם get_public_listing הקיים ו־EXISTS אחד על חדר במחיר ובתאריך המבוקשים. החזר מזהים בלבד, בלי הרחבת projection או הרשאה לטבלה פרטית ובלי פנייה נפרדת בדפדפן לכל מודעה. חבר pending/error/retry/reset, שגיאת טווח הפוך ו־HE/EN; דחה קלט גדול מדי בלי חיתוך שקט. שלד המיגרציה נוצר ב־CLI2.122.0; בדוק SQL מקומי ובעלות/יעד/data/history עדכניים לפני apply_migration. acquisition/viewport/cluster/pagination נותרים3.8/3.9 ואינם מאושרים כשלמים כאן.
   - **קריטריון קבלה:** בדירת 2000/2600 סינון 2100–2500 אינו מציג אותה רק מפני שהטווח הכולל חופף; איפוס מחזיר אותה.
 
-- [ ] **משימה 3.5: נתיבי פרטים בשתי שפות**
+- [x] **משימה 3.5: נתיבי פרטים בשתי שפות**
   - **קבצים לעריכה/יצירה:** `web/src/app/listings/[listingId]/page.tsx`, `web/src/app/en/listings/[listingId]/page.tsx`, `web/src/components/listings/ListingUnavailable.tsx`, `web/src/app/listings/[listingId]/not-found.tsx`, `web/src/app/en/listings/[listingId]/not-found.tsx`, `web/src/app/listings/not-found.tsx`, `web/src/app/en/listings/not-found.tsx`, `web/src/app/listings/layout.tsx`, `web/src/app/en/listings/layout.tsx`.
   - **הוראות טכניות ברורות:** השתמש באותו renderer; העבר locale ונתיב חזרה מתאים. מצב unavailable מוביל לתצוגה מפורשת ולא לשגיאת שרת.
   - **קריטריון קבלה:** אותה דירה נפתחת בעברית ובאנגלית, ב־390px ובמחשב, בלי איבוד לחצני השיתוף והפנייה.

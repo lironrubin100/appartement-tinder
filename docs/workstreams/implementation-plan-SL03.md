@@ -1,5 +1,15 @@
 # Implementation plan SL03 — public map and listing detail
 
+## Task3.5 — accepted and production verified after owner resume — 30October2026
+
+Exact da455981c47c9afac063fdfb9c35f0e07b54d9d8 equals remote master at publication; READYdpl_4zkWGQPqVxrKHR5os5wc5cZgmD79 and canonical alias independently verified. Shared healthy HE/EN renderer retains share/contact and locale navigation; mounted public parent boundaries give unavailable routes localized copy and same-language catalog return, preserving404/noindex. LISTING-UNAVAILABLE-ROUTE-001 closed for this browser scope. Final types/focused lint/optimized build pass. Healthy renderer/reader and room SQL/test are byte-identical to accepted3.3; its ordinary/API/SQL evidence reused without a new migration. No config/dependency/authorization change.
+
+Read-only run8cc6d2ca-5454-48b3-9a13-25f5a370205f:16 local+16 production actual Chrome guest/original3 x HE/EN390/1280 pass same listing/available-room count, actual share dialog URL and keyboard open/close, guest login returnTo/ordinary inquiry control, keyboard locale navigation both ways, refresh/decoded image/no overflow/page errors. Each verifies missing/invalid UUID and existing paused/taken listings (64 unavailable responses per target), localized explicit404/noindex, no share action and correct return; guest keyboard return opens the public catalog. Local healthy/unavailable and production unavailable HE phone/EN desktop pixels inspected. Raw unavailable HTTP is a404 Next RSC error shell; JS-enabled rendered fallback is proven, no no-JS body-copy or WhatsApp/metadata acceptance is inferred (later3.7).
+
+Wrapper exit0, browser_passed=true. Independent original59 Auth/59 profiles/62 apartments, four global root-ID hashes, nine complete private-table hashes and exact3 profile hash unchanged; main scenario remains clean, actor leases0. All six generated browser Auth sessions independently absent after ordinary local sign-out. No new identities/fixtures/media, inquiry/message send or cleanup mutation. Private route35 baseline/local/production/publication/proof/independent-after/final receipts preserved; initial generic404 probe and partial boundary result remain diagnosis, not acceptance.
+
+Task3.5 checked; full SL03.1 remains in-progress. Owner explicitly resumed the goal after3.4, superseding the earlier stop; dispatch stays enabled. Next3.6 through the same entrypoint/usage/claim gate; later viewport/privacy/full-packet acceptance remains open.
+
 ## Task3.5 — local acceptance passed; production pending — 30October2026
 
 Mounted identity public-catalog layouts now catch the validating ID layout's unavailable result before streaming. Shared unavailable renderer uses HE/EN/RTL/LTR and same-locale public catalog return; HTTP404/noindex remain intact. Healthy routes keep one PublicListing renderer, existing localized share/contact, and explicit Hebrew locale. Final types/focused lint/optimized build exit0. Public renderer/reader, historical room SQL and its plan_core_map test are byte-identical to accepted3.3; reuse that SQL/API contract evidence without a new hosted migration or unrelated SQL rerun.
