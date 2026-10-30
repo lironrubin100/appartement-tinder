@@ -1,0 +1,9 @@
+# Implementation plan SL05 — personal saves
+
+## Task5.1 — source/live reconciliation before implementation — 30October2026
+
+Selected Stage A5.1 after all3.1–3.5 accepted and bounded public-listing prerequisite receipt reconciled. Primary8977a35, no competing writer/actor lease; fresh ordinary allowance available, no reset consumed. Initial5.1 lease released before card fingerprint change. Planned20261021000003 migration/test are absent; CLI2.122.0 migration-new help read and empty20261030185212_core_personal_save.sql generated. No hosted write yet.
+
+Live and bootstrap: toggle RPC has the existing unique actor/listing PK and atomic save/interest pair, but count derives from separately writable apartment_interests. own_saves allows group-member reads and accepts group_id; hype_faces is ordinarily SELECT-granted and returns saver identities/Pro names, contrary to G1/G2/E7. Live11 saves/11 interests and0 group saves; no legacy row rewrite is needed. Source search finds no runtime hype_faces/interest-table consumer; useFavorites reads own saves and existing toggle signature. Narrow fix: own-save SELECT only, RPC-only writes, deny group-tagged new saves and ordinary hype-face/interest access; aggregate RPC/apartments_public/apartment_stats counts canonical saves. Preserve all public fields, eligibility, RPC signature and atomic compatibility shadow writes; serialize actor then listing. No inquiry/chat/group/occupancy transition, UI/config or new product decision.
+
+Next commit bounded card alignment, reselect/claim and implement locally with meaningful allow/deny/privacy/counter/no-inquiry SQL tests. Ordinary same3-actor acceptance and guarded exact save-only restoration must capture complete pre-existing saves/interests baseline; no identity or fixture reset. Hosted migration requires fresh target/history/Auth/data/owner gate immediately before apply. Full SL05.1 and retry/UI hardening remain separate.

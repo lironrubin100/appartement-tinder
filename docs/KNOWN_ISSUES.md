@@ -1,5 +1,10 @@
 # Known issues
 
+## PERSONAL-SAVE-PRIVACY-001 — Legacy save sharing and interest identity/count bypass
+
+- Source/live-confirmed30October2026 while reconciling5.1: own_saves includes group-member access, ordinary roles can mutate separate apartment_interests, and apartment_hype_faces is ordinarily granted with names/identity and an is_pro branch. Existing toggle/public counters read that separately writable interest table. No real-user leak or destructive test was performed; current target is the retained demo/QA dataset.
+- Bounded G1/G2/E7 correction belongs to5.1: private actor-only reads/RPC writes, canonical save count, no ordinary saver-identity view or group wishlist. Preserve11 current saves/interests (0 group rows) and all inquiries/history. Local/hosted/ordinary-client acceptance pending.
+
 ## LISTING-UNAVAILABLE-ROUTE-001 — Public unavailable listing loses its localized return path
 
 - Reproduced30October2026 on production b58198f: English missing listing returns404 with generic Next text, no explicit listing-unavailable message or return link. The validating ID layout throws outside its own segment's not-found boundary. Existing English nested fallback also aliases bilingual Hebrew UI and /map.
