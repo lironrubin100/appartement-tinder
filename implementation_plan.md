@@ -423,8 +423,8 @@
   - **קריטריון קבלה:** לחיצה על pin פותחת את אותה דירה ברשימה ובפרטים; streets/pins נראים בדפדפן. בעלים resident/lister רואה סימון וקישור ניהול, צופה אחר רואה כרטיס רגיל; HE/EN390/desktop ורענון. אין קבלה על סמך HTTP 200 של tile בלבד ואין שינוי בהרשאות פנייה עצמית.
 
 - [ ] **משימה 3.3: פרטי דירה וחדרים**
-  - **קבצים לעריכה/יצירה:** `web/src/components/listings/PublicListing.tsx`, `web/src/lib/listings/public.ts`.
-  - **הוראות טכניות ברורות:** צרוך get_public_listing הקיים והצג מחירים/זמינות לכל חדר, תמונות, facts ואזור ציבורי. טען פרטים לפי מזהה ולא את כל הדירות.
+  - **קבצים לעריכה/יצירה:** `web/src/components/listings/PublicListing.tsx`, `web/src/lib/listings/public.ts`, `web/src/types/database.ts`; שחזור החוזה שכבר הוחל: `supabase/migrations/20261015143837_listing_detail_rooms.sql`, `supabase/tests/plan_core_map.sql`, `scripts/test-resident-sql.mjs`.
+  - **הוראות טכניות ברורות:** צרוך get_public_listing הקיים והצג מחירים/זמינות לכל חדר, תמונות, facts ואזור ציבורי. טען פרטים לפי מזהה ולא את כל הדירות. התאמת30באוקטובר: היסטוריית היעד מאשרת version20261015143837 בשם listing_detail_rooms; שחזר את statements המדויקים לקובץ המקומי וטיפוס rooms, ובדוק בחוזה SQL הקיים. אין יצירה/החלה חוזרת או שינוי של מיגרציה שכבר הוחלה. החוזה מחזיר חדרים זמינים בלבד, עם monthly_price ו־available_from בלבד.
   - **קריטריון קבלה:** דירת שני חדרים מציגה מחירים נפרדים, כמות זמינה ותמונות נכונות; פרטי בעלים פרטיים אינם נדרשים לתצוגה.
 
 - [ ] **משימה 3.4: סינון חדר מתאים**
