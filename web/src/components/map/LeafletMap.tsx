@@ -128,7 +128,16 @@ export default function LeafletMap({ apartments, selectedId, onSelect }: Leaflet
               position={[apt.lat, apt.lng]}
               icon={priceIcon(apt, apt.id === selectedId, en)}
               title={apt.title}
-              eventHandlers={{ click: () => onSelect(apt.id) }}
+              eventHandlers={{
+                click: () => onSelect(apt.id),
+                keydown: event => {
+                  const key = event.originalEvent.key;
+                  if (key === 'Enter' || key === ' ') {
+                    event.originalEvent.preventDefault();
+                    onSelect(apt.id);
+                  }
+                },
+              }}
             />
           ))}
         </MarkerClusterGroup>
