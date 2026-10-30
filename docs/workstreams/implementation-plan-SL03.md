@@ -1,5 +1,9 @@
 # Implementation plan SL03 — public map and listing detail
 
+## Task3.5 — owner resumed Build — 30October2026
+
+Owner explicitly resumed the active goal after the completed3.4 stop. Re-enabled the existing Build dispatch gate; resume from3.5's same-renderer HE/EN public routes, explicit unavailable state and share/contact acceptance. Primary b58198f was clean, no executor/actor lease remained; prior stop evidence is preserved. Existing3.3 source-bound public detail/keyboard evidence is available for reuse after current-source verification. No fixture reset, new identity or SQL change authorized by this checkpoint alone. Next select/claim3.5 and inspect only its route/renderer contracts.
+
 ## Task3.4 — accepted, published; owner-requested stop — 30October2026
 
 Exact source3c6d016cdd07b2ea459ec2cb08e6aa0b70b810b3 equals remote master at publication. Production READYdpl_8tfJiKwrrHdwXrviYrhb7VkV2Nku and canonical alias independently verified. Price/date now match the same available room through authenticated stable SECURITY INVOKER match_public_listing_ids, returning IDs only; existing public reader governs visibility and available-room allowlist. Hosted version20261030151222,58 migrations; no new private grants or anonymous execution. Fresh target/Auth/data/lease gate preceded application. Independent before/after data baseline unchanged; security advisors retain the same five categories, with no matcher finding.

@@ -549,12 +549,12 @@
   },
   "workflow_mode": "build",
   "automation_control": {
-    "enabled": false,
+    "enabled": true,
     "cadence_minutes": 10,
     "unit": "one-approved-atomic-task",
     "model": "gpt-5.6-terra",
     "reasoning_effort": "medium",
-    "reason": "Owner30October requested completion of current task3.4 followed by a stop.3.4 is accepted and published; dispatch is paused and3.5 has not started. Resume only on a new owner instruction. Existing evidence, reusable QA actors and ownership guards are preserved; Stage C remains deferred.",
+    "reason": "Owner30October explicitly resumed the active Build goal after the completed3.4 stop. Continue the approved queue from3.5 with one writer, existing reusable QA actors and source-bound evidence. Existing SQL/publication authorization and ownership/target/data guards persist; Stage C remains deferred.",
     "automation_id": "shutaf-next-approved-task"
   }
 }
